@@ -31,7 +31,11 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// Get events for a given entity.
+// Returns all webhook events that were triggered for the specified entity based on your enabled webhook subscriptions. These are the same events that were sent to your configured webhook listener endpoints, aggregated into a single list. Results can be filtered by the related object type or time period.
+//
+// You can use this to get the missed events for the time periods when your webhook listener was temporarily unavailable.
+//
+// We guarantee access to event data only from the last three months. Earlier events may be unavailable.
 func (c *Client) Get(
 	ctx context.Context,
 	request *monitegoclient.EventsGetRequest,
@@ -88,9 +92,10 @@ func (c *Client) Get(
 	return response, nil
 }
 
-// Get event by ID.
+// Get a webhook event by its ID. The data is the same as you might have previously received in a webhook sent by Monite to your server.
 func (c *Client) GetById(
 	ctx context.Context,
+	// ID of the webhook event. This is the `id` value you might have received in a webhook or retrieved from `GET /events`.
 	eventId string,
 	opts ...option.RequestOption,
 ) (*monitegoclient.EventResource, error) {

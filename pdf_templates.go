@@ -9,30 +9,20 @@ import (
 	time "time"
 )
 
-// Represents a file (such as a PDF invoice) that was uploaded to Monite.
 type FileSchema struct {
-	// A unique ID of this file.
-	Id string `json:"id" url:"id"`
-	// UTC date and time when this workflow was uploaded to Monite. Timestamps follow the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-	CreatedAt time.Time `json:"created_at" url:"created_at"`
-	// The type of the business object associated with this file.
-	FileType string `json:"file_type" url:"file_type"`
-	// The MD5 hash of the file.
-	Md5 string `json:"md5" url:"md5"`
-	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
-	Mimetype string `json:"mimetype" url:"mimetype"`
-	// The original file name (if available).
-	Name string `json:"name" url:"name"`
-	// If the file is a PDF document, this property contains individual pages extracted from the file. Otherwise, an empty array.
-	Pages []*PageSchema `json:"pages,omitempty" url:"pages,omitempty"`
-	// Preview images generated for this file. There can be multiple images with different sizes.
-	Previews []*PreviewSchema `json:"previews,omitempty" url:"previews,omitempty"`
-	// Geographical region of the data center where the file is stored.
-	Region string `json:"region" url:"region"`
-	// The file size in bytes.
-	Size int `json:"size" url:"size"`
-	// The URL to download the file.
-	Url string `json:"url" url:"url"`
+	Id         string    `json:"id" url:"id"`
+	CreatedAt  time.Time `json:"created_at" url:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at" url:"updated_at"`
+	EntityId   *string   `json:"entity_id,omitempty" url:"entity_id,omitempty"`
+	FileType   string    `json:"file_type" url:"file_type"`
+	Md5        string    `json:"md5" url:"md5"`
+	Mimetype   string    `json:"mimetype" url:"mimetype"`
+	Name       string    `json:"name" url:"name"`
+	Region     string    `json:"region" url:"region"`
+	S3Bucket   string    `json:"s3_bucket" url:"s3_bucket"`
+	S3FilePath string    `json:"s3_file_path" url:"s3_file_path"`
+	Size       int       `json:"size" url:"size"`
+	Url        string    `json:"url" url:"url"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -50,6 +40,20 @@ func (f *FileSchema) GetCreatedAt() time.Time {
 		return time.Time{}
 	}
 	return f.CreatedAt
+}
+
+func (f *FileSchema) GetUpdatedAt() time.Time {
+	if f == nil {
+		return time.Time{}
+	}
+	return f.UpdatedAt
+}
+
+func (f *FileSchema) GetEntityId() *string {
+	if f == nil {
+		return nil
+	}
+	return f.EntityId
 }
 
 func (f *FileSchema) GetFileType() string {
@@ -80,25 +84,25 @@ func (f *FileSchema) GetName() string {
 	return f.Name
 }
 
-func (f *FileSchema) GetPages() []*PageSchema {
-	if f == nil {
-		return nil
-	}
-	return f.Pages
-}
-
-func (f *FileSchema) GetPreviews() []*PreviewSchema {
-	if f == nil {
-		return nil
-	}
-	return f.Previews
-}
-
 func (f *FileSchema) GetRegion() string {
 	if f == nil {
 		return ""
 	}
 	return f.Region
+}
+
+func (f *FileSchema) GetS3Bucket() string {
+	if f == nil {
+		return ""
+	}
+	return f.S3Bucket
+}
+
+func (f *FileSchema) GetS3FilePath() string {
+	if f == nil {
+		return ""
+	}
+	return f.S3FilePath
 }
 
 func (f *FileSchema) GetSize() int {
@@ -124,6 +128,7 @@ func (f *FileSchema) UnmarshalJSON(data []byte) error {
 	var unmarshaler = struct {
 		embed
 		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
 	}{
 		embed: embed(*f),
 	}
@@ -132,6 +137,7 @@ func (f *FileSchema) UnmarshalJSON(data []byte) error {
 	}
 	*f = FileSchema(unmarshaler.embed)
 	f.CreatedAt = unmarshaler.CreatedAt.Time()
+	f.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	extraProperties, err := internal.ExtractExtraProperties(data, *f)
 	if err != nil {
 		return err
@@ -146,9 +152,11 @@ func (f *FileSchema) MarshalJSON() ([]byte, error) {
 	var marshaler = struct {
 		embed
 		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
 	}{
 		embed:     embed(*f),
 		CreatedAt: internal.NewDateTime(f.CreatedAt),
+		UpdatedAt: internal.NewDateTime(f.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
@@ -163,157 +171,6 @@ func (f *FileSchema) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", f)
-}
-
-// When a PDF document is uploaded to Monite, it extracts individual pages from the document
-// and saves them as PNG images. This object contains the image and metadata of a single page.
-type PageSchema struct {
-	// A unique ID of the image.
-	Id string `json:"id" url:"id"`
-	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of the image.
-	Mimetype string `json:"mimetype" url:"mimetype"`
-	// The page number in the PDF document, from 0.
-	Number int `json:"number" url:"number"`
-	// Image file size, in bytes.
-	Size int `json:"size" url:"size"`
-	// The URL to download the image.
-	Url string `json:"url" url:"url"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (p *PageSchema) GetId() string {
-	if p == nil {
-		return ""
-	}
-	return p.Id
-}
-
-func (p *PageSchema) GetMimetype() string {
-	if p == nil {
-		return ""
-	}
-	return p.Mimetype
-}
-
-func (p *PageSchema) GetNumber() int {
-	if p == nil {
-		return 0
-	}
-	return p.Number
-}
-
-func (p *PageSchema) GetSize() int {
-	if p == nil {
-		return 0
-	}
-	return p.Size
-}
-
-func (p *PageSchema) GetUrl() string {
-	if p == nil {
-		return ""
-	}
-	return p.Url
-}
-
-func (p *PageSchema) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *PageSchema) UnmarshalJSON(data []byte) error {
-	type unmarshaler PageSchema
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = PageSchema(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-	p.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *PageSchema) String() string {
-	if len(p.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
-// A preview image generated for a file.
-type PreviewSchema struct {
-	// The image height in pixels.
-	Height int `json:"height" url:"height"`
-	// The image URL.
-	Url string `json:"url" url:"url"`
-	// The image width in pixels.
-	Width int `json:"width" url:"width"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (p *PreviewSchema) GetHeight() int {
-	if p == nil {
-		return 0
-	}
-	return p.Height
-}
-
-func (p *PreviewSchema) GetUrl() string {
-	if p == nil {
-		return ""
-	}
-	return p.Url
-}
-
-func (p *PreviewSchema) GetWidth() int {
-	if p == nil {
-		return 0
-	}
-	return p.Width
-}
-
-func (p *PreviewSchema) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *PreviewSchema) UnmarshalJSON(data []byte) error {
-	type unmarshaler PreviewSchema
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = PreviewSchema(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-	p.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *PreviewSchema) String() string {
-	if len(p.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
 }
 
 type TemplateListResponse struct {

@@ -847,8 +847,12 @@ func (c *Client) DeclineById(
 	return response, nil
 }
 
+// Returns the history of the specified accounts receivable document. The history contains all revisions of the document, status updates, and other events that occurred during the document's lifecycle. For more information, see [Document history](https://docs.monite.com/accounts-receivable/document-history).
+//
+// You can filter the history by the date range and event type. Events are sorted from oldest to newest by default.
 func (c *Client) GetHistory(
 	ctx context.Context,
+	// ID of the accounts receivable document whose history you want to get.
 	receivableId string,
 	request *monitegoclient.ReceivablesGetHistoryRequest,
 	opts ...option.RequestOption,
@@ -927,9 +931,12 @@ func (c *Client) GetHistory(
 	return response, nil
 }
 
+// Returns a single record from the change history of the specified accounts receivable document.
 func (c *Client) GetHistoryById(
 	ctx context.Context,
+	// ID of the history record to return. You can get these IDs from `GET /receivables/{receivable_id}/history`.
 	receivableHistoryId string,
+	// ID of the accounts receivable document whose history you want to get.
 	receivableId string,
 	opts ...option.RequestOption,
 ) (*monitegoclient.ReceivableHistoryResponse, error) {

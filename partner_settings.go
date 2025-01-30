@@ -8,62 +8,50 @@ import (
 	internal "github.com/team-monite/monite-go-client/internal"
 )
 
-type AccountingSettingsPayload struct {
-	Provider string `json:"provider" url:"provider"`
-	// Token for the accounting provider (Codat only)
-	Token *string `json:"token,omitempty" url:"token,omitempty"`
+type ApiVersion string
 
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
+const (
+	ApiVersionTwoThousandTwentyFour0525  ApiVersion = "2024-05-25"
+	ApiVersionTwoThousandTwentyFour0131  ApiVersion = "2024-01-31"
+	ApiVersionTwoThousandTwentyThree0901 ApiVersion = "2023-09-01"
+	ApiVersionTwoThousandTwentyThree0604 ApiVersion = "2023-06-04"
+	ApiVersionTwoThousandTwentyThree0412 ApiVersion = "2023-04-12"
+	ApiVersionTwoThousandTwentyThree0314 ApiVersion = "2023-03-14"
+	ApiVersionTwoThousandTwentyThree0301 ApiVersion = "2023-03-01"
+	ApiVersionTwoThousandTwentyThree0207 ApiVersion = "2023-02-07"
+	ApiVersionTwoThousandTwentyTwo1116   ApiVersion = "2022-11-16"
+)
+
+func NewApiVersionFromString(s string) (ApiVersion, error) {
+	switch s {
+	case "2024-05-25":
+		return ApiVersionTwoThousandTwentyFour0525, nil
+	case "2024-01-31":
+		return ApiVersionTwoThousandTwentyFour0131, nil
+	case "2023-09-01":
+		return ApiVersionTwoThousandTwentyThree0901, nil
+	case "2023-06-04":
+		return ApiVersionTwoThousandTwentyThree0604, nil
+	case "2023-04-12":
+		return ApiVersionTwoThousandTwentyThree0412, nil
+	case "2023-03-14":
+		return ApiVersionTwoThousandTwentyThree0314, nil
+	case "2023-03-01":
+		return ApiVersionTwoThousandTwentyThree0301, nil
+	case "2023-02-07":
+		return ApiVersionTwoThousandTwentyThree0207, nil
+	case "2022-11-16":
+		return ApiVersionTwoThousandTwentyTwo1116, nil
+	}
+	var t ApiVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-func (a *AccountingSettingsPayload) GetProvider() string {
-	if a == nil {
-		return ""
-	}
-	return a.Provider
+func (a ApiVersion) Ptr() *ApiVersion {
+	return &a
 }
 
-func (a *AccountingSettingsPayload) GetToken() *string {
-	if a == nil {
-		return nil
-	}
-	return a.Token
-}
-
-func (a *AccountingSettingsPayload) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AccountingSettingsPayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler AccountingSettingsPayload
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AccountingSettingsPayload(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-	a.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AccountingSettingsPayload) String() string {
-	if len(a.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type ButtonThemePayload struct {
+type ButtonTheme struct {
 	PrimaryColor        *string `json:"primary_color,omitempty" url:"primary_color,omitempty"`
 	PrimaryHoverColor   *string `json:"primary_hover_color,omitempty" url:"primary_hover_color,omitempty"`
 	SecondaryColor      *string `json:"secondary_color,omitempty" url:"secondary_color,omitempty"`
@@ -73,45 +61,45 @@ type ButtonThemePayload struct {
 	rawJSON         json.RawMessage
 }
 
-func (b *ButtonThemePayload) GetPrimaryColor() *string {
+func (b *ButtonTheme) GetPrimaryColor() *string {
 	if b == nil {
 		return nil
 	}
 	return b.PrimaryColor
 }
 
-func (b *ButtonThemePayload) GetPrimaryHoverColor() *string {
+func (b *ButtonTheme) GetPrimaryHoverColor() *string {
 	if b == nil {
 		return nil
 	}
 	return b.PrimaryHoverColor
 }
 
-func (b *ButtonThemePayload) GetSecondaryColor() *string {
+func (b *ButtonTheme) GetSecondaryColor() *string {
 	if b == nil {
 		return nil
 	}
 	return b.SecondaryColor
 }
 
-func (b *ButtonThemePayload) GetSecondaryHoverColor() *string {
+func (b *ButtonTheme) GetSecondaryHoverColor() *string {
 	if b == nil {
 		return nil
 	}
 	return b.SecondaryHoverColor
 }
 
-func (b *ButtonThemePayload) GetExtraProperties() map[string]interface{} {
+func (b *ButtonTheme) GetExtraProperties() map[string]interface{} {
 	return b.extraProperties
 }
 
-func (b *ButtonThemePayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler ButtonThemePayload
+func (b *ButtonTheme) UnmarshalJSON(data []byte) error {
+	type unmarshaler ButtonTheme
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*b = ButtonThemePayload(value)
+	*b = ButtonTheme(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *b)
 	if err != nil {
 		return err
@@ -121,7 +109,7 @@ func (b *ButtonThemePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (b *ButtonThemePayload) String() string {
+func (b *ButtonTheme) String() string {
 	if len(b.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
 			return value
@@ -133,31 +121,31 @@ func (b *ButtonThemePayload) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-type CardThemePayload struct {
+type CardTheme struct {
 	BackgroundColor *string `json:"background_color,omitempty" url:"background_color,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (c *CardThemePayload) GetBackgroundColor() *string {
+func (c *CardTheme) GetBackgroundColor() *string {
 	if c == nil {
 		return nil
 	}
 	return c.BackgroundColor
 }
 
-func (c *CardThemePayload) GetExtraProperties() map[string]interface{} {
+func (c *CardTheme) GetExtraProperties() map[string]interface{} {
 	return c.extraProperties
 }
 
-func (c *CardThemePayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler CardThemePayload
+func (c *CardTheme) UnmarshalJSON(data []byte) error {
+	type unmarshaler CardTheme
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CardThemePayload(value)
+	*c = CardTheme(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -167,7 +155,7 @@ func (c *CardThemePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CardThemePayload) String() string {
+func (c *CardTheme) String() string {
 	if len(c.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
@@ -179,62 +167,7 @@ func (c *CardThemePayload) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-type EInvoicingSettingsPayload struct {
-	ClientId     string                 `json:"client_id" url:"client_id"`
-	ClientSecret string                 `json:"client_secret" url:"client_secret"`
-	Provider     EInvoicingProviderEnum `json:"provider" url:"provider"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (e *EInvoicingSettingsPayload) GetClientId() string {
-	if e == nil {
-		return ""
-	}
-	return e.ClientId
-}
-
-func (e *EInvoicingSettingsPayload) GetClientSecret() string {
-	if e == nil {
-		return ""
-	}
-	return e.ClientSecret
-}
-
-func (e *EInvoicingSettingsPayload) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *EInvoicingSettingsPayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler EInvoicingSettingsPayload
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = EInvoicingSettingsPayload(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-	e.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *EInvoicingSettingsPayload) String() string {
-	if len(e.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type MailSettingsPayload struct {
+type MailSettings struct {
 	AttachDocumentsAsPdf bool    `json:"attach_documents_as_pdf" url:"attach_documents_as_pdf"`
 	FromEmailUsername    *string `json:"from_email_username,omitempty" url:"from_email_username,omitempty"`
 	FromName             *string `json:"from_name,omitempty" url:"from_name,omitempty"`
@@ -243,38 +176,38 @@ type MailSettingsPayload struct {
 	rawJSON         json.RawMessage
 }
 
-func (m *MailSettingsPayload) GetAttachDocumentsAsPdf() bool {
+func (m *MailSettings) GetAttachDocumentsAsPdf() bool {
 	if m == nil {
 		return false
 	}
 	return m.AttachDocumentsAsPdf
 }
 
-func (m *MailSettingsPayload) GetFromEmailUsername() *string {
+func (m *MailSettings) GetFromEmailUsername() *string {
 	if m == nil {
 		return nil
 	}
 	return m.FromEmailUsername
 }
 
-func (m *MailSettingsPayload) GetFromName() *string {
+func (m *MailSettings) GetFromName() *string {
 	if m == nil {
 		return nil
 	}
 	return m.FromName
 }
 
-func (m *MailSettingsPayload) GetExtraProperties() map[string]interface{} {
+func (m *MailSettings) GetExtraProperties() map[string]interface{} {
 	return m.extraProperties
 }
 
-func (m *MailSettingsPayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler MailSettingsPayload
+func (m *MailSettings) UnmarshalJSON(data []byte) error {
+	type unmarshaler MailSettings
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*m = MailSettingsPayload(value)
+	*m = MailSettings(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
@@ -284,7 +217,7 @@ func (m *MailSettingsPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (m *MailSettingsPayload) String() string {
+func (m *MailSettings) String() string {
 	if len(m.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
@@ -296,130 +229,112 @@ func (m *MailSettingsPayload) String() string {
 	return fmt.Sprintf("%#v", m)
 }
 
-type PartnerProjectSettingsResponse struct {
-	// Settings for the accounting module.
-	Accounting *AccountingSettingsResponse `json:"accounting,omitempty" url:"accounting,omitempty"`
-	// Default API version for partner.
-	ApiVersion *ApiVersion `json:"api_version,omitempty" url:"api_version,omitempty"`
+type PartnerProjectSettingsPayloadOutput struct {
+	// Custom currency exchange rates.
+	Currency *CurrencySettingsOutput `json:"currency,omitempty" url:"currency,omitempty"`
+	// Settings for the payables module.
+	Payable *PayableSettings `json:"payable,omitempty" url:"payable,omitempty"`
+	// Settings for the receivables module.
+	Receivable *ReceivableSettings `json:"receivable,omitempty" url:"receivable,omitempty"`
+	// Settings for email and mailboxes.
+	Mail *MailSettings `json:"mail,omitempty" url:"mail,omitempty"`
 	// Commercial conditions for receivables.
 	CommercialConditions []string `json:"commercial_conditions,omitempty" url:"commercial_conditions,omitempty"`
-	// Custom currency exchange rates.
-	Currency *CurrencySettings `json:"currency,omitempty" url:"currency,omitempty"`
-	// A default role to provision upon new entity creation.
-	DefaultRole map[string]interface{} `json:"default_role,omitempty" url:"default_role,omitempty"`
-	// Settings for the e-invoicing module.
-	Einvoicing *EInvoicingSettingsResponse `json:"einvoicing,omitempty" url:"einvoicing,omitempty"`
-	// Settings for email and mailboxes.
-	Mail *MailSettingsResponse `json:"mail,omitempty" url:"mail,omitempty"`
-	// Settings for the payables module.
-	Payable *PayableSettingsResponse `json:"payable,omitempty" url:"payable,omitempty"`
-	// Settings for the payments module.
-	Payments *PaymentsSettingsResponse `json:"payments,omitempty" url:"payments,omitempty"`
-	// Settings for the receivables module.
-	Receivable *ReceivableSettingsResponse `json:"receivable,omitempty" url:"receivable,omitempty"`
 	// Measurement units.
 	Units   []*Unit `json:"units,omitempty" url:"units,omitempty"`
 	Website *string `json:"website,omitempty" url:"website,omitempty"`
+	// A default role to provision upon new entity creation.
+	DefaultRole map[string]interface{} `json:"default_role,omitempty" url:"default_role,omitempty"`
+	// Settings for the payments module.
+	Payments *PaymentsSettingsOutput `json:"payments,omitempty" url:"payments,omitempty"`
+	// Default API version for partner.
+	ApiVersion *ApiVersion `json:"api_version,omitempty" url:"api_version,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (p *PartnerProjectSettingsResponse) GetAccounting() *AccountingSettingsResponse {
-	if p == nil {
-		return nil
-	}
-	return p.Accounting
-}
-
-func (p *PartnerProjectSettingsResponse) GetApiVersion() *ApiVersion {
-	if p == nil {
-		return nil
-	}
-	return p.ApiVersion
-}
-
-func (p *PartnerProjectSettingsResponse) GetCommercialConditions() []string {
-	if p == nil {
-		return nil
-	}
-	return p.CommercialConditions
-}
-
-func (p *PartnerProjectSettingsResponse) GetCurrency() *CurrencySettings {
+func (p *PartnerProjectSettingsPayloadOutput) GetCurrency() *CurrencySettingsOutput {
 	if p == nil {
 		return nil
 	}
 	return p.Currency
 }
 
-func (p *PartnerProjectSettingsResponse) GetDefaultRole() map[string]interface{} {
-	if p == nil {
-		return nil
-	}
-	return p.DefaultRole
-}
-
-func (p *PartnerProjectSettingsResponse) GetEinvoicing() *EInvoicingSettingsResponse {
-	if p == nil {
-		return nil
-	}
-	return p.Einvoicing
-}
-
-func (p *PartnerProjectSettingsResponse) GetMail() *MailSettingsResponse {
-	if p == nil {
-		return nil
-	}
-	return p.Mail
-}
-
-func (p *PartnerProjectSettingsResponse) GetPayable() *PayableSettingsResponse {
+func (p *PartnerProjectSettingsPayloadOutput) GetPayable() *PayableSettings {
 	if p == nil {
 		return nil
 	}
 	return p.Payable
 }
 
-func (p *PartnerProjectSettingsResponse) GetPayments() *PaymentsSettingsResponse {
-	if p == nil {
-		return nil
-	}
-	return p.Payments
-}
-
-func (p *PartnerProjectSettingsResponse) GetReceivable() *ReceivableSettingsResponse {
+func (p *PartnerProjectSettingsPayloadOutput) GetReceivable() *ReceivableSettings {
 	if p == nil {
 		return nil
 	}
 	return p.Receivable
 }
 
-func (p *PartnerProjectSettingsResponse) GetUnits() []*Unit {
+func (p *PartnerProjectSettingsPayloadOutput) GetMail() *MailSettings {
+	if p == nil {
+		return nil
+	}
+	return p.Mail
+}
+
+func (p *PartnerProjectSettingsPayloadOutput) GetCommercialConditions() []string {
+	if p == nil {
+		return nil
+	}
+	return p.CommercialConditions
+}
+
+func (p *PartnerProjectSettingsPayloadOutput) GetUnits() []*Unit {
 	if p == nil {
 		return nil
 	}
 	return p.Units
 }
 
-func (p *PartnerProjectSettingsResponse) GetWebsite() *string {
+func (p *PartnerProjectSettingsPayloadOutput) GetWebsite() *string {
 	if p == nil {
 		return nil
 	}
 	return p.Website
 }
 
-func (p *PartnerProjectSettingsResponse) GetExtraProperties() map[string]interface{} {
+func (p *PartnerProjectSettingsPayloadOutput) GetDefaultRole() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return p.DefaultRole
+}
+
+func (p *PartnerProjectSettingsPayloadOutput) GetPayments() *PaymentsSettingsOutput {
+	if p == nil {
+		return nil
+	}
+	return p.Payments
+}
+
+func (p *PartnerProjectSettingsPayloadOutput) GetApiVersion() *ApiVersion {
+	if p == nil {
+		return nil
+	}
+	return p.ApiVersion
+}
+
+func (p *PartnerProjectSettingsPayloadOutput) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PartnerProjectSettingsResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler PartnerProjectSettingsResponse
+func (p *PartnerProjectSettingsPayloadOutput) UnmarshalJSON(data []byte) error {
+	type unmarshaler PartnerProjectSettingsPayloadOutput
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PartnerProjectSettingsResponse(value)
+	*p = PartnerProjectSettingsPayloadOutput(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -429,7 +344,7 @@ func (p *PartnerProjectSettingsResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PartnerProjectSettingsResponse) String() string {
+func (p *PartnerProjectSettingsPayloadOutput) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -441,72 +356,89 @@ func (p *PartnerProjectSettingsResponse) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-type PayableSettingsPayload struct {
+type PayableSettings struct {
 	AllowCancelDuplicatesAutomatically *bool  `json:"allow_cancel_duplicates_automatically,omitempty" url:"allow_cancel_duplicates_automatically,omitempty"`
 	AllowCounterpartAutocreation       *bool  `json:"allow_counterpart_autocreation,omitempty" url:"allow_counterpart_autocreation,omitempty"`
 	AllowCounterpartAutolinking        *bool  `json:"allow_counterpart_autolinking,omitempty" url:"allow_counterpart_autolinking,omitempty"`
+	AllowCreditNoteAutolinking         *bool  `json:"allow_credit_note_autolinking,omitempty" url:"allow_credit_note_autolinking,omitempty"`
 	ApprovePageUrl                     string `json:"approve_page_url" url:"approve_page_url"`
 	// A state each new payable will have upon creation
-	DefaultState    *string `json:"default_state,omitempty" url:"default_state,omitempty"`
-	EnableLineItems *bool   `json:"enable_line_items,omitempty" url:"enable_line_items,omitempty"`
+	DefaultState *string `json:"default_state,omitempty" url:"default_state,omitempty"`
+	// Starting from version 2024-05-25 by default is always set to True.
+	EnableLineItems            *bool `json:"enable_line_items,omitempty" url:"enable_line_items,omitempty"`
+	SkipApprovalForPaidInvoice *bool `json:"skip_approval_for_paid_invoice,omitempty" url:"skip_approval_for_paid_invoice,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (p *PayableSettingsPayload) GetAllowCancelDuplicatesAutomatically() *bool {
+func (p *PayableSettings) GetAllowCancelDuplicatesAutomatically() *bool {
 	if p == nil {
 		return nil
 	}
 	return p.AllowCancelDuplicatesAutomatically
 }
 
-func (p *PayableSettingsPayload) GetAllowCounterpartAutocreation() *bool {
+func (p *PayableSettings) GetAllowCounterpartAutocreation() *bool {
 	if p == nil {
 		return nil
 	}
 	return p.AllowCounterpartAutocreation
 }
 
-func (p *PayableSettingsPayload) GetAllowCounterpartAutolinking() *bool {
+func (p *PayableSettings) GetAllowCounterpartAutolinking() *bool {
 	if p == nil {
 		return nil
 	}
 	return p.AllowCounterpartAutolinking
 }
 
-func (p *PayableSettingsPayload) GetApprovePageUrl() string {
+func (p *PayableSettings) GetAllowCreditNoteAutolinking() *bool {
+	if p == nil {
+		return nil
+	}
+	return p.AllowCreditNoteAutolinking
+}
+
+func (p *PayableSettings) GetApprovePageUrl() string {
 	if p == nil {
 		return ""
 	}
 	return p.ApprovePageUrl
 }
 
-func (p *PayableSettingsPayload) GetDefaultState() *string {
+func (p *PayableSettings) GetDefaultState() *string {
 	if p == nil {
 		return nil
 	}
 	return p.DefaultState
 }
 
-func (p *PayableSettingsPayload) GetEnableLineItems() *bool {
+func (p *PayableSettings) GetEnableLineItems() *bool {
 	if p == nil {
 		return nil
 	}
 	return p.EnableLineItems
 }
 
-func (p *PayableSettingsPayload) GetExtraProperties() map[string]interface{} {
+func (p *PayableSettings) GetSkipApprovalForPaidInvoice() *bool {
+	if p == nil {
+		return nil
+	}
+	return p.SkipApprovalForPaidInvoice
+}
+
+func (p *PayableSettings) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PayableSettingsPayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler PayableSettingsPayload
+func (p *PayableSettings) UnmarshalJSON(data []byte) error {
+	type unmarshaler PayableSettings
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PayableSettingsPayload(value)
+	*p = PayableSettings(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -516,7 +448,7 @@ func (p *PayableSettingsPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PayableSettingsPayload) String() string {
+func (p *PayableSettings) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -528,87 +460,87 @@ func (p *PayableSettingsPayload) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-type PaymentPageThemePayload struct {
-	BackgroundColor *string             `json:"background_color,omitempty" url:"background_color,omitempty"`
-	BorderRadius    *string             `json:"border_radius,omitempty" url:"border_radius,omitempty"`
-	Button          *ButtonThemePayload `json:"button,omitempty" url:"button,omitempty"`
-	Card            *CardThemePayload   `json:"card,omitempty" url:"card,omitempty"`
-	FontColor       *string             `json:"font_color,omitempty" url:"font_color,omitempty"`
-	FontFamily      *string             `json:"font_family,omitempty" url:"font_family,omitempty"`
-	FontLinkHref    *string             `json:"font_link_href,omitempty" url:"font_link_href,omitempty"`
-	LogoSrc         *string             `json:"logo_src,omitempty" url:"logo_src,omitempty"`
+type PaymentPageTheme struct {
+	BackgroundColor *string      `json:"background_color,omitempty" url:"background_color,omitempty"`
+	BorderRadius    *string      `json:"border_radius,omitempty" url:"border_radius,omitempty"`
+	Button          *ButtonTheme `json:"button,omitempty" url:"button,omitempty"`
+	Card            *CardTheme   `json:"card,omitempty" url:"card,omitempty"`
+	FontColor       *string      `json:"font_color,omitempty" url:"font_color,omitempty"`
+	FontFamily      *string      `json:"font_family,omitempty" url:"font_family,omitempty"`
+	FontLinkHref    *string      `json:"font_link_href,omitempty" url:"font_link_href,omitempty"`
+	LogoSrc         *string      `json:"logo_src,omitempty" url:"logo_src,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (p *PaymentPageThemePayload) GetBackgroundColor() *string {
+func (p *PaymentPageTheme) GetBackgroundColor() *string {
 	if p == nil {
 		return nil
 	}
 	return p.BackgroundColor
 }
 
-func (p *PaymentPageThemePayload) GetBorderRadius() *string {
+func (p *PaymentPageTheme) GetBorderRadius() *string {
 	if p == nil {
 		return nil
 	}
 	return p.BorderRadius
 }
 
-func (p *PaymentPageThemePayload) GetButton() *ButtonThemePayload {
+func (p *PaymentPageTheme) GetButton() *ButtonTheme {
 	if p == nil {
 		return nil
 	}
 	return p.Button
 }
 
-func (p *PaymentPageThemePayload) GetCard() *CardThemePayload {
+func (p *PaymentPageTheme) GetCard() *CardTheme {
 	if p == nil {
 		return nil
 	}
 	return p.Card
 }
 
-func (p *PaymentPageThemePayload) GetFontColor() *string {
+func (p *PaymentPageTheme) GetFontColor() *string {
 	if p == nil {
 		return nil
 	}
 	return p.FontColor
 }
 
-func (p *PaymentPageThemePayload) GetFontFamily() *string {
+func (p *PaymentPageTheme) GetFontFamily() *string {
 	if p == nil {
 		return nil
 	}
 	return p.FontFamily
 }
 
-func (p *PaymentPageThemePayload) GetFontLinkHref() *string {
+func (p *PaymentPageTheme) GetFontLinkHref() *string {
 	if p == nil {
 		return nil
 	}
 	return p.FontLinkHref
 }
 
-func (p *PaymentPageThemePayload) GetLogoSrc() *string {
+func (p *PaymentPageTheme) GetLogoSrc() *string {
 	if p == nil {
 		return nil
 	}
 	return p.LogoSrc
 }
 
-func (p *PaymentPageThemePayload) GetExtraProperties() map[string]interface{} {
+func (p *PaymentPageTheme) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PaymentPageThemePayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler PaymentPageThemePayload
+func (p *PaymentPageTheme) UnmarshalJSON(data []byte) error {
+	type unmarshaler PaymentPageTheme
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PaymentPageThemePayload(value)
+	*p = PaymentPageTheme(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -618,7 +550,7 @@ func (p *PaymentPageThemePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PaymentPageThemePayload) String() string {
+func (p *PaymentPageTheme) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -630,9 +562,9 @@ func (p *PaymentPageThemePayload) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-type PaymentsSettingsPayload struct {
-	PaymentPageDomain *string                  `json:"payment_page_domain,omitempty" url:"payment_page_domain,omitempty"`
-	PaymentPageTheme  *PaymentPageThemePayload `json:"payment_page_theme,omitempty" url:"payment_page_theme,omitempty"`
+type PaymentsSettingsInput struct {
+	PaymentPageDomain *string           `json:"payment_page_domain,omitempty" url:"payment_page_domain,omitempty"`
+	PaymentPageTheme  *PaymentPageTheme `json:"payment_page_theme,omitempty" url:"payment_page_theme,omitempty"`
 	// The support email address
 	SupportEmail *string `json:"support_email,omitempty" url:"support_email,omitempty"`
 
@@ -640,38 +572,38 @@ type PaymentsSettingsPayload struct {
 	rawJSON         json.RawMessage
 }
 
-func (p *PaymentsSettingsPayload) GetPaymentPageDomain() *string {
+func (p *PaymentsSettingsInput) GetPaymentPageDomain() *string {
 	if p == nil {
 		return nil
 	}
 	return p.PaymentPageDomain
 }
 
-func (p *PaymentsSettingsPayload) GetPaymentPageTheme() *PaymentPageThemePayload {
+func (p *PaymentsSettingsInput) GetPaymentPageTheme() *PaymentPageTheme {
 	if p == nil {
 		return nil
 	}
 	return p.PaymentPageTheme
 }
 
-func (p *PaymentsSettingsPayload) GetSupportEmail() *string {
+func (p *PaymentsSettingsInput) GetSupportEmail() *string {
 	if p == nil {
 		return nil
 	}
 	return p.SupportEmail
 }
 
-func (p *PaymentsSettingsPayload) GetExtraProperties() map[string]interface{} {
+func (p *PaymentsSettingsInput) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PaymentsSettingsPayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler PaymentsSettingsPayload
+func (p *PaymentsSettingsInput) UnmarshalJSON(data []byte) error {
+	type unmarshaler PaymentsSettingsInput
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PaymentsSettingsPayload(value)
+	*p = PaymentsSettingsInput(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -681,7 +613,7 @@ func (p *PaymentsSettingsPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PaymentsSettingsPayload) String() string {
+func (p *PaymentsSettingsInput) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -693,7 +625,70 @@ func (p *PaymentsSettingsPayload) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-type ReceivableSettingsPayload struct {
+type PaymentsSettingsOutput struct {
+	PaymentPageDomain *string           `json:"payment_page_domain,omitempty" url:"payment_page_domain,omitempty"`
+	PaymentPageTheme  *PaymentPageTheme `json:"payment_page_theme,omitempty" url:"payment_page_theme,omitempty"`
+	// The support email address
+	SupportEmail *string `json:"support_email,omitempty" url:"support_email,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PaymentsSettingsOutput) GetPaymentPageDomain() *string {
+	if p == nil {
+		return nil
+	}
+	return p.PaymentPageDomain
+}
+
+func (p *PaymentsSettingsOutput) GetPaymentPageTheme() *PaymentPageTheme {
+	if p == nil {
+		return nil
+	}
+	return p.PaymentPageTheme
+}
+
+func (p *PaymentsSettingsOutput) GetSupportEmail() *string {
+	if p == nil {
+		return nil
+	}
+	return p.SupportEmail
+}
+
+func (p *PaymentsSettingsOutput) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PaymentsSettingsOutput) UnmarshalJSON(data []byte) error {
+	type unmarshaler PaymentsSettingsOutput
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PaymentsSettingsOutput(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PaymentsSettingsOutput) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ReceivableSettings struct {
 	CreateWithoutPersonalInfo bool    `json:"create_without_personal_info" url:"create_without_personal_info"`
 	DeductionTitle            *string `json:"deduction_title,omitempty" url:"deduction_title,omitempty"`
 
@@ -701,31 +696,31 @@ type ReceivableSettingsPayload struct {
 	rawJSON         json.RawMessage
 }
 
-func (r *ReceivableSettingsPayload) GetCreateWithoutPersonalInfo() bool {
+func (r *ReceivableSettings) GetCreateWithoutPersonalInfo() bool {
 	if r == nil {
 		return false
 	}
 	return r.CreateWithoutPersonalInfo
 }
 
-func (r *ReceivableSettingsPayload) GetDeductionTitle() *string {
+func (r *ReceivableSettings) GetDeductionTitle() *string {
 	if r == nil {
 		return nil
 	}
 	return r.DeductionTitle
 }
 
-func (r *ReceivableSettingsPayload) GetExtraProperties() map[string]interface{} {
+func (r *ReceivableSettings) GetExtraProperties() map[string]interface{} {
 	return r.extraProperties
 }
 
-func (r *ReceivableSettingsPayload) UnmarshalJSON(data []byte) error {
-	type unmarshaler ReceivableSettingsPayload
+func (r *ReceivableSettings) UnmarshalJSON(data []byte) error {
+	type unmarshaler ReceivableSettings
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*r = ReceivableSettingsPayload(value)
+	*r = ReceivableSettings(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
@@ -735,7 +730,7 @@ func (r *ReceivableSettingsPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (r *ReceivableSettingsPayload) String() string {
+func (r *ReceivableSettings) String() string {
 	if len(r.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
@@ -747,28 +742,78 @@ func (r *ReceivableSettingsPayload) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
-type PartnerProjectSettingsPayload struct {
-	// Settings for the accounting module.
-	Accounting *AccountingSettingsPayload `json:"accounting,omitempty" url:"-"`
-	// Default API version for partner.
-	ApiVersion *ApiVersion `json:"api_version,omitempty" url:"-"`
+type Unit struct {
+	Designation string `json:"designation" url:"designation"`
+	Name        string `json:"name" url:"name"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (u *Unit) GetDesignation() string {
+	if u == nil {
+		return ""
+	}
+	return u.Designation
+}
+
+func (u *Unit) GetName() string {
+	if u == nil {
+		return ""
+	}
+	return u.Name
+}
+
+func (u *Unit) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *Unit) UnmarshalJSON(data []byte) error {
+	type unmarshaler Unit
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = Unit(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+	u.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *Unit) String() string {
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type PartnerProjectSettingsPayloadInput struct {
+	// Custom currency exchange rates.
+	Currency *CurrencySettingsInput `json:"currency,omitempty" url:"-"`
+	// Settings for the payables module.
+	Payable *PayableSettings `json:"payable,omitempty" url:"-"`
+	// Settings for the receivables module.
+	Receivable *ReceivableSettings `json:"receivable,omitempty" url:"-"`
+	// Settings for email and mailboxes.
+	Mail *MailSettings `json:"mail,omitempty" url:"-"`
 	// Commercial conditions for receivables.
 	CommercialConditions []string `json:"commercial_conditions,omitempty" url:"-"`
-	// Custom currency exchange rates.
-	Currency *CurrencySettings `json:"currency,omitempty" url:"-"`
-	// A default role to provision upon new entity creation.
-	DefaultRole map[string]interface{} `json:"default_role,omitempty" url:"-"`
-	// Settings for the e-invoicing module.
-	Einvoicing *EInvoicingSettingsPayload `json:"einvoicing,omitempty" url:"-"`
-	// Settings for email and mailboxes.
-	Mail *MailSettingsPayload `json:"mail,omitempty" url:"-"`
-	// Settings for the payables module.
-	Payable *PayableSettingsPayload `json:"payable,omitempty" url:"-"`
-	// Settings for the payments module.
-	Payments *PaymentsSettingsPayload `json:"payments,omitempty" url:"-"`
-	// Settings for the receivables module.
-	Receivable *ReceivableSettingsPayload `json:"receivable,omitempty" url:"-"`
 	// Measurement units.
 	Units   []*Unit `json:"units,omitempty" url:"-"`
 	Website *string `json:"website,omitempty" url:"-"`
+	// A default role to provision upon new entity creation.
+	DefaultRole map[string]interface{} `json:"default_role,omitempty" url:"-"`
+	// Settings for the payments module.
+	Payments *PaymentsSettingsInput `json:"payments,omitempty" url:"-"`
+	// Default API version for partner.
+	ApiVersion *ApiVersion `json:"api_version,omitempty" url:"-"`
 }

@@ -200,7 +200,7 @@ type PaymentIntentResponse struct {
 	Currency              string                         `json:"currency" url:"currency"`
 	Invoice               *Invoice                       `json:"invoice,omitempty" url:"invoice,omitempty"`
 	Object                *PaymentObject                 `json:"object,omitempty" url:"object,omitempty"`
-	Payer                 *AccountResponse               `json:"payer,omitempty" url:"payer,omitempty"`
+	Payer                 *PayerAccountResponse          `json:"payer,omitempty" url:"payer,omitempty"`
 	PaymentLinkId         *string                        `json:"payment_link_id,omitempty" url:"payment_link_id,omitempty"`
 	PaymentMethods        []MoniteAllPaymentMethodsTypes `json:"payment_methods" url:"payment_methods"`
 	PaymentReference      *string                        `json:"payment_reference,omitempty" url:"payment_reference,omitempty"`
@@ -269,7 +269,7 @@ func (p *PaymentIntentResponse) GetObject() *PaymentObject {
 	return p.Object
 }
 
-func (p *PaymentIntentResponse) GetPayer() *AccountResponse {
+func (p *PaymentIntentResponse) GetPayer() *PayerAccountResponse {
 	if p == nil {
 		return nil
 	}

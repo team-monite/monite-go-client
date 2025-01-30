@@ -5,18 +5,21 @@ package client
 import (
 	accesstokens "github.com/team-monite/monite-go-client/accesstokens"
 	accountingclient "github.com/team-monite/monite-go-client/accounting/client"
+	analytics "github.com/team-monite/monite-go-client/analytics"
 	approvalpoliciesclient "github.com/team-monite/monite-go-client/approvalpolicies/client"
 	approvalrequests "github.com/team-monite/monite-go-client/approvalrequests"
-	auditlogs "github.com/team-monite/monite-go-client/auditlogs"
 	batchpayments "github.com/team-monite/monite-go-client/batchpayments"
 	comments "github.com/team-monite/monite-go-client/comments"
 	core "github.com/team-monite/monite-go-client/core"
 	counterpartsclient "github.com/team-monite/monite-go-client/counterparts/client"
+	creditnotes "github.com/team-monite/monite-go-client/creditnotes"
 	dataexportsclient "github.com/team-monite/monite-go-client/dataexports/client"
+	einvoicingconnections "github.com/team-monite/monite-go-client/einvoicingconnections"
 	entitiesclient "github.com/team-monite/monite-go-client/entities/client"
 	entityusers "github.com/team-monite/monite-go-client/entityusers"
 	events "github.com/team-monite/monite-go-client/events"
 	files "github.com/team-monite/monite-go-client/files"
+	financing "github.com/team-monite/monite-go-client/financing"
 	internal "github.com/team-monite/monite-go-client/internal"
 	mailboxdomains "github.com/team-monite/monite-go-client/mailboxdomains"
 	mailboxes "github.com/team-monite/monite-go-client/mailboxes"
@@ -52,44 +55,47 @@ type Client struct {
 	caller  *internal.Caller
 	header  http.Header
 
-	ApprovalPolicies     *approvalpoliciesclient.Client
-	ApprovalRequests     *approvalrequests.Client
-	AuditLogs            *auditlogs.Client
-	AccessTokens         *accesstokens.Client
-	BatchPayments        *batchpayments.Client
-	Comments             *comments.Client
-	Counterparts         *counterpartsclient.Client
-	DataExports          *dataexportsclient.Client
-	PdfTemplates         *pdftemplates.Client
-	Entities             *entitiesclient.Client
-	EntityUsers          *entityusers.Client
-	Events               *events.Client
-	Files                *files.Client
-	MailTemplates        *mailtemplates.Client
-	MailboxDomains       *mailboxdomains.Client
-	Mailboxes            *mailboxes.Client
-	MeasureUnits         *measureunits.Client
-	OnboardingLinks      *onboardinglinks.Client
-	OverdueReminders     *overduereminders.Client
-	PurchaseOrders       *purchaseorders.Client
-	Payables             *payablesclient.Client
-	PaymentIntents       *paymentintents.Client
-	PaymentLinks         *paymentlinks.Client
-	PaymentRecords       *paymentrecords.Client
-	PaymentReminders     *paymentreminders.Client
-	PaymentTerms         *paymentterms.Client
-	Products             *products.Client
-	Projects             *projects.Client
-	Receivables          *receivables.Client
-	Recurrences          *recurrences.Client
-	Roles                *roles.Client
-	PartnerSettings      *partnersettings.Client
-	Tags                 *tags.Client
-	TextTemplates        *texttemplates.Client
-	VatRates             *vatrates.Client
-	WebhookDeliveries    *webhookdeliveries.Client
-	WebhookSubscriptions *webhooksubscriptions.Client
-	Accounting           *accountingclient.Client
+	Analytics             *analytics.Client
+	ApprovalPolicies      *approvalpoliciesclient.Client
+	ApprovalRequests      *approvalrequests.Client
+	AccessTokens          *accesstokens.Client
+	BatchPayments         *batchpayments.Client
+	Comments              *comments.Client
+	Counterparts          *counterpartsclient.Client
+	DataExports           *dataexportsclient.Client
+	PdfTemplates          *pdftemplates.Client
+	EInvoicingConnections *einvoicingconnections.Client
+	Entities              *entitiesclient.Client
+	EntityUsers           *entityusers.Client
+	Events                *events.Client
+	Files                 *files.Client
+	Financing             *financing.Client
+	MailTemplates         *mailtemplates.Client
+	MailboxDomains        *mailboxdomains.Client
+	Mailboxes             *mailboxes.Client
+	MeasureUnits          *measureunits.Client
+	OnboardingLinks       *onboardinglinks.Client
+	OverdueReminders      *overduereminders.Client
+	CreditNotes           *creditnotes.Client
+	PurchaseOrders        *purchaseorders.Client
+	Payables              *payablesclient.Client
+	PaymentIntents        *paymentintents.Client
+	PaymentLinks          *paymentlinks.Client
+	PaymentRecords        *paymentrecords.Client
+	PaymentReminders      *paymentreminders.Client
+	PaymentTerms          *paymentterms.Client
+	Products              *products.Client
+	Projects              *projects.Client
+	Receivables           *receivables.Client
+	Recurrences           *recurrences.Client
+	Roles                 *roles.Client
+	PartnerSettings       *partnersettings.Client
+	Tags                  *tags.Client
+	TextTemplates         *texttemplates.Client
+	VatRates              *vatrates.Client
+	WebhookDeliveries     *webhookdeliveries.Client
+	WebhookSubscriptions  *webhooksubscriptions.Client
+	Accounting            *accountingclient.Client
 }
 
 func NewClient(opts ...option.RequestOption) *Client {
@@ -102,44 +108,47 @@ func NewClient(opts ...option.RequestOption) *Client {
 				MaxAttempts: options.MaxAttempts,
 			},
 		),
-		header:               options.ToHeader(),
-		ApprovalPolicies:     approvalpoliciesclient.NewClient(opts...),
-		ApprovalRequests:     approvalrequests.NewClient(opts...),
-		AuditLogs:            auditlogs.NewClient(opts...),
-		AccessTokens:         accesstokens.NewClient(opts...),
-		BatchPayments:        batchpayments.NewClient(opts...),
-		Comments:             comments.NewClient(opts...),
-		Counterparts:         counterpartsclient.NewClient(opts...),
-		DataExports:          dataexportsclient.NewClient(opts...),
-		PdfTemplates:         pdftemplates.NewClient(opts...),
-		Entities:             entitiesclient.NewClient(opts...),
-		EntityUsers:          entityusers.NewClient(opts...),
-		Events:               events.NewClient(opts...),
-		Files:                files.NewClient(opts...),
-		MailTemplates:        mailtemplates.NewClient(opts...),
-		MailboxDomains:       mailboxdomains.NewClient(opts...),
-		Mailboxes:            mailboxes.NewClient(opts...),
-		MeasureUnits:         measureunits.NewClient(opts...),
-		OnboardingLinks:      onboardinglinks.NewClient(opts...),
-		OverdueReminders:     overduereminders.NewClient(opts...),
-		PurchaseOrders:       purchaseorders.NewClient(opts...),
-		Payables:             payablesclient.NewClient(opts...),
-		PaymentIntents:       paymentintents.NewClient(opts...),
-		PaymentLinks:         paymentlinks.NewClient(opts...),
-		PaymentRecords:       paymentrecords.NewClient(opts...),
-		PaymentReminders:     paymentreminders.NewClient(opts...),
-		PaymentTerms:         paymentterms.NewClient(opts...),
-		Products:             products.NewClient(opts...),
-		Projects:             projects.NewClient(opts...),
-		Receivables:          receivables.NewClient(opts...),
-		Recurrences:          recurrences.NewClient(opts...),
-		Roles:                roles.NewClient(opts...),
-		PartnerSettings:      partnersettings.NewClient(opts...),
-		Tags:                 tags.NewClient(opts...),
-		TextTemplates:        texttemplates.NewClient(opts...),
-		VatRates:             vatrates.NewClient(opts...),
-		WebhookDeliveries:    webhookdeliveries.NewClient(opts...),
-		WebhookSubscriptions: webhooksubscriptions.NewClient(opts...),
-		Accounting:           accountingclient.NewClient(opts...),
+		header:                options.ToHeader(),
+		Analytics:             analytics.NewClient(opts...),
+		ApprovalPolicies:      approvalpoliciesclient.NewClient(opts...),
+		ApprovalRequests:      approvalrequests.NewClient(opts...),
+		AccessTokens:          accesstokens.NewClient(opts...),
+		BatchPayments:         batchpayments.NewClient(opts...),
+		Comments:              comments.NewClient(opts...),
+		Counterparts:          counterpartsclient.NewClient(opts...),
+		DataExports:           dataexportsclient.NewClient(opts...),
+		PdfTemplates:          pdftemplates.NewClient(opts...),
+		EInvoicingConnections: einvoicingconnections.NewClient(opts...),
+		Entities:              entitiesclient.NewClient(opts...),
+		EntityUsers:           entityusers.NewClient(opts...),
+		Events:                events.NewClient(opts...),
+		Files:                 files.NewClient(opts...),
+		Financing:             financing.NewClient(opts...),
+		MailTemplates:         mailtemplates.NewClient(opts...),
+		MailboxDomains:        mailboxdomains.NewClient(opts...),
+		Mailboxes:             mailboxes.NewClient(opts...),
+		MeasureUnits:          measureunits.NewClient(opts...),
+		OnboardingLinks:       onboardinglinks.NewClient(opts...),
+		OverdueReminders:      overduereminders.NewClient(opts...),
+		CreditNotes:           creditnotes.NewClient(opts...),
+		PurchaseOrders:        purchaseorders.NewClient(opts...),
+		Payables:              payablesclient.NewClient(opts...),
+		PaymentIntents:        paymentintents.NewClient(opts...),
+		PaymentLinks:          paymentlinks.NewClient(opts...),
+		PaymentRecords:        paymentrecords.NewClient(opts...),
+		PaymentReminders:      paymentreminders.NewClient(opts...),
+		PaymentTerms:          paymentterms.NewClient(opts...),
+		Products:              products.NewClient(opts...),
+		Projects:              projects.NewClient(opts...),
+		Receivables:           receivables.NewClient(opts...),
+		Recurrences:           recurrences.NewClient(opts...),
+		Roles:                 roles.NewClient(opts...),
+		PartnerSettings:       partnersettings.NewClient(opts...),
+		Tags:                  tags.NewClient(opts...),
+		TextTemplates:         texttemplates.NewClient(opts...),
+		VatRates:              vatrates.NewClient(opts...),
+		WebhookDeliveries:     webhookdeliveries.NewClient(opts...),
+		WebhookSubscriptions:  webhooksubscriptions.NewClient(opts...),
+		Accounting:            accountingclient.NewClient(opts...),
 	}
 }

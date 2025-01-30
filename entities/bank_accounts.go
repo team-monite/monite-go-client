@@ -8,11 +8,11 @@ import (
 
 type CompleteVerificationRequest struct {
 	AirwallexPlaid *monitegoclient.CompleteVerificationAirwallexPlaidRequest `json:"airwallex_plaid,omitempty" url:"-"`
-	Type           monitegoclient.BankAccountVerificationType                `json:"type,omitempty" url:"-"`
+	Type           monitegoclient.BankAccountVerificationType                `json:"type" url:"-"`
 }
 
 type CompleteRefreshVerificationRequest struct {
-	Type monitegoclient.BankAccountVerificationType `json:"type,omitempty" url:"-"`
+	Type monitegoclient.BankAccountVerificationType `json:"type" url:"-"`
 }
 
 type CreateEntityBankAccountRequest struct {
@@ -26,7 +26,7 @@ type CreateEntityBankAccountRequest struct {
 	Bic *string `json:"bic,omitempty" url:"-"`
 	// The country in which the bank account is registered, repsesented as a two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
 	Country monitegoclient.AllowedCountries `json:"country" url:"-"`
-	// The currency of the bank account, represented as a three-letter ISO [currency code](https://docs.monite.com/docs/currencies).
+	// The currency of the bank account, represented as a three-letter ISO [currency code](https://docs.monite.com/references/currencies).
 	Currency monitegoclient.CurrencyEnum `json:"currency" url:"-"`
 	// User-defined name of this bank account, such as 'Primary account' or 'Savings account'.
 	DisplayName *string `json:"display_name,omitempty" url:"-"`
@@ -34,7 +34,7 @@ type CreateEntityBankAccountRequest struct {
 	Iban *string `json:"iban,omitempty" url:"-"`
 	// If set to `true` or if this is the first bank account added for the given currency, this account becomes the default one for its currency.
 	IsDefaultForCurrency *bool `json:"is_default_for_currency,omitempty" url:"-"`
-	// The bank's routing transit number (RTN). Required if the account currency is USD. US routing numbers consist of 9 digits.
+	// The bank's routing transit number (RTN) or branch code. Required if the account currency is USD. US routing numbers consist of 9 digits.
 	RoutingNumber *string `json:"routing_number,omitempty" url:"-"`
 	// The bank's sort code. Required if the account currency is GBP.
 	SortCode *string `json:"sort_code,omitempty" url:"-"`

@@ -35,7 +35,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 func (c *Client) Get(
 	ctx context.Context,
 	opts ...option.RequestOption,
-) (*monitegoclient.PartnerProjectSettingsResponse, error) {
+) (*monitegoclient.PartnerProjectSettingsPayloadOutput, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -65,7 +65,7 @@ func (c *Client) Get(
 		},
 	}
 
-	var response *monitegoclient.PartnerProjectSettingsResponse
+	var response *monitegoclient.PartnerProjectSettingsPayloadOutput
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{
@@ -88,9 +88,9 @@ func (c *Client) Get(
 // Change the specified fields with the provided values.
 func (c *Client) Update(
 	ctx context.Context,
-	request *monitegoclient.PartnerProjectSettingsPayload,
+	request *monitegoclient.PartnerProjectSettingsPayloadInput,
 	opts ...option.RequestOption,
-) (*monitegoclient.PartnerProjectSettingsResponse, error) {
+) (*monitegoclient.PartnerProjectSettingsPayloadOutput, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -121,7 +121,7 @@ func (c *Client) Update(
 		},
 	}
 
-	var response *monitegoclient.PartnerProjectSettingsResponse
+	var response *monitegoclient.PartnerProjectSettingsPayloadOutput
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{
