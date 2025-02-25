@@ -8,9 +8,9 @@ import (
 
 type EntityOnboardingDataRequest struct {
 	// Business information about the entity.
-	BusinessProfile *monitegoclient.BusinessProfileInput `json:"business_profile,omitempty" url:"-"`
+	BusinessProfile *monitegoclient.BusinessProfile `json:"business_profile,omitempty" url:"-"`
 	// Used to attest that the beneficial owner information provided is both current and correct.
-	OwnershipDeclaration *monitegoclient.OwnershipDeclarationInput `json:"ownership_declaration,omitempty" url:"-"`
+	OwnershipDeclaration *monitegoclient.OwnershipDeclaration `json:"ownership_declaration,omitempty" url:"-"`
 	// Details on the entity's acceptance of the service agreement.
-	TosAcceptance *monitegoclient.TermsOfServiceAcceptanceInput `json:"tos_acceptance,omitempty" url:"-"`
+	TosAcceptance *monitegoclient.TermsOfServiceAcceptance `json:"tos_acceptance,omitempty" url:"-"`
 }

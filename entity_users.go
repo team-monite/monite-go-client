@@ -26,28 +26,25 @@ type CreateEntityUserRequest struct {
 }
 
 type EntityUsersGetRequest struct {
-	// Sort order (ascending by default). Typically used together with the `sort` parameter.
+	// Order by
 	Order *OrderEnum `json:"-" url:"order,omitempty"`
-	// The number of items (0 .. 100) to return in a single page of the response. The response may contain fewer items if it is the last or only page.
+	// Max is 100
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// A pagination token obtained from a previous call to this endpoint. Use it to get the next or previous page of results for your initial query. If `pagination_token` is specified, all other query parameters are ignored and inferred from the initial query.
-	//
-	// If not specified, the first page of results will be returned.
+	// A token, obtained from previous page. Prior over other filters
 	PaginationToken *string `json:"-" url:"pagination_token,omitempty"`
-	// The field to sort the results by. Typically used together with the `order` parameter.
-	Sort            *EntityUserCursorFields `json:"-" url:"sort,omitempty"`
-	IdIn            []*string               `json:"-" url:"id__in,omitempty"`
-	IdNotIn         []*string               `json:"-" url:"id__not_in,omitempty"`
-	RoleId          *string                 `json:"-" url:"role_id,omitempty"`
-	RoleIdIn        []*string               `json:"-" url:"role_id__in,omitempty"`
-	Login           *string                 `json:"-" url:"login,omitempty"`
-	Status          *string                 `json:"-" url:"status,omitempty"`
-	FirstName       *string                 `json:"-" url:"first_name,omitempty"`
-	NameIstartswith *string                 `json:"-" url:"name__istartswith,omitempty"`
-	CreatedAtGt     *time.Time              `json:"-" url:"created_at__gt,omitempty"`
-	CreatedAtLt     *time.Time              `json:"-" url:"created_at__lt,omitempty"`
-	CreatedAtGte    *time.Time              `json:"-" url:"created_at__gte,omitempty"`
-	CreatedAtLte    *time.Time              `json:"-" url:"created_at__lte,omitempty"`
+	// Allowed sort fields
+	Sort         *EntityUserCursorFields `json:"-" url:"sort,omitempty"`
+	IdIn         []*string               `json:"-" url:"id__in,omitempty"`
+	IdNotIn      []*string               `json:"-" url:"id__not_in,omitempty"`
+	RoleId       *string                 `json:"-" url:"role_id,omitempty"`
+	RoleIdIn     []*string               `json:"-" url:"role_id__in,omitempty"`
+	Login        *string                 `json:"-" url:"login,omitempty"`
+	Status       *string                 `json:"-" url:"status,omitempty"`
+	FirstName    *string                 `json:"-" url:"first_name,omitempty"`
+	CreatedAtGt  *time.Time              `json:"-" url:"created_at__gt,omitempty"`
+	CreatedAtLt  *time.Time              `json:"-" url:"created_at__lt,omitempty"`
+	CreatedAtGte *time.Time              `json:"-" url:"created_at__gte,omitempty"`
+	CreatedAtLte *time.Time              `json:"-" url:"created_at__lte,omitempty"`
 }
 
 type EntityUserCursorFields = string
@@ -117,6 +114,7 @@ func (e *EntityUserPaginationResponse) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// A scheme for validation an entity user additional info
 type EntityUserResponse struct {
 	// UUID entity user ID
 	Id string `json:"id" url:"id"`

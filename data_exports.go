@@ -366,9 +366,6 @@ func (e *ExportObjectSchema) UnmarshalJSON(data []byte) error {
 }
 
 func (e ExportObjectSchema) MarshalJSON() ([]byte, error) {
-	if err := e.validate(); err != nil {
-		return nil, err
-	}
 	if e.Payable != nil {
 		return internal.MarshalJSONWithExtraProperty(e.Payable, "name", "payable")
 	}
@@ -391,40 +388,6 @@ func (e *ExportObjectSchema) Accept(visitor ExportObjectSchemaVisitor) error {
 		return visitor.VisitReceivable(e.Receivable)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", e)
-}
-
-func (e *ExportObjectSchema) validate() error {
-	if e == nil {
-		return fmt.Errorf("type %T is nil", e)
-	}
-	var fields []string
-	if e.Payable != nil {
-		fields = append(fields, "payable")
-	}
-	if e.Receivable != nil {
-		fields = append(fields, "receivable")
-	}
-	if len(fields) == 0 {
-		if e.Name != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", e, e.Name)
-		}
-		return fmt.Errorf("type %T is empty", e)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", e, fields)
-	}
-	if e.Name != "" {
-		field := fields[0]
-		if e.Name != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				e,
-				e.Name,
-				e,
-			)
-		}
-	}
-	return nil
 }
 
 type ExportPayableSchema struct {

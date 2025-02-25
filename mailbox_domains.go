@@ -10,7 +10,6 @@ import (
 )
 
 type DomainRequest struct {
-	// The domain name, such as `mail.mycompany.com`. Can contain only alphanumeric characters (A..Z a..z 0..9), dots (.), and hyphens (-). Each segment of the domain name must start and end with either a letter or a digit.
 	Domain string `json:"domain" url:"-"`
 }
 
@@ -257,8 +256,7 @@ type DomainResponse struct {
 	// A dedicated IP address assigned to this mailbox and used to send outgoing email.
 	DedicatedIp *string                   `json:"dedicated_ip,omitempty" url:"dedicated_ip,omitempty"`
 	DnsRecords  *DomainResponseDnsRecords `json:"dns_records" url:"dns_records"`
-	// The domain name.
-	Domain string `json:"domain" url:"domain"`
+	Domain      string                    `json:"domain" url:"domain"`
 	// The time the domain was updated for the last time
 	LastUpdatedAt *time.Time `json:"last_updated_at,omitempty" url:"last_updated_at,omitempty"`
 	Status        string     `json:"status" url:"status"`
@@ -423,8 +421,7 @@ func (d *DomainResponseDnsRecords) Accept(visitor DomainResponseDnsRecordsVisito
 
 type VerifyResponse struct {
 	// Entry UUID
-	Id string `json:"id" url:"id"`
-	// The domain name.
+	Id     string `json:"id" url:"id"`
 	Domain string `json:"domain" url:"domain"`
 	Status string `json:"status" url:"status"`
 

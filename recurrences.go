@@ -10,15 +10,12 @@ import (
 )
 
 type CreateRecurrencePayload struct {
-	BodyText    *string     `json:"body_text,omitempty" url:"-"`
-	DayOfMonth  DayOfMonth  `json:"day_of_month" url:"-"`
-	EndMonth    int         `json:"end_month" url:"-"`
-	EndYear     int         `json:"end_year" url:"-"`
-	InvoiceId   string      `json:"invoice_id" url:"-"`
-	Recipients  *Recipients `json:"recipients,omitempty" url:"-"`
-	StartMonth  int         `json:"start_month" url:"-"`
-	StartYear   int         `json:"start_year" url:"-"`
-	SubjectText *string     `json:"subject_text,omitempty" url:"-"`
+	DayOfMonth DayOfMonth `json:"day_of_month" url:"-"`
+	EndMonth   int        `json:"end_month" url:"-"`
+	EndYear    int        `json:"end_year" url:"-"`
+	InvoiceId  string     `json:"invoice_id" url:"-"`
+	StartMonth int        `json:"start_month" url:"-"`
+	StartYear  int        `json:"start_year" url:"-"`
 }
 
 type DayOfMonth string
@@ -126,18 +123,15 @@ type Recurrence struct {
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Time at which the receivable was last updated. Timestamps follow the ISO 8601 standard.
 	UpdatedAt        time.Time              `json:"updated_at" url:"updated_at"`
-	BodyText         *string                `json:"body_text,omitempty" url:"body_text,omitempty"`
 	CurrentIteration int                    `json:"current_iteration" url:"current_iteration"`
 	DayOfMonth       DayOfMonth             `json:"day_of_month" url:"day_of_month"`
 	EndMonth         int                    `json:"end_month" url:"end_month"`
 	EndYear          int                    `json:"end_year" url:"end_year"`
 	InvoiceId        string                 `json:"invoice_id" url:"invoice_id"`
 	Iterations       []*RecurrenceIteration `json:"iterations" url:"iterations"`
-	Recipients       *Recipients            `json:"recipients,omitempty" url:"recipients,omitempty"`
 	StartMonth       int                    `json:"start_month" url:"start_month"`
 	StartYear        int                    `json:"start_year" url:"start_year"`
 	Status           RecurrenceStatus       `json:"status" url:"status"`
-	SubjectText      *string                `json:"subject_text,omitempty" url:"subject_text,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -162,13 +156,6 @@ func (r *Recurrence) GetUpdatedAt() time.Time {
 		return time.Time{}
 	}
 	return r.UpdatedAt
-}
-
-func (r *Recurrence) GetBodyText() *string {
-	if r == nil {
-		return nil
-	}
-	return r.BodyText
 }
 
 func (r *Recurrence) GetCurrentIteration() int {
@@ -213,13 +200,6 @@ func (r *Recurrence) GetIterations() []*RecurrenceIteration {
 	return r.Iterations
 }
 
-func (r *Recurrence) GetRecipients() *Recipients {
-	if r == nil {
-		return nil
-	}
-	return r.Recipients
-}
-
 func (r *Recurrence) GetStartMonth() int {
 	if r == nil {
 		return 0
@@ -239,13 +219,6 @@ func (r *Recurrence) GetStatus() RecurrenceStatus {
 		return ""
 	}
 	return r.Status
-}
-
-func (r *Recurrence) GetSubjectText() *string {
-	if r == nil {
-		return nil
-	}
-	return r.SubjectText
 }
 
 func (r *Recurrence) GetExtraProperties() map[string]interface{} {
@@ -398,10 +371,7 @@ func (r RecurrenceStatus) Ptr() *RecurrenceStatus {
 }
 
 type UpdateRecurrencePayload struct {
-	BodyText    *string     `json:"body_text,omitempty" url:"-"`
-	DayOfMonth  *DayOfMonth `json:"day_of_month,omitempty" url:"-"`
-	EndMonth    *int        `json:"end_month,omitempty" url:"-"`
-	EndYear     *int        `json:"end_year,omitempty" url:"-"`
-	Recipients  *Recipients `json:"recipients,omitempty" url:"-"`
-	SubjectText *string     `json:"subject_text,omitempty" url:"-"`
+	DayOfMonth *DayOfMonth `json:"day_of_month,omitempty" url:"-"`
+	EndMonth   *int        `json:"end_month,omitempty" url:"-"`
+	EndYear    *int        `json:"end_year,omitempty" url:"-"`
 }

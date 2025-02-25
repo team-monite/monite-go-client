@@ -55,6 +55,41 @@ func (c *Client) Get(
 		options.ToHeader(),
 	)
 	errorCodes := internal.ErrorCodes{
+		400: func(apiError *core.APIError) error {
+			return &monitegoclient.BadRequestError{
+				APIError: apiError,
+			}
+		},
+		401: func(apiError *core.APIError) error {
+			return &monitegoclient.UnauthorizedError{
+				APIError: apiError,
+			}
+		},
+		403: func(apiError *core.APIError) error {
+			return &monitegoclient.ForbiddenError{
+				APIError: apiError,
+			}
+		},
+		404: func(apiError *core.APIError) error {
+			return &monitegoclient.NotFoundError{
+				APIError: apiError,
+			}
+		},
+		406: func(apiError *core.APIError) error {
+			return &monitegoclient.NotAcceptableError{
+				APIError: apiError,
+			}
+		},
+		409: func(apiError *core.APIError) error {
+			return &monitegoclient.ConflictError{
+				APIError: apiError,
+			}
+		},
+		416: func(apiError *core.APIError) error {
+			return &monitegoclient.RangeNotSatisfiableError{
+				APIError: apiError,
+			}
+		},
 		422: func(apiError *core.APIError) error {
 			return &monitegoclient.UnprocessableEntityError{
 				APIError: apiError,
@@ -105,6 +140,41 @@ func (c *Client) Create(
 	)
 	headers.Set("Content-Type", "application/json")
 	errorCodes := internal.ErrorCodes{
+		400: func(apiError *core.APIError) error {
+			return &monitegoclient.BadRequestError{
+				APIError: apiError,
+			}
+		},
+		401: func(apiError *core.APIError) error {
+			return &monitegoclient.UnauthorizedError{
+				APIError: apiError,
+			}
+		},
+		403: func(apiError *core.APIError) error {
+			return &monitegoclient.ForbiddenError{
+				APIError: apiError,
+			}
+		},
+		404: func(apiError *core.APIError) error {
+			return &monitegoclient.NotFoundError{
+				APIError: apiError,
+			}
+		},
+		406: func(apiError *core.APIError) error {
+			return &monitegoclient.NotAcceptableError{
+				APIError: apiError,
+			}
+		},
+		409: func(apiError *core.APIError) error {
+			return &monitegoclient.ConflictError{
+				APIError: apiError,
+			}
+		},
+		416: func(apiError *core.APIError) error {
+			return &monitegoclient.RangeNotSatisfiableError{
+				APIError: apiError,
+			}
+		},
 		422: func(apiError *core.APIError) error {
 			return &monitegoclient.UnprocessableEntityError{
 				APIError: apiError,
@@ -158,6 +228,41 @@ func (c *Client) GetById(
 		options.ToHeader(),
 	)
 	errorCodes := internal.ErrorCodes{
+		400: func(apiError *core.APIError) error {
+			return &monitegoclient.BadRequestError{
+				APIError: apiError,
+			}
+		},
+		401: func(apiError *core.APIError) error {
+			return &monitegoclient.UnauthorizedError{
+				APIError: apiError,
+			}
+		},
+		403: func(apiError *core.APIError) error {
+			return &monitegoclient.ForbiddenError{
+				APIError: apiError,
+			}
+		},
+		404: func(apiError *core.APIError) error {
+			return &monitegoclient.NotFoundError{
+				APIError: apiError,
+			}
+		},
+		406: func(apiError *core.APIError) error {
+			return &monitegoclient.NotAcceptableError{
+				APIError: apiError,
+			}
+		},
+		409: func(apiError *core.APIError) error {
+			return &monitegoclient.ConflictError{
+				APIError: apiError,
+			}
+		},
+		416: func(apiError *core.APIError) error {
+			return &monitegoclient.RangeNotSatisfiableError{
+				APIError: apiError,
+			}
+		},
 		422: func(apiError *core.APIError) error {
 			return &monitegoclient.UnprocessableEntityError{
 				APIError: apiError,

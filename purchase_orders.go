@@ -27,15 +27,13 @@ type PurchaseOrderPayloadSchema struct {
 }
 
 type PurchaseOrdersGetRequest struct {
-	// Sort order (ascending by default). Typically used together with the `sort` parameter.
+	// Order by
 	Order *OrderEnum `json:"-" url:"order,omitempty"`
-	// The number of items (0 .. 100) to return in a single page of the response. The response may contain fewer items if it is the last or only page.
+	// Max is 100
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// A pagination token obtained from a previous call to this endpoint. Use it to get the next or previous page of results for your initial query. If `pagination_token` is specified, all other query parameters are ignored and inferred from the initial query.
-	//
-	// If not specified, the first page of results will be returned.
+	// A token, obtained from previous page. Prior over other filters
 	PaginationToken *string `json:"-" url:"pagination_token,omitempty"`
-	// The field to sort the results by. Typically used together with the `order` parameter.
+	// Allowed sort fields
 	Sort            *PurchaseOrderCursorFields `json:"-" url:"sort,omitempty"`
 	CreatedAtGt     *time.Time                 `json:"-" url:"created_at__gt,omitempty"`
 	CreatedAtLt     *time.Time                 `json:"-" url:"created_at__lt,omitempty"`
@@ -71,23 +69,23 @@ type SendPurchaseOrderViaEmailRequest struct {
 }
 
 // Represents a file (such as a PDF invoice) that was uploaded to Monite.
-type FileSchema4 struct {
+type FileSchema2 struct {
 	// A unique ID of this file.
 	Id string `json:"id" url:"id"`
-	// UTC date and time when this file was uploaded to Monite. Timestamps follow the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+	// UTC date and time when this workflow was uploaded to Monite. Timestamps follow the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// The type of the business object associated with this file.
 	FileType string `json:"file_type" url:"file_type"`
 	// The MD5 hash of the file.
 	Md5 string `json:"md5" url:"md5"`
-	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types).
+	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
 	Mimetype string `json:"mimetype" url:"mimetype"`
 	// The original file name (if available).
 	Name string `json:"name" url:"name"`
 	// If the file is a PDF document, this property contains individual pages extracted from the file. Otherwise, an empty array.
-	Pages []*PageSchema3 `json:"pages,omitempty" url:"pages,omitempty"`
+	Pages []*PageSchema2 `json:"pages,omitempty" url:"pages,omitempty"`
 	// Preview images generated for this file. There can be multiple images with different sizes.
-	Previews []*PreviewSchema3 `json:"previews,omitempty" url:"previews,omitempty"`
+	Previews []*PreviewSchema2 `json:"previews,omitempty" url:"previews,omitempty"`
 	// Geographical region of the data center where the file is stored.
 	Region string `json:"region" url:"region"`
 	// The file size in bytes.
@@ -99,89 +97,89 @@ type FileSchema4 struct {
 	rawJSON         json.RawMessage
 }
 
-func (f *FileSchema4) GetId() string {
+func (f *FileSchema2) GetId() string {
 	if f == nil {
 		return ""
 	}
 	return f.Id
 }
 
-func (f *FileSchema4) GetCreatedAt() time.Time {
+func (f *FileSchema2) GetCreatedAt() time.Time {
 	if f == nil {
 		return time.Time{}
 	}
 	return f.CreatedAt
 }
 
-func (f *FileSchema4) GetFileType() string {
+func (f *FileSchema2) GetFileType() string {
 	if f == nil {
 		return ""
 	}
 	return f.FileType
 }
 
-func (f *FileSchema4) GetMd5() string {
+func (f *FileSchema2) GetMd5() string {
 	if f == nil {
 		return ""
 	}
 	return f.Md5
 }
 
-func (f *FileSchema4) GetMimetype() string {
+func (f *FileSchema2) GetMimetype() string {
 	if f == nil {
 		return ""
 	}
 	return f.Mimetype
 }
 
-func (f *FileSchema4) GetName() string {
+func (f *FileSchema2) GetName() string {
 	if f == nil {
 		return ""
 	}
 	return f.Name
 }
 
-func (f *FileSchema4) GetPages() []*PageSchema3 {
+func (f *FileSchema2) GetPages() []*PageSchema2 {
 	if f == nil {
 		return nil
 	}
 	return f.Pages
 }
 
-func (f *FileSchema4) GetPreviews() []*PreviewSchema3 {
+func (f *FileSchema2) GetPreviews() []*PreviewSchema2 {
 	if f == nil {
 		return nil
 	}
 	return f.Previews
 }
 
-func (f *FileSchema4) GetRegion() string {
+func (f *FileSchema2) GetRegion() string {
 	if f == nil {
 		return ""
 	}
 	return f.Region
 }
 
-func (f *FileSchema4) GetSize() int {
+func (f *FileSchema2) GetSize() int {
 	if f == nil {
 		return 0
 	}
 	return f.Size
 }
 
-func (f *FileSchema4) GetUrl() string {
+func (f *FileSchema2) GetUrl() string {
 	if f == nil {
 		return ""
 	}
 	return f.Url
 }
 
-func (f *FileSchema4) GetExtraProperties() map[string]interface{} {
+func (f *FileSchema2) GetExtraProperties() map[string]interface{} {
 	return f.extraProperties
 }
 
-func (f *FileSchema4) UnmarshalJSON(data []byte) error {
-	type embed FileSchema4
+func (f *FileSchema2) UnmarshalJSON(data []byte) error {
+	type embed FileSchema2
 	var unmarshaler = struct {
 		embed
 		CreatedAt *internal.DateTime `json:"created_at"`
@@ -191,7 +189,7 @@ func (f *FileSchema4) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*f = FileSchema4(unmarshaler.embed)
+	*f = FileSchema2(unmarshaler.embed)
 	f.CreatedAt = unmarshaler.CreatedAt.Time()
 	extraProperties, err := internal.ExtractExtraProperties(data, *f)
 	if err != nil {
@@ -202,8 +200,8 @@ func (f *FileSchema4) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *FileSchema4) MarshalJSON() ([]byte, error) {
-	type embed FileSchema4
+func (f *FileSchema2) MarshalJSON() ([]byte, error) {
+	type embed FileSchema2
 	var marshaler = struct {
 		embed
 		CreatedAt *internal.DateTime `json:"created_at"`
@@ -214,7 +212,7 @@ func (f *FileSchema4) MarshalJSON() ([]byte, error) {
 	return json.Marshal(marshaler)
 }
 
-func (f *FileSchema4) String() string {
+func (f *FileSchema2) String() string {
 	if len(f.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
 			return value
@@ -228,10 +226,10 @@ func (f *FileSchema4) String() string {
 
 // When a PDF document is uploaded to Monite, it extracts individual pages from the document
 // and saves them as PNG images. This object contains the image and metadata of a single page.
-type PageSchema3 struct {
+type PageSchema2 struct {
 	// A unique ID of the image.
 	Id string `json:"id" url:"id"`
-	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types) of the image.
+	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of the image.
 	Mimetype string `json:"mimetype" url:"mimetype"`
 	// The page number in the PDF document, from 0.
 	Number int `json:"number" url:"number"`
@@ -244,52 +242,52 @@ type PageSchema3 struct {
 	rawJSON         json.RawMessage
 }
 
-func (p *PageSchema3) GetId() string {
+func (p *PageSchema2) GetId() string {
 	if p == nil {
 		return ""
 	}
 	return p.Id
 }
 
-func (p *PageSchema3) GetMimetype() string {
+func (p *PageSchema2) GetMimetype() string {
 	if p == nil {
 		return ""
 	}
 	return p.Mimetype
 }
 
-func (p *PageSchema3) GetNumber() int {
+func (p *PageSchema2) GetNumber() int {
 	if p == nil {
 		return 0
 	}
 	return p.Number
 }
 
-func (p *PageSchema3) GetSize() int {
+func (p *PageSchema2) GetSize() int {
 	if p == nil {
 		return 0
 	}
 	return p.Size
 }
 
-func (p *PageSchema3) GetUrl() string {
+func (p *PageSchema2) GetUrl() string {
 	if p == nil {
 		return ""
 	}
 	return p.Url
 }
 
-func (p *PageSchema3) GetExtraProperties() map[string]interface{} {
+func (p *PageSchema2) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PageSchema3) UnmarshalJSON(data []byte) error {
-	type unmarshaler PageSchema3
+func (p *PageSchema2) UnmarshalJSON(data []byte) error {
+	type unmarshaler PageSchema2
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PageSchema3(value)
+	*p = PageSchema2(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -299,7 +297,7 @@ func (p *PageSchema3) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PageSchema3) String() string {
+func (p *PageSchema2) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -418,7 +416,7 @@ type PayableEntityIndividualResponse struct {
 	// A set of metadata describing an individual
 	Individual *PayableIndividualSchema `json:"individual" url:"individual"`
 	// A logo image of the entity
-	Logo *FileSchema4 `json:"logo,omitempty" url:"logo,omitempty"`
+	Logo *FileSchema2 `json:"logo,omitempty" url:"logo,omitempty"`
 	// A phone number of the entity
 	Phone *string `json:"phone,omitempty" url:"phone,omitempty"`
 	// record status, 'active' by default
@@ -474,7 +472,7 @@ func (p *PayableEntityIndividualResponse) GetIndividual() *PayableIndividualSche
 	return p.Individual
 }
 
-func (p *PayableEntityIndividualResponse) GetLogo() *FileSchema4 {
+func (p *PayableEntityIndividualResponse) GetLogo() *FileSchema2 {
 	if p == nil {
 		return nil
 	}
@@ -575,7 +573,7 @@ type PayableEntityOrganizationResponse struct {
 	// An official email address of the entity
 	Email *string `json:"email,omitempty" url:"email,omitempty"`
 	// A logo image of the entity
-	Logo *FileSchema4 `json:"logo,omitempty" url:"logo,omitempty"`
+	Logo *FileSchema2 `json:"logo,omitempty" url:"logo,omitempty"`
 	// A set of metadata describing an organization
 	Organization *PayableOrganizationSchema `json:"organization" url:"organization"`
 	// A phone number of the entity
@@ -626,7 +624,7 @@ func (p *PayableEntityOrganizationResponse) GetEmail() *string {
 	return p.Email
 }
 
-func (p *PayableEntityOrganizationResponse) GetLogo() *FileSchema4 {
+func (p *PayableEntityOrganizationResponse) GetLogo() *FileSchema2 {
 	if p == nil {
 		return nil
 	}
@@ -912,7 +910,7 @@ func (p *PayableOrganizationSchema) String() string {
 }
 
 // A preview image generated for a file.
-type PreviewSchema3 struct {
+type PreviewSchema2 struct {
 	// The image height in pixels.
 	Height int `json:"height" url:"height"`
 	// The image URL.
@@ -924,38 +922,38 @@ type PreviewSchema3 struct {
 	rawJSON         json.RawMessage
 }
 
-func (p *PreviewSchema3) GetHeight() int {
+func (p *PreviewSchema2) GetHeight() int {
 	if p == nil {
 		return 0
 	}
 	return p.Height
 }
 
-func (p *PreviewSchema3) GetUrl() string {
+func (p *PreviewSchema2) GetUrl() string {
 	if p == nil {
 		return ""
 	}
 	return p.Url
 }
 
-func (p *PreviewSchema3) GetWidth() int {
+func (p *PreviewSchema2) GetWidth() int {
 	if p == nil {
 		return 0
 	}
 	return p.Width
 }
 
-func (p *PreviewSchema3) GetExtraProperties() map[string]interface{} {
+func (p *PreviewSchema2) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PreviewSchema3) UnmarshalJSON(data []byte) error {
-	type unmarshaler PreviewSchema3
+func (p *PreviewSchema2) UnmarshalJSON(data []byte) error {
+	type unmarshaler PreviewSchema2
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PreviewSchema3(value)
+	*p = PreviewSchema2(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -965,7 +963,7 @@ func (p *PreviewSchema3) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PreviewSchema3) String() string {
+func (p *PreviewSchema2) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -1189,7 +1187,7 @@ type PurchaseOrderCounterpartIndividualRootResponse struct {
 	// Entity user ID of counterpart creator.
 	CreatedByEntityUserId *string                                     `json:"created_by_entity_user_id,omitempty" url:"created_by_entity_user_id,omitempty"`
 	Individual            *PurchaseOrderCounterpartIndividualResponse `json:"individual" url:"individual"`
-	// The language used to generate PDF documents for this counterpart.
+	// The language used to generate pdf documents for this counterpart.
 	Language         *LanguageCodeEnum `json:"language,omitempty" url:"language,omitempty"`
 	RemindersEnabled *bool             `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
 	// The counterpart's taxpayer identification number or tax ID. This field is required for counterparts that are non-VAT registered.
@@ -1439,7 +1437,7 @@ type PurchaseOrderCounterpartOrganizationRootResponse struct {
 	DefaultShippingAddressId *string `json:"default_shipping_address_id,omitempty" url:"default_shipping_address_id,omitempty"`
 	// Entity user ID of counterpart creator.
 	CreatedByEntityUserId *string `json:"created_by_entity_user_id,omitempty" url:"created_by_entity_user_id,omitempty"`
-	// The language used to generate PDF documents for this counterpart.
+	// The language used to generate pdf documents for this counterpart.
 	Language         *LanguageCodeEnum                             `json:"language,omitempty" url:"language,omitempty"`
 	Organization     *PurchaseOrderCounterpartOrganizationResponse `json:"organization" url:"organization"`
 	RemindersEnabled *bool                                         `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
@@ -1784,7 +1782,7 @@ type PurchaseOrderItem struct {
 	Currency CurrencyEnum `json:"currency" url:"currency"`
 	// The name of the product to purchase
 	Name string `json:"name" url:"name"`
-	// The subtotal cost (excluding VAT), in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The subtotal cost (excluding VAT), in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	Price int `json:"price" url:"price"`
 	// Number (quantity) of products
 	Quantity int `json:"quantity" url:"quantity"`

@@ -111,7 +111,6 @@ func (c *Client) Get(
 	return response, nil
 }
 
-// Request the export of payable and receivable documents with the specified statuses.
 func (c *Client) Create(
 	ctx context.Context,
 	request *monitegoclient.ExportPayloadSchema,

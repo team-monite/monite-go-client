@@ -55,6 +55,68 @@ func (a AccountDisabledReason) Ptr() *AccountDisabledReason {
 	return &a
 }
 
+type AccountResponse struct {
+	Id           string             `json:"id" url:"id"`
+	BankAccounts []*BankAccount     `json:"bank_accounts,omitempty" url:"bank_accounts,omitempty"`
+	Type         PaymentAccountType `json:"type" url:"type"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AccountResponse) GetId() string {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *AccountResponse) GetBankAccounts() []*BankAccount {
+	if a == nil {
+		return nil
+	}
+	return a.BankAccounts
+}
+
+func (a *AccountResponse) GetType() PaymentAccountType {
+	if a == nil {
+		return ""
+	}
+	return a.Type
+}
+
+func (a *AccountResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AccountResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AccountResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AccountResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AccountResponse) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type AccountingConnectionList struct {
 	Data []*AccountingConnectionResponse `json:"data" url:"data"`
 
@@ -1055,6 +1117,61 @@ func (a *AccountingRefObject) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type AccountingSettingsResponse struct {
+	Provider string `json:"provider" url:"provider"`
+	// Token for the accounting provider (Codat only)
+	Token *string `json:"token,omitempty" url:"token,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AccountingSettingsResponse) GetProvider() string {
+	if a == nil {
+		return ""
+	}
+	return a.Provider
+}
+
+func (a *AccountingSettingsResponse) GetToken() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Token
+}
+
+func (a *AccountingSettingsResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AccountingSettingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AccountingSettingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AccountingSettingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AccountingSettingsResponse) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type AccountingTaxRateListResponse struct {
 	Data                []*AccountingTaxRateResponse `json:"data" url:"data"`
 	NextPaginationToken *string                      `json:"next_pagination_token,omitempty" url:"next_pagination_token,omitempty"`
@@ -1122,11 +1239,11 @@ type AccountingTaxRateResponse struct {
 	// Code for the tax rate from the accounting platform.
 	Code       *string                 `json:"code,omitempty" url:"code,omitempty"`
 	Components []*TaxComponentResponse `json:"components,omitempty" url:"components,omitempty"`
-	// Effective tax rate in percent [minor units](https://docs.monite.com/references/currencies#minor-units). Example: 12.5% is 1250.
+	// Effective tax rate in percent [minor units](https://docs.monite.com/docs/currencies#minor-units). Example: 12.5% is 1250.
 	EffectiveTaxRate *int    `json:"effective_tax_rate,omitempty" url:"effective_tax_rate,omitempty"`
 	Name             *string `json:"name,omitempty" url:"name,omitempty"`
 	Status           *string `json:"status,omitempty" url:"status,omitempty"`
-	// Total (not compounded) sum of the components of a tax rate in [minor units](https://docs.monite.com/references/currencies#minor-units). Example: 12.5% is 1250.
+	// Total (not compounded) sum of the components of a tax rate in [minor units](https://docs.monite.com/docs/currencies#minor-units). Example: 12.5% is 1250.
 	TotalTaxRate *int `json:"total_tax_rate,omitempty" url:"total_tax_rate,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -1481,31 +1598,6 @@ func (a *AirwallexPlaidAccount) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
-type AirwallexPlaidBankAccountVerificationStatus string
-
-const (
-	AirwallexPlaidBankAccountVerificationStatusVerified  AirwallexPlaidBankAccountVerificationStatus = "verified"
-	AirwallexPlaidBankAccountVerificationStatusExpired   AirwallexPlaidBankAccountVerificationStatus = "expired"
-	AirwallexPlaidBankAccountVerificationStatusSuspended AirwallexPlaidBankAccountVerificationStatus = "suspended"
-)
-
-func NewAirwallexPlaidBankAccountVerificationStatusFromString(s string) (AirwallexPlaidBankAccountVerificationStatus, error) {
-	switch s {
-	case "verified":
-		return AirwallexPlaidBankAccountVerificationStatusVerified, nil
-	case "expired":
-		return AirwallexPlaidBankAccountVerificationStatusExpired, nil
-	case "suspended":
-		return AirwallexPlaidBankAccountVerificationStatusSuspended, nil
-	}
-	var t AirwallexPlaidBankAccountVerificationStatus
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (a AirwallexPlaidBankAccountVerificationStatus) Ptr() *AirwallexPlaidBankAccountVerificationStatus {
-	return &a
-}
-
 type AirwallexPlaidInstitution struct {
 	// The institution identifier assigned by Plaid
 	Id string `json:"id" url:"id"`
@@ -1551,53 +1643,6 @@ func (a *AirwallexPlaidInstitution) UnmarshalJSON(data []byte) error {
 }
 
 func (a *AirwallexPlaidInstitution) String() string {
-	if len(a.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type AirwallexPlaidVerification struct {
-	// Status of the bank account verification
-	Status AirwallexPlaidBankAccountVerificationStatus `json:"status" url:"status"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (a *AirwallexPlaidVerification) GetStatus() AirwallexPlaidBankAccountVerificationStatus {
-	if a == nil {
-		return ""
-	}
-	return a.Status
-}
-
-func (a *AirwallexPlaidVerification) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AirwallexPlaidVerification) UnmarshalJSON(data []byte) error {
-	type unmarshaler AirwallexPlaidVerification
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AirwallexPlaidVerification(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-	a.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AirwallexPlaidVerification) String() string {
 	if len(a.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
@@ -2381,6 +2426,46 @@ func (a AllowedCountries) Ptr() *AllowedCountries {
 	return &a
 }
 
+type ApiVersion string
+
+const (
+	ApiVersionTwoThousandTwentyFour0131  ApiVersion = "2024-01-31"
+	ApiVersionTwoThousandTwentyThree0901 ApiVersion = "2023-09-01"
+	ApiVersionTwoThousandTwentyThree0604 ApiVersion = "2023-06-04"
+	ApiVersionTwoThousandTwentyThree0412 ApiVersion = "2023-04-12"
+	ApiVersionTwoThousandTwentyThree0314 ApiVersion = "2023-03-14"
+	ApiVersionTwoThousandTwentyThree0301 ApiVersion = "2023-03-01"
+	ApiVersionTwoThousandTwentyThree0207 ApiVersion = "2023-02-07"
+	ApiVersionTwoThousandTwentyTwo1116   ApiVersion = "2022-11-16"
+)
+
+func NewApiVersionFromString(s string) (ApiVersion, error) {
+	switch s {
+	case "2024-01-31":
+		return ApiVersionTwoThousandTwentyFour0131, nil
+	case "2023-09-01":
+		return ApiVersionTwoThousandTwentyThree0901, nil
+	case "2023-06-04":
+		return ApiVersionTwoThousandTwentyThree0604, nil
+	case "2023-04-12":
+		return ApiVersionTwoThousandTwentyThree0412, nil
+	case "2023-03-14":
+		return ApiVersionTwoThousandTwentyThree0314, nil
+	case "2023-03-01":
+		return ApiVersionTwoThousandTwentyThree0301, nil
+	case "2023-02-07":
+		return ApiVersionTwoThousandTwentyThree0207, nil
+	case "2022-11-16":
+		return ApiVersionTwoThousandTwentyTwo1116, nil
+	}
+	var t ApiVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a ApiVersion) Ptr() *ApiVersion {
+	return &a
+}
+
 type ApprovalProcessResourceList struct {
 	Data []*ProcessResource `json:"data" url:"data"`
 
@@ -2605,31 +2690,18 @@ func (a ApprovalProcessStepStatus) Ptr() *ApprovalProcessStepStatus {
 }
 
 type BankAccount struct {
-	// The ID of the bank account.
-	Id string `json:"id" url:"id"`
-	// The name of the person or business that owns this bank account.
-	AccountHolderName *string `json:"account_holder_name,omitempty" url:"account_holder_name,omitempty"`
-	// The bank account number. Typically used for UK and US bank accounts. US account numbers contain 9 to 12 digits. UK account numbers typically contain 8 digits.
-	AccountNumber *string `json:"account_number,omitempty" url:"account_number,omitempty"`
-	// The BIC/SWIFT code of the bank.
-	Bic *string `json:"bic,omitempty" url:"bic,omitempty"`
-	// The country in which the bank account is registered, repsesented as a two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
-	Country *AllowedCountries `json:"country,omitempty" url:"country,omitempty"`
-	// The currency of the bank account, represented as a three-letter ISO [currency code](https://docs.monite.com/references/currencies).
-	Currency *CurrencyEnum `json:"currency,omitempty" url:"currency,omitempty"`
-	// User-defined name of this bank account, such as 'Primary account' or 'Savings account'. Used only for entity bank accounts.
-	DisplayName *string `json:"display_name,omitempty" url:"display_name,omitempty"`
-	// The IBAN of the bank account.
-	Iban *string `json:"iban,omitempty" url:"iban,omitempty"`
-	// Indicates whether this bank account is the default one for its currency.
-	IsDefault *bool `json:"is_default,omitempty" url:"is_default,omitempty"`
-	// User-defined name of this bank account, such as 'Primary account' or 'Savings account'. Used only for counterpart bank accounts.
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
-	// The bank's routing transit number (RTN). Typically used for US banks. US routing numbers consist of 9 digits.
-	RoutingNumber *string `json:"routing_number,omitempty" url:"routing_number,omitempty"`
-	// The bank's sort code. Typically used for UK banks.
-	SortCode *string `json:"sort_code,omitempty" url:"sort_code,omitempty"`
-	// ID of the entity user who added this bank account, or `null` if it was added using a partner access token. Used only for entity bank accounts.
+	Id                string            `json:"id" url:"id"`
+	AccountHolderName *string           `json:"account_holder_name,omitempty" url:"account_holder_name,omitempty"`
+	AccountNumber     *string           `json:"account_number,omitempty" url:"account_number,omitempty"`
+	Bic               *string           `json:"bic,omitempty" url:"bic,omitempty"`
+	Country           *AllowedCountries `json:"country,omitempty" url:"country,omitempty"`
+	Currency          *CurrencyEnum     `json:"currency,omitempty" url:"currency,omitempty"`
+	DisplayName       *string           `json:"display_name,omitempty" url:"display_name,omitempty"`
+	Iban              *string           `json:"iban,omitempty" url:"iban,omitempty"`
+	IsDefault         *bool             `json:"is_default,omitempty" url:"is_default,omitempty"`
+	// Display name of a bank account
+	Name               *string `json:"name,omitempty" url:"name,omitempty"`
+	SortCode           *string `json:"sort_code,omitempty" url:"sort_code,omitempty"`
 	WasCreatedByUserId *string `json:"was_created_by_user_id,omitempty" url:"was_created_by_user_id,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -2706,13 +2778,6 @@ func (b *BankAccount) GetName() *string {
 	return b.Name
 }
 
-func (b *BankAccount) GetRoutingNumber() *string {
-	if b == nil {
-		return nil
-	}
-	return b.RoutingNumber
-}
-
 func (b *BankAccount) GetSortCode() *string {
 	if b == nil {
 		return nil
@@ -2759,101 +2824,34 @@ func (b *BankAccount) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-type BankAccountVerificationType string
+type BankAccountVerificationType = string
 
-const (
-	BankAccountVerificationTypeAirwallexPlaid BankAccountVerificationType = "airwallex_plaid"
-	BankAccountVerificationTypeMicroDeposit   BankAccountVerificationType = "micro_deposit"
-)
-
-func NewBankAccountVerificationTypeFromString(s string) (BankAccountVerificationType, error) {
-	switch s {
-	case "airwallex_plaid":
-		return BankAccountVerificationTypeAirwallexPlaid, nil
-	case "micro_deposit":
-		return BankAccountVerificationTypeMicroDeposit, nil
-	}
-	var t BankAccountVerificationType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (b BankAccountVerificationType) Ptr() *BankAccountVerificationType {
-	return &b
-}
-
-type BankAccountVerifications struct {
-	// Airwallex Plaid verification
-	AirwallexPlaid *AirwallexPlaidVerification `json:"airwallex_plaid,omitempty" url:"airwallex_plaid,omitempty"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (b *BankAccountVerifications) GetAirwallexPlaid() *AirwallexPlaidVerification {
-	if b == nil {
-		return nil
-	}
-	return b.AirwallexPlaid
-}
-
-func (b *BankAccountVerifications) GetExtraProperties() map[string]interface{} {
-	return b.extraProperties
-}
-
-func (b *BankAccountVerifications) UnmarshalJSON(data []byte) error {
-	type unmarshaler BankAccountVerifications
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*b = BankAccountVerifications(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *b)
-	if err != nil {
-		return err
-	}
-	b.extraProperties = extraProperties
-	b.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (b *BankAccountVerifications) String() string {
-	if len(b.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(b); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", b)
-}
-
-type BizObjectsSchemaOutput struct {
+type BizObjectsSchema struct {
 	// List of objects
-	Objects []*RootSchemaOutput `json:"objects,omitempty" url:"objects,omitempty"`
+	Objects []*RootSchema `json:"objects,omitempty" url:"objects,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (b *BizObjectsSchemaOutput) GetObjects() []*RootSchemaOutput {
+func (b *BizObjectsSchema) GetObjects() []*RootSchema {
 	if b == nil {
 		return nil
 	}
 	return b.Objects
 }
 
-func (b *BizObjectsSchemaOutput) GetExtraProperties() map[string]interface{} {
+func (b *BizObjectsSchema) GetExtraProperties() map[string]interface{} {
 	return b.extraProperties
 }
 
-func (b *BizObjectsSchemaOutput) UnmarshalJSON(data []byte) error {
-	type unmarshaler BizObjectsSchemaOutput
+func (b *BizObjectsSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler BizObjectsSchema
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*b = BizObjectsSchemaOutput(value)
+	*b = BizObjectsSchema(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *b)
 	if err != nil {
 		return err
@@ -2863,7 +2861,7 @@ func (b *BizObjectsSchemaOutput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (b *BizObjectsSchemaOutput) String() string {
+func (b *BizObjectsSchema) String() string {
 	if len(b.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
 			return value
@@ -2875,7 +2873,7 @@ func (b *BizObjectsSchemaOutput) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-type BusinessProfileInput struct {
+type BusinessProfile struct {
 	// Required for US entities. A free-form description of the products the entity sells (whether online or at offline retail stores) or the services it provides to its customers.
 	DescriptionOfGoodsOrServices *string `json:"description_of_goods_or_services,omitempty" url:"description_of_goods_or_services,omitempty"`
 	// Required for US entities. The approximate revenue that the business generates per month.
@@ -2891,52 +2889,52 @@ type BusinessProfileInput struct {
 	rawJSON         json.RawMessage
 }
 
-func (b *BusinessProfileInput) GetDescriptionOfGoodsOrServices() *string {
+func (b *BusinessProfile) GetDescriptionOfGoodsOrServices() *string {
 	if b == nil {
 		return nil
 	}
 	return b.DescriptionOfGoodsOrServices
 }
 
-func (b *BusinessProfileInput) GetEstimatedMonthlyRevenue() *EstimatedMonthlyRevenue {
+func (b *BusinessProfile) GetEstimatedMonthlyRevenue() *EstimatedMonthlyRevenue {
 	if b == nil {
 		return nil
 	}
 	return b.EstimatedMonthlyRevenue
 }
 
-func (b *BusinessProfileInput) GetMcc() *string {
+func (b *BusinessProfile) GetMcc() *string {
 	if b == nil {
 		return nil
 	}
 	return b.Mcc
 }
 
-func (b *BusinessProfileInput) GetOperatingCountries() []AllowedCountries {
+func (b *BusinessProfile) GetOperatingCountries() []AllowedCountries {
 	if b == nil {
 		return nil
 	}
 	return b.OperatingCountries
 }
 
-func (b *BusinessProfileInput) GetUrl() *string {
+func (b *BusinessProfile) GetUrl() *string {
 	if b == nil {
 		return nil
 	}
 	return b.Url
 }
 
-func (b *BusinessProfileInput) GetExtraProperties() map[string]interface{} {
+func (b *BusinessProfile) GetExtraProperties() map[string]interface{} {
 	return b.extraProperties
 }
 
-func (b *BusinessProfileInput) UnmarshalJSON(data []byte) error {
-	type unmarshaler BusinessProfileInput
+func (b *BusinessProfile) UnmarshalJSON(data []byte) error {
+	type unmarshaler BusinessProfile
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*b = BusinessProfileInput(value)
+	*b = BusinessProfile(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *b)
 	if err != nil {
 		return err
@@ -2946,7 +2944,7 @@ func (b *BusinessProfileInput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (b *BusinessProfileInput) String() string {
+func (b *BusinessProfile) String() string {
 	if len(b.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
 			return value
@@ -2958,68 +2956,55 @@ func (b *BusinessProfileInput) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-type BusinessProfileOutput struct {
-	// Required for US entities. A free-form description of the products the entity sells (whether online or at offline retail stores) or the services it provides to its customers.
-	DescriptionOfGoodsOrServices *string `json:"description_of_goods_or_services,omitempty" url:"description_of_goods_or_services,omitempty"`
-	// Required for US entities. The approximate revenue that the business generates per month.
-	EstimatedMonthlyRevenue *EstimatedMonthlyRevenue `json:"estimated_monthly_revenue,omitempty" url:"estimated_monthly_revenue,omitempty"`
-	// The merchant category code of the entity. MCCs are used to classify businesses based on the goods or services they provide.
-	Mcc *string `json:"mcc,omitempty" url:"mcc,omitempty"`
-	// Required for US entities. A list of primary countries where the business conducts its operations, such as selling products or providing services. Use two-letter country codes (ISO 3166-2 alpha-2).
-	OperatingCountries []AllowedCountries `json:"operating_countries,omitempty" url:"operating_countries,omitempty"`
-	// The business's publicly available website.
-	Url *string `json:"url,omitempty" url:"url,omitempty"`
+type ButtonThemeResponse struct {
+	PrimaryColor        *string `json:"primary_color,omitempty" url:"primary_color,omitempty"`
+	PrimaryHoverColor   *string `json:"primary_hover_color,omitempty" url:"primary_hover_color,omitempty"`
+	SecondaryColor      *string `json:"secondary_color,omitempty" url:"secondary_color,omitempty"`
+	SecondaryHoverColor *string `json:"secondary_hover_color,omitempty" url:"secondary_hover_color,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (b *BusinessProfileOutput) GetDescriptionOfGoodsOrServices() *string {
+func (b *ButtonThemeResponse) GetPrimaryColor() *string {
 	if b == nil {
 		return nil
 	}
-	return b.DescriptionOfGoodsOrServices
+	return b.PrimaryColor
 }
 
-func (b *BusinessProfileOutput) GetEstimatedMonthlyRevenue() *EstimatedMonthlyRevenue {
+func (b *ButtonThemeResponse) GetPrimaryHoverColor() *string {
 	if b == nil {
 		return nil
 	}
-	return b.EstimatedMonthlyRevenue
+	return b.PrimaryHoverColor
 }
 
-func (b *BusinessProfileOutput) GetMcc() *string {
+func (b *ButtonThemeResponse) GetSecondaryColor() *string {
 	if b == nil {
 		return nil
 	}
-	return b.Mcc
+	return b.SecondaryColor
 }
 
-func (b *BusinessProfileOutput) GetOperatingCountries() []AllowedCountries {
+func (b *ButtonThemeResponse) GetSecondaryHoverColor() *string {
 	if b == nil {
 		return nil
 	}
-	return b.OperatingCountries
+	return b.SecondaryHoverColor
 }
 
-func (b *BusinessProfileOutput) GetUrl() *string {
-	if b == nil {
-		return nil
-	}
-	return b.Url
-}
-
-func (b *BusinessProfileOutput) GetExtraProperties() map[string]interface{} {
+func (b *ButtonThemeResponse) GetExtraProperties() map[string]interface{} {
 	return b.extraProperties
 }
 
-func (b *BusinessProfileOutput) UnmarshalJSON(data []byte) error {
-	type unmarshaler BusinessProfileOutput
+func (b *ButtonThemeResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ButtonThemeResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*b = BusinessProfileOutput(value)
+	*b = ButtonThemeResponse(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *b)
 	if err != nil {
 		return err
@@ -3029,7 +3014,7 @@ func (b *BusinessProfileOutput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (b *BusinessProfileOutput) String() string {
+func (b *ButtonThemeResponse) String() string {
 	if len(b.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
 			return value
@@ -3041,32 +3026,31 @@ func (b *BusinessProfileOutput) String() string {
 	return fmt.Sprintf("%#v", b)
 }
 
-type CommonSchemaOutput struct {
-	// List of actions
-	Actions []*ActionSchema `json:"actions,omitempty" url:"actions,omitempty"`
+type CardThemeResponse struct {
+	BackgroundColor *string `json:"background_color,omitempty" url:"background_color,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (c *CommonSchemaOutput) GetActions() []*ActionSchema {
+func (c *CardThemeResponse) GetBackgroundColor() *string {
 	if c == nil {
 		return nil
 	}
-	return c.Actions
+	return c.BackgroundColor
 }
 
-func (c *CommonSchemaOutput) GetExtraProperties() map[string]interface{} {
+func (c *CardThemeResponse) GetExtraProperties() map[string]interface{} {
 	return c.extraProperties
 }
 
-func (c *CommonSchemaOutput) UnmarshalJSON(data []byte) error {
-	type unmarshaler CommonSchemaOutput
+func (c *CardThemeResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CardThemeResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CommonSchemaOutput(value)
+	*c = CardThemeResponse(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -3076,7 +3060,93 @@ func (c *CommonSchemaOutput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CommonSchemaOutput) String() string {
+func (c *CardThemeResponse) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CommonSchema struct {
+	// List of actions
+	Actions []*ActionSchema `json:"actions,omitempty" url:"actions,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CommonSchema) GetActions() []*ActionSchema {
+	if c == nil {
+		return nil
+	}
+	return c.Actions
+}
+
+func (c *CommonSchema) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CommonSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler CommonSchema
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CommonSchema(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CommonSchema) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CompleteRefreshVerificationRequest struct {
+	Type BankAccountVerificationType `json:"type" url:"type"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CompleteRefreshVerificationRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CompleteRefreshVerificationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CompleteRefreshVerificationRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CompleteRefreshVerificationRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CompleteRefreshVerificationRequest) String() string {
 	if len(c.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
@@ -3196,6 +3266,53 @@ func (c *CompleteVerificationAirwallexPlaidRequest) UnmarshalJSON(data []byte) e
 }
 
 func (c *CompleteVerificationAirwallexPlaidRequest) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CompleteVerificationRequest struct {
+	AirwallexPlaid *CompleteVerificationAirwallexPlaidRequest `json:"airwallex_plaid" url:"airwallex_plaid"`
+	Type           BankAccountVerificationType                `json:"type" url:"type"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CompleteVerificationRequest) GetAirwallexPlaid() *CompleteVerificationAirwallexPlaidRequest {
+	if c == nil {
+		return nil
+	}
+	return c.AirwallexPlaid
+}
+
+func (c *CompleteVerificationRequest) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CompleteVerificationRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler CompleteVerificationRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CompleteVerificationRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CompleteVerificationRequest) String() string {
 	if len(c.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
@@ -4218,31 +4335,6 @@ func (c *CreateOnboardingLinkRequest) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-type CreditNoteStateEnum string
-
-const (
-	CreditNoteStateEnumDraft   CreditNoteStateEnum = "draft"
-	CreditNoteStateEnumIssued  CreditNoteStateEnum = "issued"
-	CreditNoteStateEnumDeleted CreditNoteStateEnum = "deleted"
-)
-
-func NewCreditNoteStateEnumFromString(s string) (CreditNoteStateEnum, error) {
-	switch s {
-	case "draft":
-		return CreditNoteStateEnumDraft, nil
-	case "issued":
-		return CreditNoteStateEnumIssued, nil
-	case "deleted":
-		return CreditNoteStateEnumDeleted, nil
-	}
-	var t CreditNoteStateEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (c CreditNoteStateEnum) Ptr() *CreditNoteStateEnum {
-	return &c
-}
-
 type CurrencyEnum string
 
 const (
@@ -4667,7 +4759,7 @@ func (c CurrencyEnum) Ptr() *CurrencyEnum {
 	return &c
 }
 
-type CurrencySettingsInput struct {
+type CurrencySettings struct {
 	Default       CurrencyEnum    `json:"default" url:"default"`
 	ExchangeRates []*ExchangeRate `json:"exchange_rates,omitempty" url:"exchange_rates,omitempty"`
 
@@ -4675,31 +4767,31 @@ type CurrencySettingsInput struct {
 	rawJSON         json.RawMessage
 }
 
-func (c *CurrencySettingsInput) GetDefault() CurrencyEnum {
+func (c *CurrencySettings) GetDefault() CurrencyEnum {
 	if c == nil {
 		return ""
 	}
 	return c.Default
 }
 
-func (c *CurrencySettingsInput) GetExchangeRates() []*ExchangeRate {
+func (c *CurrencySettings) GetExchangeRates() []*ExchangeRate {
 	if c == nil {
 		return nil
 	}
 	return c.ExchangeRates
 }
 
-func (c *CurrencySettingsInput) GetExtraProperties() map[string]interface{} {
+func (c *CurrencySettings) GetExtraProperties() map[string]interface{} {
 	return c.extraProperties
 }
 
-func (c *CurrencySettingsInput) UnmarshalJSON(data []byte) error {
-	type unmarshaler CurrencySettingsInput
+func (c *CurrencySettings) UnmarshalJSON(data []byte) error {
+	type unmarshaler CurrencySettings
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CurrencySettingsInput(value)
+	*c = CurrencySettings(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -4709,61 +4801,7 @@ func (c *CurrencySettingsInput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CurrencySettingsInput) String() string {
-	if len(c.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-type CurrencySettingsOutput struct {
-	Default       CurrencyEnum    `json:"default" url:"default"`
-	ExchangeRates []*ExchangeRate `json:"exchange_rates,omitempty" url:"exchange_rates,omitempty"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (c *CurrencySettingsOutput) GetDefault() CurrencyEnum {
-	if c == nil {
-		return ""
-	}
-	return c.Default
-}
-
-func (c *CurrencySettingsOutput) GetExchangeRates() []*ExchangeRate {
-	if c == nil {
-		return nil
-	}
-	return c.ExchangeRates
-}
-
-func (c *CurrencySettingsOutput) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *CurrencySettingsOutput) UnmarshalJSON(data []byte) error {
-	type unmarshaler CurrencySettingsOutput
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*c = CurrencySettingsOutput(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-	c.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CurrencySettingsOutput) String() string {
+func (c *CurrencySettings) String() string {
 	if len(c.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
@@ -4810,6 +4848,63 @@ func NewDocumentTypeEnumFromString(s string) (DocumentTypeEnum, error) {
 
 func (d DocumentTypeEnum) Ptr() *DocumentTypeEnum {
 	return &d
+}
+
+type EInvoicingProviderEnum = string
+
+type EInvoicingSettingsResponse struct {
+	ClientId     string                 `json:"client_id" url:"client_id"`
+	ClientSecret string                 `json:"client_secret" url:"client_secret"`
+	Provider     EInvoicingProviderEnum `json:"provider" url:"provider"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EInvoicingSettingsResponse) GetClientId() string {
+	if e == nil {
+		return ""
+	}
+	return e.ClientId
+}
+
+func (e *EInvoicingSettingsResponse) GetClientSecret() string {
+	if e == nil {
+		return ""
+	}
+	return e.ClientSecret
+}
+
+func (e *EInvoicingSettingsResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EInvoicingSettingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler EInvoicingSettingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EInvoicingSettingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EInvoicingSettingsResponse) String() string {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 // A schema represents address info of the entity
@@ -4985,7 +5080,7 @@ type EntityBankAccountResponse struct {
 	Bic *string `json:"bic,omitempty" url:"bic,omitempty"`
 	// The country in which the bank account is registered, repsesented as a two-letter country code ([ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)).
 	Country *AllowedCountries `json:"country,omitempty" url:"country,omitempty"`
-	// The currency of the bank account, represented as a three-letter ISO [currency code](https://docs.monite.com/references/currencies).
+	// The currency of the bank account, represented as a three-letter ISO [currency code](https://docs.monite.com/docs/currencies).
 	Currency *CurrencyEnum `json:"currency,omitempty" url:"currency,omitempty"`
 	// User-defined name of this bank account, such as 'Primary account' or 'Savings account'.
 	DisplayName *string `json:"display_name,omitempty" url:"display_name,omitempty"`
@@ -4993,7 +5088,7 @@ type EntityBankAccountResponse struct {
 	Iban *string `json:"iban,omitempty" url:"iban,omitempty"`
 	// Indicates whether this bank account is the default one for its currency.
 	IsDefaultForCurrency *bool `json:"is_default_for_currency,omitempty" url:"is_default_for_currency,omitempty"`
-	// The bank's routing transit number (RTN) or branch code. Required if the account currency is USD. US routing numbers consist of 9 digits.
+	// The bank's routing transit number (RTN). Required if the account currency is USD. US routing numbers consist of 9 digits.
 	RoutingNumber *string `json:"routing_number,omitempty" url:"routing_number,omitempty"`
 	// The bank's sort code. Required if the account currency is GBP.
 	SortCode *string `json:"sort_code,omitempty" url:"sort_code,omitempty"`
@@ -5173,6 +5268,7 @@ func (e EntityBusinessStructure) Ptr() *EntityBusinessStructure {
 	return &e
 }
 
+// A base for an entity response schema
 type EntityIndividualResponse struct {
 	// UUID entity ID
 	Id string `json:"id" url:"id"`
@@ -5187,11 +5283,11 @@ type EntityIndividualResponse struct {
 	// A set of metadata describing an individual
 	Individual *IndividualResponseSchema `json:"individual" url:"individual"`
 	// A logo image of the entity
-	Logo *FileSchema3 `json:"logo,omitempty" url:"logo,omitempty"`
+	Logo *FileSchema4 `json:"logo,omitempty" url:"logo,omitempty"`
 	// A phone number of the entity
 	Phone *string `json:"phone,omitempty" url:"phone,omitempty"`
 	// record status, 'active' by default
-	Status EntityStatusEnum `json:"status" url:"status"`
+	Status StatusEnum `json:"status" url:"status"`
 	// The entity's taxpayer identification number or tax ID. This field is required for entities that are non-VAT registered.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 	// A website of the entity
@@ -5243,7 +5339,7 @@ func (e *EntityIndividualResponse) GetIndividual() *IndividualResponseSchema {
 	return e.Individual
 }
 
-func (e *EntityIndividualResponse) GetLogo() *FileSchema3 {
+func (e *EntityIndividualResponse) GetLogo() *FileSchema4 {
 	if e == nil {
 		return nil
 	}
@@ -5257,7 +5353,7 @@ func (e *EntityIndividualResponse) GetPhone() *string {
 	return e.Phone
 }
 
-func (e *EntityIndividualResponse) GetStatus() EntityStatusEnum {
+func (e *EntityIndividualResponse) GetStatus() StatusEnum {
 	if e == nil {
 		return ""
 	}
@@ -5334,31 +5430,31 @@ func (e *EntityIndividualResponse) String() string {
 
 type EntityOnboardingDataResponse struct {
 	// Business information about the entity.
-	BusinessProfile *BusinessProfileOutput `json:"business_profile,omitempty" url:"business_profile,omitempty"`
+	BusinessProfile *BusinessProfile `json:"business_profile,omitempty" url:"business_profile,omitempty"`
 	// Used to attest that the beneficial owner information provided is both current and correct.
-	OwnershipDeclaration *OwnershipDeclarationOutput `json:"ownership_declaration,omitempty" url:"ownership_declaration,omitempty"`
+	OwnershipDeclaration *OwnershipDeclaration `json:"ownership_declaration,omitempty" url:"ownership_declaration,omitempty"`
 	// Details on the entity's acceptance of the service agreement.
-	TosAcceptance *TermsOfServiceAcceptanceOutput `json:"tos_acceptance,omitempty" url:"tos_acceptance,omitempty"`
+	TosAcceptance *TermsOfServiceAcceptance `json:"tos_acceptance,omitempty" url:"tos_acceptance,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (e *EntityOnboardingDataResponse) GetBusinessProfile() *BusinessProfileOutput {
+func (e *EntityOnboardingDataResponse) GetBusinessProfile() *BusinessProfile {
 	if e == nil {
 		return nil
 	}
 	return e.BusinessProfile
 }
 
-func (e *EntityOnboardingDataResponse) GetOwnershipDeclaration() *OwnershipDeclarationOutput {
+func (e *EntityOnboardingDataResponse) GetOwnershipDeclaration() *OwnershipDeclaration {
 	if e == nil {
 		return nil
 	}
 	return e.OwnershipDeclaration
 }
 
-func (e *EntityOnboardingDataResponse) GetTosAcceptance() *TermsOfServiceAcceptanceOutput {
+func (e *EntityOnboardingDataResponse) GetTosAcceptance() *TermsOfServiceAcceptance {
 	if e == nil {
 		return nil
 	}
@@ -5523,6 +5619,7 @@ func (e *EntityOnboardingDocuments) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// A base for an entity response schema
 type EntityOrganizationResponse struct {
 	// UUID entity ID
 	Id string `json:"id" url:"id"`
@@ -5535,13 +5632,13 @@ type EntityOrganizationResponse struct {
 	// An official email address of the entity
 	Email *string `json:"email,omitempty" url:"email,omitempty"`
 	// A logo image of the entity
-	Logo *FileSchema3 `json:"logo,omitempty" url:"logo,omitempty"`
+	Logo *FileSchema4 `json:"logo,omitempty" url:"logo,omitempty"`
 	// A set of metadata describing an organization
 	Organization *OrganizationResponseSchema `json:"organization" url:"organization"`
 	// A phone number of the entity
 	Phone *string `json:"phone,omitempty" url:"phone,omitempty"`
 	// record status, 'active' by default
-	Status EntityStatusEnum `json:"status" url:"status"`
+	Status StatusEnum `json:"status" url:"status"`
 	// The entity's taxpayer identification number or tax ID. This field is required for entities that are non-VAT registered.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 	// A website of the entity
@@ -5586,7 +5683,7 @@ func (e *EntityOrganizationResponse) GetEmail() *string {
 	return e.Email
 }
 
-func (e *EntityOrganizationResponse) GetLogo() *FileSchema3 {
+func (e *EntityOrganizationResponse) GetLogo() *FileSchema4 {
 	if e == nil {
 		return nil
 	}
@@ -5607,7 +5704,7 @@ func (e *EntityOrganizationResponse) GetPhone() *string {
 	return e.Phone
 }
 
-func (e *EntityOrganizationResponse) GetStatus() EntityStatusEnum {
+func (e *EntityOrganizationResponse) GetStatus() StatusEnum {
 	if e == nil {
 		return ""
 	}
@@ -5685,8 +5782,8 @@ func (e *EntityOrganizationResponse) String() string {
 // A schema for a response after creation of an entity of different types
 type EntityResponse struct {
 	Type         string
-	Individual   *EntityIndividualResponse
 	Organization *EntityOrganizationResponse
+	Individual   *EntityIndividualResponse
 }
 
 func (e *EntityResponse) GetType() string {
@@ -5696,18 +5793,18 @@ func (e *EntityResponse) GetType() string {
 	return e.Type
 }
 
-func (e *EntityResponse) GetIndividual() *EntityIndividualResponse {
-	if e == nil {
-		return nil
-	}
-	return e.Individual
-}
-
 func (e *EntityResponse) GetOrganization() *EntityOrganizationResponse {
 	if e == nil {
 		return nil
 	}
 	return e.Organization
+}
+
+func (e *EntityResponse) GetIndividual() *EntityIndividualResponse {
+	if e == nil {
+		return nil
+	}
+	return e.Individual
 }
 
 func (e *EntityResponse) UnmarshalJSON(data []byte) error {
@@ -5722,107 +5819,45 @@ func (e *EntityResponse) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant type", e)
 	}
 	switch unmarshaler.Type {
-	case "individual":
-		value := new(EntityIndividualResponse)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		e.Individual = value
 	case "organization":
 		value := new(EntityOrganizationResponse)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.Organization = value
+	case "individual":
+		value := new(EntityIndividualResponse)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.Individual = value
 	}
 	return nil
 }
 
 func (e EntityResponse) MarshalJSON() ([]byte, error) {
-	if err := e.validate(); err != nil {
-		return nil, err
+	if e.Organization != nil {
+		return internal.MarshalJSONWithExtraProperty(e.Organization, "type", "organization")
 	}
 	if e.Individual != nil {
 		return internal.MarshalJSONWithExtraProperty(e.Individual, "type", "individual")
-	}
-	if e.Organization != nil {
-		return internal.MarshalJSONWithExtraProperty(e.Organization, "type", "organization")
 	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type EntityResponseVisitor interface {
-	VisitIndividual(*EntityIndividualResponse) error
 	VisitOrganization(*EntityOrganizationResponse) error
+	VisitIndividual(*EntityIndividualResponse) error
 }
 
 func (e *EntityResponse) Accept(visitor EntityResponseVisitor) error {
-	if e.Individual != nil {
-		return visitor.VisitIndividual(e.Individual)
-	}
 	if e.Organization != nil {
 		return visitor.VisitOrganization(e.Organization)
 	}
-	return fmt.Errorf("type %T does not define a non-empty union type", e)
-}
-
-func (e *EntityResponse) validate() error {
-	if e == nil {
-		return fmt.Errorf("type %T is nil", e)
-	}
-	var fields []string
 	if e.Individual != nil {
-		fields = append(fields, "individual")
+		return visitor.VisitIndividual(e.Individual)
 	}
-	if e.Organization != nil {
-		fields = append(fields, "organization")
-	}
-	if len(fields) == 0 {
-		if e.Type != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", e, e.Type)
-		}
-		return fmt.Errorf("type %T is empty", e)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", e, fields)
-	}
-	if e.Type != "" {
-		field := fields[0]
-		if e.Type != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				e,
-				e.Type,
-				e,
-			)
-		}
-	}
-	return nil
-}
-
-type EntityStatusEnum string
-
-const (
-	EntityStatusEnumActive   EntityStatusEnum = "active"
-	EntityStatusEnumInactive EntityStatusEnum = "inactive"
-	EntityStatusEnumDeleted  EntityStatusEnum = "deleted"
-)
-
-func NewEntityStatusEnumFromString(s string) (EntityStatusEnum, error) {
-	switch s {
-	case "active":
-		return EntityStatusEnumActive, nil
-	case "inactive":
-		return EntityStatusEnumInactive, nil
-	case "deleted":
-		return EntityStatusEnumDeleted, nil
-	}
-	var t EntityStatusEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (e EntityStatusEnum) Ptr() *EntityStatusEnum {
-	return &e
+	return fmt.Errorf("type %T does not define a non-empty union type", e)
 }
 
 type EntityVatIdResourceList struct {
@@ -5995,52 +6030,6 @@ func (e *ErrorSchema) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-type ErrorSchema2 struct {
-	Message string `json:"message" url:"message"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (e *ErrorSchema2) GetMessage() string {
-	if e == nil {
-		return ""
-	}
-	return e.Message
-}
-
-func (e *ErrorSchema2) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorSchema2) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorSchema2
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ErrorSchema2(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-	e.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *ErrorSchema2) String() string {
-	if len(e.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
 type ErrorSchemaResponse struct {
 	Error *ErrorSchema `json:"error" url:"error"`
 
@@ -6087,56 +6076,10 @@ func (e *ErrorSchemaResponse) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-type ErrorSchemaResponse2 struct {
-	Error *ErrorSchema2 `json:"error" url:"error"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (e *ErrorSchemaResponse2) GetError() *ErrorSchema2 {
-	if e == nil {
-		return nil
-	}
-	return e.Error
-}
-
-func (e *ErrorSchemaResponse2) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ErrorSchemaResponse2) UnmarshalJSON(data []byte) error {
-	type unmarshaler ErrorSchemaResponse2
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ErrorSchemaResponse2(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-	e.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *ErrorSchemaResponse2) String() string {
-	if len(e.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
 type EstimatedMonthlyRevenue struct {
-	// The amount of the monthly revenue, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The amount of the monthly revenue, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250..
 	Amount *int `json:"amount,omitempty" url:"amount,omitempty"`
-	// [Currency code](https://docs.monite.com/references/currencies) of the revenue.
+	// [Currency code](https://docs.monite.com/docs/currencies) of the revenue.
 	Currency *CurrencyEnum `json:"currency,omitempty" url:"currency,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -6320,8 +6263,8 @@ func (e *EventResourceForWebhookClient) String() string {
 
 type ExchangeRate struct {
 	Base CurrencyEnum `json:"base" url:"base"`
-	To   CurrencyEnum `json:"to" url:"to"`
 	Rate float64      `json:"rate" url:"rate"`
+	To   CurrencyEnum `json:"to" url:"to"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -6334,18 +6277,18 @@ func (e *ExchangeRate) GetBase() CurrencyEnum {
 	return e.Base
 }
 
-func (e *ExchangeRate) GetTo() CurrencyEnum {
-	if e == nil {
-		return ""
-	}
-	return e.To
-}
-
 func (e *ExchangeRate) GetRate() float64 {
 	if e == nil {
 		return 0
 	}
 	return e.Rate
+}
+
+func (e *ExchangeRate) GetTo() CurrencyEnum {
+	if e == nil {
+		return ""
+	}
+	return e.To
 }
 
 func (e *ExchangeRate) GetExtraProperties() map[string]interface{} {
@@ -6600,22 +6543,22 @@ type FileSchema3 struct {
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// The type of the business object associated with this file.
 	FileType string `json:"file_type" url:"file_type"`
-	// The MD5 hash of the file.
-	Md5 string `json:"md5" url:"md5"`
-	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types).
-	Mimetype string `json:"mimetype" url:"mimetype"`
 	// The original file name (if available).
 	Name string `json:"name" url:"name"`
-	// If the file is a PDF document, this property contains individual pages extracted from the file. Otherwise, an empty array.
-	Pages []*PageSchema `json:"pages,omitempty" url:"pages,omitempty"`
-	// Preview images generated for this file. There can be multiple images with different sizes.
-	Previews []*PreviewSchema `json:"previews,omitempty" url:"previews,omitempty"`
 	// Geographical region of the data center where the file is stored.
 	Region string `json:"region" url:"region"`
-	// The file size in bytes.
-	Size int `json:"size" url:"size"`
+	// The MD5 hash of the file.
+	Md5 string `json:"md5" url:"md5"`
+	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
+	Mimetype string `json:"mimetype" url:"mimetype"`
 	// The URL to download the file.
 	Url string `json:"url" url:"url"`
+	// The file size in bytes.
+	Size int `json:"size" url:"size"`
+	// Preview images generated for this file. There can be multiple images with different sizes.
+	Previews []*PreviewSchema3 `json:"previews,omitempty" url:"previews,omitempty"`
+	// If the file is a PDF document, this property contains individual pages extracted from the file. Otherwise, an empty array.
+	Pages []*PageSchema3 `json:"pages,omitempty" url:"pages,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -6642,6 +6585,20 @@ func (f *FileSchema3) GetFileType() string {
 	return f.FileType
 }
 
+func (f *FileSchema3) GetName() string {
+	if f == nil {
+		return ""
+	}
+	return f.Name
+}
+
+func (f *FileSchema3) GetRegion() string {
+	if f == nil {
+		return ""
+	}
+	return f.Region
+}
+
 func (f *FileSchema3) GetMd5() string {
 	if f == nil {
 		return ""
@@ -6656,32 +6613,11 @@ func (f *FileSchema3) GetMimetype() string {
 	return f.Mimetype
 }
 
-func (f *FileSchema3) GetName() string {
+func (f *FileSchema3) GetUrl() string {
 	if f == nil {
 		return ""
 	}
-	return f.Name
-}
-
-func (f *FileSchema3) GetPages() []*PageSchema {
-	if f == nil {
-		return nil
-	}
-	return f.Pages
-}
-
-func (f *FileSchema3) GetPreviews() []*PreviewSchema {
-	if f == nil {
-		return nil
-	}
-	return f.Previews
-}
-
-func (f *FileSchema3) GetRegion() string {
-	if f == nil {
-		return ""
-	}
-	return f.Region
+	return f.Url
 }
 
 func (f *FileSchema3) GetSize() int {
@@ -6691,11 +6627,18 @@ func (f *FileSchema3) GetSize() int {
 	return f.Size
 }
 
-func (f *FileSchema3) GetUrl() string {
+func (f *FileSchema3) GetPreviews() []*PreviewSchema3 {
 	if f == nil {
-		return ""
+		return nil
 	}
-	return f.Url
+	return f.Previews
+}
+
+func (f *FileSchema3) GetPages() []*PageSchema3 {
+	if f == nil {
+		return nil
+	}
+	return f.Pages
 }
 
 func (f *FileSchema3) GetExtraProperties() map[string]interface{} {
@@ -6737,6 +6680,162 @@ func (f *FileSchema3) MarshalJSON() ([]byte, error) {
 }
 
 func (f *FileSchema3) String() string {
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
+}
+
+// Represents a file (such as a PDF invoice) that was uploaded to Monite.
+type FileSchema4 struct {
+	// A unique ID of this file.
+	Id string `json:"id" url:"id"`
+	// UTC date and time when this workflow was uploaded to Monite. Timestamps follow the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// The type of the business object associated with this file.
+	FileType string `json:"file_type" url:"file_type"`
+	// The MD5 hash of the file.
+	Md5 string `json:"md5" url:"md5"`
+	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
+	Mimetype string `json:"mimetype" url:"mimetype"`
+	// The original file name (if available).
+	Name string `json:"name" url:"name"`
+	// If the file is a PDF document, this property contains individual pages extracted from the file. Otherwise, an empty array.
+	Pages []*PageSchema4 `json:"pages,omitempty" url:"pages,omitempty"`
+	// Preview images generated for this file. There can be multiple images with different sizes.
+	Previews []*PreviewSchema4 `json:"previews,omitempty" url:"previews,omitempty"`
+	// Geographical region of the data center where the file is stored.
+	Region string `json:"region" url:"region"`
+	// The file size in bytes.
+	Size int `json:"size" url:"size"`
+	// The URL to download the file.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (f *FileSchema4) GetId() string {
+	if f == nil {
+		return ""
+	}
+	return f.Id
+}
+
+func (f *FileSchema4) GetCreatedAt() time.Time {
+	if f == nil {
+		return time.Time{}
+	}
+	return f.CreatedAt
+}
+
+func (f *FileSchema4) GetFileType() string {
+	if f == nil {
+		return ""
+	}
+	return f.FileType
+}
+
+func (f *FileSchema4) GetMd5() string {
+	if f == nil {
+		return ""
+	}
+	return f.Md5
+}
+
+func (f *FileSchema4) GetMimetype() string {
+	if f == nil {
+		return ""
+	}
+	return f.Mimetype
+}
+
+func (f *FileSchema4) GetName() string {
+	if f == nil {
+		return ""
+	}
+	return f.Name
+}
+
+func (f *FileSchema4) GetPages() []*PageSchema4 {
+	if f == nil {
+		return nil
+	}
+	return f.Pages
+}
+
+func (f *FileSchema4) GetPreviews() []*PreviewSchema4 {
+	if f == nil {
+		return nil
+	}
+	return f.Previews
+}
+
+func (f *FileSchema4) GetRegion() string {
+	if f == nil {
+		return ""
+	}
+	return f.Region
+}
+
+func (f *FileSchema4) GetSize() int {
+	if f == nil {
+		return 0
+	}
+	return f.Size
+}
+
+func (f *FileSchema4) GetUrl() string {
+	if f == nil {
+		return ""
+	}
+	return f.Url
+}
+
+func (f *FileSchema4) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *FileSchema4) UnmarshalJSON(data []byte) error {
+	type embed FileSchema4
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed: embed(*f),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*f = FileSchema4(unmarshaler.embed)
+	f.CreatedAt = unmarshaler.CreatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+	f.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FileSchema4) MarshalJSON() ([]byte, error) {
+	type embed FileSchema4
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed:     embed(*f),
+		CreatedAt: internal.NewDateTime(f.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (f *FileSchema4) String() string {
 	if len(f.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
 			return value
@@ -6801,8 +6900,7 @@ type IndividualResponseSchema struct {
 	FirstName string  `json:"first_name" url:"first_name"`
 	IdNumber  *string `json:"id_number,omitempty" url:"id_number,omitempty"`
 	// A last name of an individual
-	LastName string `json:"last_name" url:"last_name"`
-	// The last four digits of the individual's Social Security number
+	LastName string  `json:"last_name" url:"last_name"`
 	SsnLast4 *string `json:"ssn_last_4,omitempty" url:"ssn_last_4,omitempty"`
 	// A title of an individual
 	Title *string `json:"title,omitempty" url:"title,omitempty"`
@@ -7634,7 +7732,7 @@ func (l *LedgerAccountListResponse) String() string {
 type LedgerAccountResponse struct {
 	// A unique identifier of the ledger account.
 	Id string `json:"id" url:"id"`
-	// The currency of the ledger account, specified as a three-letter [currency code](https://docs.monite.com/references/currencies) (ISO 4217).
+	// The currency of the ledger account, specified as a three-letter [currency code](https://docs.monite.com/docs/currencies) (ISO 4217).
 	Currency *CurrencyEnum `json:"currency,omitempty" url:"currency,omitempty"`
 	// The current balance in the account.
 	CurrentBalance *int `json:"current_balance,omitempty" url:"current_balance,omitempty"`
@@ -7793,12 +7891,12 @@ type LineItemInternalRequest struct {
 	// The quantity of each of the goods, materials, or services listed in the payable.
 	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
 	Subtotal *int     `json:"subtotal,omitempty" url:"subtotal,omitempty"`
-	// VAT rate in percent [minor units](https://docs.monite.com/references/currencies#minor-units). Example: 12.5% is 1250.
+	// VAT rate in percent [minor units](https://docs.monite.com/docs/currencies#minor-units). Example: 12.5% is 1250.
 	Tax   *int `json:"tax,omitempty" url:"tax,omitempty"`
 	Total *int `json:"total,omitempty" url:"total,omitempty"`
 	// The unit of the product
 	Unit *string `json:"unit,omitempty" url:"unit,omitempty"`
-	// The unit price of the product, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The unit price of the product, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
 	UnitPrice *int `json:"unit_price,omitempty" url:"unit_price,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -7982,11 +8080,11 @@ type LineItemRequest struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The quantity of each of the goods, materials, or services listed in the payable.
 	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
-	// VAT rate in percent [minor units](https://docs.monite.com/references/currencies#minor-units). Example: 12.5% is 1250.
+	// VAT rate in percent [minor units](https://docs.monite.com/docs/currencies#minor-units). Example: 12.5% is 1250.
 	Tax *int `json:"tax,omitempty" url:"tax,omitempty"`
 	// The unit of the product
 	Unit *string `json:"unit,omitempty" url:"unit,omitempty"`
-	// The unit price of the product, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The unit price of the product, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
 	UnitPrice *int `json:"unit_price,omitempty" url:"unit_price,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -8094,17 +8192,17 @@ type LineItemResponse struct {
 	PayableId string  `json:"payable_id" url:"payable_id"`
 	// The quantity of each of the goods, materials, or services listed in the payable.
 	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
-	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	Subtotal *int `json:"subtotal,omitempty" url:"subtotal,omitempty"`
-	// VAT rate in percent [minor units](https://docs.monite.com/references/currencies#minor-units). Example: 12.5% is 1250.
+	// VAT rate in percent [minor units](https://docs.monite.com/docs/currencies#minor-units). Example: 12.5% is 1250.
 	Tax *int `json:"tax,omitempty" url:"tax,omitempty"`
-	// Tax amount in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// Tax amount in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
 	TaxAmount *int `json:"tax_amount,omitempty" url:"tax_amount,omitempty"`
 	// The actual price of the product.
 	Total *int `json:"total,omitempty" url:"total,omitempty"`
 	// The unit of the product
 	Unit *string `json:"unit,omitempty" url:"unit,omitempty"`
-	// The unit price of the product, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The unit price of the product, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
 	UnitPrice *int `json:"unit_price,omitempty" url:"unit_price,omitempty"`
 	// ID of the user who created the tag.
 	WasCreatedByUserId *string `json:"was_created_by_user_id,omitempty" url:"was_created_by_user_id,omitempty"`
@@ -8289,6 +8387,68 @@ func (l *LineItemsReplaceResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
+type MailSettingsResponse struct {
+	AttachDocumentsAsPdf bool    `json:"attach_documents_as_pdf" url:"attach_documents_as_pdf"`
+	FromEmailUsername    *string `json:"from_email_username,omitempty" url:"from_email_username,omitempty"`
+	FromName             *string `json:"from_name,omitempty" url:"from_name,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MailSettingsResponse) GetAttachDocumentsAsPdf() bool {
+	if m == nil {
+		return false
+	}
+	return m.AttachDocumentsAsPdf
+}
+
+func (m *MailSettingsResponse) GetFromEmailUsername() *string {
+	if m == nil {
+		return nil
+	}
+	return m.FromEmailUsername
+}
+
+func (m *MailSettingsResponse) GetFromName() *string {
+	if m == nil {
+		return nil
+	}
+	return m.FromName
+}
+
+func (m *MailSettingsResponse) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MailSettingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler MailSettingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MailSettingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MailSettingsResponse) String() string {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
 type MoniteAllPaymentMethods string
 
 const (
@@ -8408,12 +8568,11 @@ func (m MoniteAllPaymentMethodsTypes) Ptr() *MoniteAllPaymentMethodsTypes {
 type ObjectMatchTypes string
 
 const (
-	ObjectMatchTypesProduct       ObjectMatchTypes = "product"
-	ObjectMatchTypesCustomer      ObjectMatchTypes = "customer"
-	ObjectMatchTypesVendor        ObjectMatchTypes = "vendor"
-	ObjectMatchTypesReceivable    ObjectMatchTypes = "receivable"
-	ObjectMatchTypesBill          ObjectMatchTypes = "bill"
-	ObjectMatchTypesPaymentRecord ObjectMatchTypes = "payment_record"
+	ObjectMatchTypesProduct    ObjectMatchTypes = "product"
+	ObjectMatchTypesCustomer   ObjectMatchTypes = "customer"
+	ObjectMatchTypesVendor     ObjectMatchTypes = "vendor"
+	ObjectMatchTypesReceivable ObjectMatchTypes = "receivable"
+	ObjectMatchTypesBill       ObjectMatchTypes = "bill"
 )
 
 func NewObjectMatchTypesFromString(s string) (ObjectMatchTypes, error) {
@@ -8428,8 +8587,6 @@ func NewObjectMatchTypesFromString(s string) (ObjectMatchTypes, error) {
 		return ObjectMatchTypesReceivable, nil
 	case "bill":
 		return ObjectMatchTypesBill, nil
-	case "payment_record":
-		return ObjectMatchTypesPaymentRecord, nil
 	}
 	var t ObjectMatchTypes
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -8446,7 +8603,7 @@ const (
 	ObjectTypeApproval                   ObjectType = "approval"
 	ObjectTypeApprovalRequest            ObjectType = "approval_request"
 	ObjectTypeApprovalPolicy             ObjectType = "approval_policy"
-	ObjectTypeApprovalPolicyProcess      ObjectType = "approval_policy_process"
+	ObjectTypeMonitescriptProcess        ObjectType = "monitescript_process"
 	ObjectTypeAuditTrail                 ObjectType = "audit_trail"
 	ObjectTypeComment                    ObjectType = "comment"
 	ObjectTypeCounterpart                ObjectType = "counterpart"
@@ -8456,7 +8613,6 @@ const (
 	ObjectTypeCounterpartPartnerMetadata ObjectType = "counterpart_partner_metadata"
 	ObjectTypeCounterpartTaxId           ObjectType = "counterpart_tax_id"
 	ObjectTypeCounterpartVatId           ObjectType = "counterpart_vat_id"
-	ObjectTypeEinvoicing                 ObjectType = "einvoicing"
 	ObjectTypeEntity                     ObjectType = "entity"
 	ObjectTypeEntityBankAccount          ObjectType = "entity_bank_account"
 	ObjectTypeEntitySettings             ObjectType = "entity_settings"
@@ -8465,17 +8621,14 @@ const (
 	ObjectTypeEntityUserToken            ObjectType = "entity_user_token"
 	ObjectTypeEntityVatIds               ObjectType = "entity_vat_ids"
 	ObjectTypeExport                     ObjectType = "export"
-	ObjectTypeMailbox                    ObjectType = "mailbox"
-	ObjectTypeMonitescriptProcess        ObjectType = "monitescript_process"
 	ObjectTypeOnboarding                 ObjectType = "onboarding"
-	ObjectTypeOverdueReminder            ObjectType = "overdue_reminder"
 	ObjectTypePartner                    ObjectType = "partner"
 	ObjectTypePartnerInternalConfig      ObjectType = "partner_internal_config"
 	ObjectTypePartnerSettings            ObjectType = "partner_settings"
 	ObjectTypePartnerToken               ObjectType = "partner_token"
 	ObjectTypePayable                    ObjectType = "payable"
+	ObjectTypeProject                    ObjectType = "project"
 	ObjectTypePayableLineItem            ObjectType = "payable_line_item"
-	ObjectTypePayablesCreditNote         ObjectType = "payables_credit_note"
 	ObjectTypePayablesPurchaseOrder      ObjectType = "payables_purchase_order"
 	ObjectTypePayment                    ObjectType = "payment"
 	ObjectTypePaymentIntent              ObjectType = "payment_intent"
@@ -8484,7 +8637,6 @@ const (
 	ObjectTypePaymentReminder            ObjectType = "payment_reminder"
 	ObjectTypePerson                     ObjectType = "person"
 	ObjectTypeProduct                    ObjectType = "product"
-	ObjectTypeProject                    ObjectType = "project"
 	ObjectTypeReceivable                 ObjectType = "receivable"
 	ObjectTypeReconciliation             ObjectType = "reconciliation"
 	ObjectTypeRecurrence                 ObjectType = "recurrence"
@@ -8496,6 +8648,8 @@ const (
 	ObjectTypeWebhook                    ObjectType = "webhook"
 	ObjectTypeWorkflow                   ObjectType = "workflow"
 	ObjectTypeWorkflowPipeline           ObjectType = "workflow_pipeline"
+	ObjectTypeOverdueReminder            ObjectType = "overdue_reminder"
+	ObjectTypeEinvoicing                 ObjectType = "einvoicing"
 )
 
 func NewObjectTypeFromString(s string) (ObjectType, error) {
@@ -8508,8 +8662,8 @@ func NewObjectTypeFromString(s string) (ObjectType, error) {
 		return ObjectTypeApprovalRequest, nil
 	case "approval_policy":
 		return ObjectTypeApprovalPolicy, nil
-	case "approval_policy_process":
-		return ObjectTypeApprovalPolicyProcess, nil
+	case "monitescript_process":
+		return ObjectTypeMonitescriptProcess, nil
 	case "audit_trail":
 		return ObjectTypeAuditTrail, nil
 	case "comment":
@@ -8528,8 +8682,6 @@ func NewObjectTypeFromString(s string) (ObjectType, error) {
 		return ObjectTypeCounterpartTaxId, nil
 	case "counterpart_vat_id":
 		return ObjectTypeCounterpartVatId, nil
-	case "einvoicing":
-		return ObjectTypeEinvoicing, nil
 	case "entity":
 		return ObjectTypeEntity, nil
 	case "entity_bank_account":
@@ -8546,14 +8698,8 @@ func NewObjectTypeFromString(s string) (ObjectType, error) {
 		return ObjectTypeEntityVatIds, nil
 	case "export":
 		return ObjectTypeExport, nil
-	case "mailbox":
-		return ObjectTypeMailbox, nil
-	case "monitescript_process":
-		return ObjectTypeMonitescriptProcess, nil
 	case "onboarding":
 		return ObjectTypeOnboarding, nil
-	case "overdue_reminder":
-		return ObjectTypeOverdueReminder, nil
 	case "partner":
 		return ObjectTypePartner, nil
 	case "partner_internal_config":
@@ -8564,10 +8710,10 @@ func NewObjectTypeFromString(s string) (ObjectType, error) {
 		return ObjectTypePartnerToken, nil
 	case "payable":
 		return ObjectTypePayable, nil
+	case "project":
+		return ObjectTypeProject, nil
 	case "payable_line_item":
 		return ObjectTypePayableLineItem, nil
-	case "payables_credit_note":
-		return ObjectTypePayablesCreditNote, nil
 	case "payables_purchase_order":
 		return ObjectTypePayablesPurchaseOrder, nil
 	case "payment":
@@ -8584,8 +8730,6 @@ func NewObjectTypeFromString(s string) (ObjectType, error) {
 		return ObjectTypePerson, nil
 	case "product":
 		return ObjectTypeProduct, nil
-	case "project":
-		return ObjectTypeProject, nil
 	case "receivable":
 		return ObjectTypeReceivable, nil
 	case "reconciliation":
@@ -8608,6 +8752,10 @@ func NewObjectTypeFromString(s string) (ObjectType, error) {
 		return ObjectTypeWorkflow, nil
 	case "workflow_pipeline":
 		return ObjectTypeWorkflowPipeline, nil
+	case "overdue_reminder":
+		return ObjectTypeOverdueReminder, nil
+	case "einvoicing":
+		return ObjectTypeEinvoicing, nil
 	}
 	var t ObjectType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -8617,32 +8765,188 @@ func (o ObjectType) Ptr() *ObjectType {
 	return &o
 }
 
-type OcrStatusEnum string
+type OnboardingLinkPublicResponse struct {
+	Id         string    `json:"id" url:"id"`
+	EntityId   string    `json:"entity_id" url:"entity_id"`
+	ExpiresAt  time.Time `json:"expires_at" url:"expires_at"`
+	RefreshUrl string    `json:"refresh_url" url:"refresh_url"`
+	ReturnUrl  string    `json:"return_url" url:"return_url"`
+	Url        string    `json:"url" url:"url"`
 
-const (
-	OcrStatusEnumProcessing OcrStatusEnum = "processing"
-	OcrStatusEnumError      OcrStatusEnum = "error"
-	OcrStatusEnumSuccess    OcrStatusEnum = "success"
-	OcrStatusEnumCanceled   OcrStatusEnum = "canceled"
-)
-
-func NewOcrStatusEnumFromString(s string) (OcrStatusEnum, error) {
-	switch s {
-	case "processing":
-		return OcrStatusEnumProcessing, nil
-	case "error":
-		return OcrStatusEnumError, nil
-	case "success":
-		return OcrStatusEnumSuccess, nil
-	case "canceled":
-		return OcrStatusEnumCanceled, nil
-	}
-	var t OcrStatusEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
 }
 
-func (o OcrStatusEnum) Ptr() *OcrStatusEnum {
-	return &o
+func (o *OnboardingLinkPublicResponse) GetId() string {
+	if o == nil {
+		return ""
+	}
+	return o.Id
+}
+
+func (o *OnboardingLinkPublicResponse) GetEntityId() string {
+	if o == nil {
+		return ""
+	}
+	return o.EntityId
+}
+
+func (o *OnboardingLinkPublicResponse) GetExpiresAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.ExpiresAt
+}
+
+func (o *OnboardingLinkPublicResponse) GetRefreshUrl() string {
+	if o == nil {
+		return ""
+	}
+	return o.RefreshUrl
+}
+
+func (o *OnboardingLinkPublicResponse) GetReturnUrl() string {
+	if o == nil {
+		return ""
+	}
+	return o.ReturnUrl
+}
+
+func (o *OnboardingLinkPublicResponse) GetUrl() string {
+	if o == nil {
+		return ""
+	}
+	return o.Url
+}
+
+func (o *OnboardingLinkPublicResponse) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OnboardingLinkPublicResponse) UnmarshalJSON(data []byte) error {
+	type embed OnboardingLinkPublicResponse
+	var unmarshaler = struct {
+		embed
+		ExpiresAt *internal.DateTime `json:"expires_at"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = OnboardingLinkPublicResponse(unmarshaler.embed)
+	o.ExpiresAt = unmarshaler.ExpiresAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+	o.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OnboardingLinkPublicResponse) MarshalJSON() ([]byte, error) {
+	type embed OnboardingLinkPublicResponse
+	var marshaler = struct {
+		embed
+		ExpiresAt *internal.DateTime `json:"expires_at"`
+	}{
+		embed:     embed(*o),
+		ExpiresAt: internal.NewDateTime(o.ExpiresAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *OnboardingLinkPublicResponse) String() string {
+	if len(o.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(o.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type OnboardingLinkRequest struct {
+	ExpiresAt  time.Time `json:"expires_at" url:"expires_at"`
+	RefreshUrl string    `json:"refresh_url" url:"refresh_url"`
+	ReturnUrl  string    `json:"return_url" url:"return_url"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (o *OnboardingLinkRequest) GetExpiresAt() time.Time {
+	if o == nil {
+		return time.Time{}
+	}
+	return o.ExpiresAt
+}
+
+func (o *OnboardingLinkRequest) GetRefreshUrl() string {
+	if o == nil {
+		return ""
+	}
+	return o.RefreshUrl
+}
+
+func (o *OnboardingLinkRequest) GetReturnUrl() string {
+	if o == nil {
+		return ""
+	}
+	return o.ReturnUrl
+}
+
+func (o *OnboardingLinkRequest) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OnboardingLinkRequest) UnmarshalJSON(data []byte) error {
+	type embed OnboardingLinkRequest
+	var unmarshaler = struct {
+		embed
+		ExpiresAt *internal.DateTime `json:"expires_at"`
+	}{
+		embed: embed(*o),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*o = OnboardingLinkRequest(unmarshaler.embed)
+	o.ExpiresAt = unmarshaler.ExpiresAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+	o.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OnboardingLinkRequest) MarshalJSON() ([]byte, error) {
+	type embed OnboardingLinkRequest
+	var marshaler = struct {
+		embed
+		ExpiresAt *internal.DateTime `json:"expires_at"`
+	}{
+		embed:     embed(*o),
+		ExpiresAt: internal.NewDateTime(o.ExpiresAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (o *OnboardingLinkRequest) String() string {
+	if len(o.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(o.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
 }
 
 type OnboardingLinkResponse struct {
@@ -9280,6 +9584,28 @@ func (o OrderEnum) Ptr() *OrderEnum {
 	return &o
 }
 
+type OrderEnum3 string
+
+const (
+	OrderEnum3Asc  OrderEnum3 = "asc"
+	OrderEnum3Desc OrderEnum3 = "desc"
+)
+
+func NewOrderEnum3FromString(s string) (OrderEnum3, error) {
+	switch s {
+	case "asc":
+		return OrderEnum3Asc, nil
+	case "desc":
+		return OrderEnum3Desc, nil
+	}
+	var t OrderEnum3
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrderEnum3) Ptr() *OrderEnum3 {
+	return &o
+}
+
 // Contains data specific to entities of the `organization` type.
 type OrganizationResponseSchema struct {
 	// Business structure of the company
@@ -9288,7 +9614,7 @@ type OrganizationResponseSchema struct {
 	ExecutivesProvided *bool                    `json:"executives_provided,omitempty" url:"executives_provided,omitempty"`
 	// A code which identifies uniquely a party of a transaction worldwide
 	LegalEntityId *string `json:"legal_entity_id,omitempty" url:"legal_entity_id,omitempty"`
-	// The legal name of the organization.
+	// A legal name of an organization
 	LegalName              string `json:"legal_name" url:"legal_name"`
 	OwnersProvided         *bool  `json:"owners_provided,omitempty" url:"owners_provided,omitempty"`
 	RepresentativeProvided *bool  `json:"representative_provided,omitempty" url:"representative_provided,omitempty"`
@@ -9378,7 +9704,7 @@ func (o *OrganizationResponseSchema) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
-type OwnershipDeclarationInput struct {
+type OwnershipDeclaration struct {
 	// The date and time (in the ISO 8601 format) when the beneficial owner attestation was made.
 	Date *time.Time `json:"date,omitempty" url:"date,omitempty"`
 	// The IP address from which the beneficial owner attestation was made. If omitted or set to `null` in the request, the IP address is inferred from the request origin or the `X-Forwarded-For` request header.
@@ -9388,26 +9714,26 @@ type OwnershipDeclarationInput struct {
 	rawJSON         json.RawMessage
 }
 
-func (o *OwnershipDeclarationInput) GetDate() *time.Time {
+func (o *OwnershipDeclaration) GetDate() *time.Time {
 	if o == nil {
 		return nil
 	}
 	return o.Date
 }
 
-func (o *OwnershipDeclarationInput) GetIp() *string {
+func (o *OwnershipDeclaration) GetIp() *string {
 	if o == nil {
 		return nil
 	}
 	return o.Ip
 }
 
-func (o *OwnershipDeclarationInput) GetExtraProperties() map[string]interface{} {
+func (o *OwnershipDeclaration) GetExtraProperties() map[string]interface{} {
 	return o.extraProperties
 }
 
-func (o *OwnershipDeclarationInput) UnmarshalJSON(data []byte) error {
-	type embed OwnershipDeclarationInput
+func (o *OwnershipDeclaration) UnmarshalJSON(data []byte) error {
+	type embed OwnershipDeclaration
 	var unmarshaler = struct {
 		embed
 		Date *internal.DateTime `json:"date,omitempty"`
@@ -9417,7 +9743,7 @@ func (o *OwnershipDeclarationInput) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*o = OwnershipDeclarationInput(unmarshaler.embed)
+	*o = OwnershipDeclaration(unmarshaler.embed)
 	o.Date = unmarshaler.Date.TimePtr()
 	extraProperties, err := internal.ExtractExtraProperties(data, *o)
 	if err != nil {
@@ -9428,8 +9754,8 @@ func (o *OwnershipDeclarationInput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o *OwnershipDeclarationInput) MarshalJSON() ([]byte, error) {
-	type embed OwnershipDeclarationInput
+func (o *OwnershipDeclaration) MarshalJSON() ([]byte, error) {
+	type embed OwnershipDeclaration
 	var marshaler = struct {
 		embed
 		Date *internal.DateTime `json:"date,omitempty"`
@@ -9440,81 +9766,7 @@ func (o *OwnershipDeclarationInput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(marshaler)
 }
 
-func (o *OwnershipDeclarationInput) String() string {
-	if len(o.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(o.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(o); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", o)
-}
-
-type OwnershipDeclarationOutput struct {
-	// The date and time (in the ISO 8601 format) when the beneficial owner attestation was made.
-	Date *time.Time `json:"date,omitempty" url:"date,omitempty"`
-	// The IP address from which the beneficial owner attestation was made. If omitted or set to `null` in the request, the IP address is inferred from the request origin or the `X-Forwarded-For` request header.
-	Ip *string `json:"ip,omitempty" url:"ip,omitempty"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (o *OwnershipDeclarationOutput) GetDate() *time.Time {
-	if o == nil {
-		return nil
-	}
-	return o.Date
-}
-
-func (o *OwnershipDeclarationOutput) GetIp() *string {
-	if o == nil {
-		return nil
-	}
-	return o.Ip
-}
-
-func (o *OwnershipDeclarationOutput) GetExtraProperties() map[string]interface{} {
-	return o.extraProperties
-}
-
-func (o *OwnershipDeclarationOutput) UnmarshalJSON(data []byte) error {
-	type embed OwnershipDeclarationOutput
-	var unmarshaler = struct {
-		embed
-		Date *internal.DateTime `json:"date,omitempty"`
-	}{
-		embed: embed(*o),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*o = OwnershipDeclarationOutput(unmarshaler.embed)
-	o.Date = unmarshaler.Date.TimePtr()
-	extraProperties, err := internal.ExtractExtraProperties(data, *o)
-	if err != nil {
-		return err
-	}
-	o.extraProperties = extraProperties
-	o.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (o *OwnershipDeclarationOutput) MarshalJSON() ([]byte, error) {
-	type embed OwnershipDeclarationOutput
-	var marshaler = struct {
-		embed
-		Date *internal.DateTime `json:"date,omitempty"`
-	}{
-		embed: embed(*o),
-		Date:  internal.NewOptionalDateTime(o.Date),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (o *OwnershipDeclarationOutput) String() string {
+func (o *OwnershipDeclaration) String() string {
 	if len(o.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(o.rawJSON); err == nil {
 			return value
@@ -9528,10 +9780,95 @@ func (o *OwnershipDeclarationOutput) String() string {
 
 // When a PDF document is uploaded to Monite, it extracts individual pages from the document
 // and saves them as PNG images. This object contains the image and metadata of a single page.
-type PageSchema struct {
+type PageSchema3 struct {
 	// A unique ID of the image.
 	Id string `json:"id" url:"id"`
-	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types) of the image.
+	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of the image.
+	Mimetype string `json:"mimetype" url:"mimetype"`
+	// Image file size, in bytes.
+	Size int `json:"size" url:"size"`
+	// The page number in the PDF document, from 0.
+	Number int `json:"number" url:"number"`
+	// The URL to download the image.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PageSchema3) GetId() string {
+	if p == nil {
+		return ""
+	}
+	return p.Id
+}
+
+func (p *PageSchema3) GetMimetype() string {
+	if p == nil {
+		return ""
+	}
+	return p.Mimetype
+}
+
+func (p *PageSchema3) GetSize() int {
+	if p == nil {
+		return 0
+	}
+	return p.Size
+}
+
+func (p *PageSchema3) GetNumber() int {
+	if p == nil {
+		return 0
+	}
+	return p.Number
+}
+
+func (p *PageSchema3) GetUrl() string {
+	if p == nil {
+		return ""
+	}
+	return p.Url
+}
+
+func (p *PageSchema3) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PageSchema3) UnmarshalJSON(data []byte) error {
+	type unmarshaler PageSchema3
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PageSchema3(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PageSchema3) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// When a PDF document is uploaded to Monite, it extracts individual pages from the document
+// and saves them as PNG images. This object contains the image and metadata of a single page.
+type PageSchema4 struct {
+	// A unique ID of the image.
+	Id string `json:"id" url:"id"`
+	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of the image.
 	Mimetype string `json:"mimetype" url:"mimetype"`
 	// The page number in the PDF document, from 0.
 	Number int `json:"number" url:"number"`
@@ -9544,52 +9881,52 @@ type PageSchema struct {
 	rawJSON         json.RawMessage
 }
 
-func (p *PageSchema) GetId() string {
+func (p *PageSchema4) GetId() string {
 	if p == nil {
 		return ""
 	}
 	return p.Id
 }
 
-func (p *PageSchema) GetMimetype() string {
+func (p *PageSchema4) GetMimetype() string {
 	if p == nil {
 		return ""
 	}
 	return p.Mimetype
 }
 
-func (p *PageSchema) GetNumber() int {
+func (p *PageSchema4) GetNumber() int {
 	if p == nil {
 		return 0
 	}
 	return p.Number
 }
 
-func (p *PageSchema) GetSize() int {
+func (p *PageSchema4) GetSize() int {
 	if p == nil {
 		return 0
 	}
 	return p.Size
 }
 
-func (p *PageSchema) GetUrl() string {
+func (p *PageSchema4) GetUrl() string {
 	if p == nil {
 		return ""
 	}
 	return p.Url
 }
 
-func (p *PageSchema) GetExtraProperties() map[string]interface{} {
+func (p *PageSchema4) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PageSchema) UnmarshalJSON(data []byte) error {
-	type unmarshaler PageSchema
+func (p *PageSchema4) UnmarshalJSON(data []byte) error {
+	type unmarshaler PageSchema4
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PageSchema(value)
+	*p = PageSchema4(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -9599,7 +9936,7 @@ func (p *PageSchema) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PageSchema) String() string {
+func (p *PageSchema4) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -9807,7 +10144,7 @@ func (p *PayableActionSchema) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-type PayableSchemaOutput struct {
+type PayableSchema struct {
 	// List of actions
 	Actions []*PayableActionSchema `json:"actions,omitempty" url:"actions,omitempty"`
 
@@ -9815,24 +10152,24 @@ type PayableSchemaOutput struct {
 	rawJSON         json.RawMessage
 }
 
-func (p *PayableSchemaOutput) GetActions() []*PayableActionSchema {
+func (p *PayableSchema) GetActions() []*PayableActionSchema {
 	if p == nil {
 		return nil
 	}
 	return p.Actions
 }
 
-func (p *PayableSchemaOutput) GetExtraProperties() map[string]interface{} {
+func (p *PayableSchema) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PayableSchemaOutput) UnmarshalJSON(data []byte) error {
-	type unmarshaler PayableSchemaOutput
+func (p *PayableSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler PayableSchema
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PayableSchemaOutput(value)
+	*p = PayableSchema(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -9842,7 +10179,94 @@ func (p *PayableSchemaOutput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PayableSchemaOutput) String() string {
+func (p *PayableSchema) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type PayableSettingsResponse struct {
+	AllowCancelDuplicatesAutomatically *bool  `json:"allow_cancel_duplicates_automatically,omitempty" url:"allow_cancel_duplicates_automatically,omitempty"`
+	AllowCounterpartAutocreation       *bool  `json:"allow_counterpart_autocreation,omitempty" url:"allow_counterpart_autocreation,omitempty"`
+	AllowCounterpartAutolinking        *bool  `json:"allow_counterpart_autolinking,omitempty" url:"allow_counterpart_autolinking,omitempty"`
+	ApprovePageUrl                     string `json:"approve_page_url" url:"approve_page_url"`
+	// A state each new payable will have upon creation
+	DefaultState    *string `json:"default_state,omitempty" url:"default_state,omitempty"`
+	EnableLineItems *bool   `json:"enable_line_items,omitempty" url:"enable_line_items,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PayableSettingsResponse) GetAllowCancelDuplicatesAutomatically() *bool {
+	if p == nil {
+		return nil
+	}
+	return p.AllowCancelDuplicatesAutomatically
+}
+
+func (p *PayableSettingsResponse) GetAllowCounterpartAutocreation() *bool {
+	if p == nil {
+		return nil
+	}
+	return p.AllowCounterpartAutocreation
+}
+
+func (p *PayableSettingsResponse) GetAllowCounterpartAutolinking() *bool {
+	if p == nil {
+		return nil
+	}
+	return p.AllowCounterpartAutolinking
+}
+
+func (p *PayableSettingsResponse) GetApprovePageUrl() string {
+	if p == nil {
+		return ""
+	}
+	return p.ApprovePageUrl
+}
+
+func (p *PayableSettingsResponse) GetDefaultState() *string {
+	if p == nil {
+		return nil
+	}
+	return p.DefaultState
+}
+
+func (p *PayableSettingsResponse) GetEnableLineItems() *bool {
+	if p == nil {
+		return nil
+	}
+	return p.EnableLineItems
+}
+
+func (p *PayableSettingsResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PayableSettingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PayableSettingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PayableSettingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PayableSettingsResponse) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -9894,80 +10318,6 @@ func (p PayableStateEnum) Ptr() *PayableStateEnum {
 	return &p
 }
 
-type PayerAccountResponse struct {
-	// ID of a payment account
-	Id string `json:"id" url:"id"`
-	// List of bank accounts
-	BankAccounts []*BankAccount `json:"bank_accounts,omitempty" url:"bank_accounts,omitempty"`
-	// Display name of a payment account
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
-	// Type of a payment account. Can be `entity` or `counterpart`
-	Type PaymentAccountType `json:"type" url:"type"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (p *PayerAccountResponse) GetId() string {
-	if p == nil {
-		return ""
-	}
-	return p.Id
-}
-
-func (p *PayerAccountResponse) GetBankAccounts() []*BankAccount {
-	if p == nil {
-		return nil
-	}
-	return p.BankAccounts
-}
-
-func (p *PayerAccountResponse) GetName() *string {
-	if p == nil {
-		return nil
-	}
-	return p.Name
-}
-
-func (p *PayerAccountResponse) GetType() PaymentAccountType {
-	if p == nil {
-		return ""
-	}
-	return p.Type
-}
-
-func (p *PayerAccountResponse) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *PayerAccountResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler PayerAccountResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = PayerAccountResponse(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-	p.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *PayerAccountResponse) String() string {
-	if len(p.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
 type PaymentAccountType string
 
 const (
@@ -9988,6 +10338,116 @@ func NewPaymentAccountTypeFromString(s string) (PaymentAccountType, error) {
 
 func (p PaymentAccountType) Ptr() *PaymentAccountType {
 	return &p
+}
+
+type PaymentIntentPayoutMethod string
+
+const (
+	PaymentIntentPayoutMethodBankAccount PaymentIntentPayoutMethod = "bank_account"
+	PaymentIntentPayoutMethodPaperCheck  PaymentIntentPayoutMethod = "paper_check"
+)
+
+func NewPaymentIntentPayoutMethodFromString(s string) (PaymentIntentPayoutMethod, error) {
+	switch s {
+	case "bank_account":
+		return PaymentIntentPayoutMethodBankAccount, nil
+	case "paper_check":
+		return PaymentIntentPayoutMethodPaperCheck, nil
+	}
+	var t PaymentIntentPayoutMethod
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PaymentIntentPayoutMethod) Ptr() *PaymentIntentPayoutMethod {
+	return &p
+}
+
+type PaymentIntentsRecipient struct {
+	Id            string                     `json:"id" url:"id"`
+	BankAccountId *string                    `json:"bank_account_id,omitempty" url:"bank_account_id,omitempty"`
+	PayoutMethod  *PaymentIntentPayoutMethod `json:"payout_method,omitempty" url:"payout_method,omitempty"`
+	type_         string
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PaymentIntentsRecipient) GetId() string {
+	if p == nil {
+		return ""
+	}
+	return p.Id
+}
+
+func (p *PaymentIntentsRecipient) GetBankAccountId() *string {
+	if p == nil {
+		return nil
+	}
+	return p.BankAccountId
+}
+
+func (p *PaymentIntentsRecipient) GetPayoutMethod() *PaymentIntentPayoutMethod {
+	if p == nil {
+		return nil
+	}
+	return p.PayoutMethod
+}
+
+func (p *PaymentIntentsRecipient) Type() string {
+	return p.type_
+}
+
+func (p *PaymentIntentsRecipient) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PaymentIntentsRecipient) UnmarshalJSON(data []byte) error {
+	type embed PaymentIntentsRecipient
+	var unmarshaler = struct {
+		embed
+		Type string `json:"type"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = PaymentIntentsRecipient(unmarshaler.embed)
+	if unmarshaler.Type != "counterpart" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", p, "counterpart", unmarshaler.Type)
+	}
+	p.type_ = unmarshaler.Type
+	extraProperties, err := internal.ExtractExtraProperties(data, *p, "type")
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PaymentIntentsRecipient) MarshalJSON() ([]byte, error) {
+	type embed PaymentIntentsRecipient
+	var marshaler = struct {
+		embed
+		Type string `json:"type"`
+	}{
+		embed: embed(*p),
+		Type:  "counterpart",
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *PaymentIntentsRecipient) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type PaymentMethod struct {
@@ -10158,6 +10618,78 @@ func (p *PaymentObject) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+type PaymentObjectPayable struct {
+	Id    string `json:"id" url:"id"`
+	type_ string
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PaymentObjectPayable) GetId() string {
+	if p == nil {
+		return ""
+	}
+	return p.Id
+}
+
+func (p *PaymentObjectPayable) Type() string {
+	return p.type_
+}
+
+func (p *PaymentObjectPayable) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PaymentObjectPayable) UnmarshalJSON(data []byte) error {
+	type embed PaymentObjectPayable
+	var unmarshaler = struct {
+		embed
+		Type string `json:"type"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = PaymentObjectPayable(unmarshaler.embed)
+	if unmarshaler.Type != "payable" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", p, "payable", unmarshaler.Type)
+	}
+	p.type_ = unmarshaler.Type
+	extraProperties, err := internal.ExtractExtraProperties(data, *p, "type")
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PaymentObjectPayable) MarshalJSON() ([]byte, error) {
+	type embed PaymentObjectPayable
+	var marshaler = struct {
+		embed
+		Type string `json:"type"`
+	}{
+		embed: embed(*p),
+		Type:  "payable",
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *PaymentObjectPayable) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type PaymentObjectType string
 
 const (
@@ -10178,6 +10710,108 @@ func NewPaymentObjectTypeFromString(s string) (PaymentObjectType, error) {
 
 func (p PaymentObjectType) Ptr() *PaymentObjectType {
 	return &p
+}
+
+type PaymentPageThemeResponse struct {
+	BackgroundColor *string              `json:"background_color,omitempty" url:"background_color,omitempty"`
+	BorderRadius    *string              `json:"border_radius,omitempty" url:"border_radius,omitempty"`
+	Button          *ButtonThemeResponse `json:"button,omitempty" url:"button,omitempty"`
+	Card            *CardThemeResponse   `json:"card,omitempty" url:"card,omitempty"`
+	FontColor       *string              `json:"font_color,omitempty" url:"font_color,omitempty"`
+	FontFamily      *string              `json:"font_family,omitempty" url:"font_family,omitempty"`
+	FontLinkHref    *string              `json:"font_link_href,omitempty" url:"font_link_href,omitempty"`
+	LogoSrc         *string              `json:"logo_src,omitempty" url:"logo_src,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PaymentPageThemeResponse) GetBackgroundColor() *string {
+	if p == nil {
+		return nil
+	}
+	return p.BackgroundColor
+}
+
+func (p *PaymentPageThemeResponse) GetBorderRadius() *string {
+	if p == nil {
+		return nil
+	}
+	return p.BorderRadius
+}
+
+func (p *PaymentPageThemeResponse) GetButton() *ButtonThemeResponse {
+	if p == nil {
+		return nil
+	}
+	return p.Button
+}
+
+func (p *PaymentPageThemeResponse) GetCard() *CardThemeResponse {
+	if p == nil {
+		return nil
+	}
+	return p.Card
+}
+
+func (p *PaymentPageThemeResponse) GetFontColor() *string {
+	if p == nil {
+		return nil
+	}
+	return p.FontColor
+}
+
+func (p *PaymentPageThemeResponse) GetFontFamily() *string {
+	if p == nil {
+		return nil
+	}
+	return p.FontFamily
+}
+
+func (p *PaymentPageThemeResponse) GetFontLinkHref() *string {
+	if p == nil {
+		return nil
+	}
+	return p.FontLinkHref
+}
+
+func (p *PaymentPageThemeResponse) GetLogoSrc() *string {
+	if p == nil {
+		return nil
+	}
+	return p.LogoSrc
+}
+
+func (p *PaymentPageThemeResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PaymentPageThemeResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PaymentPageThemeResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PaymentPageThemeResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PaymentPageThemeResponse) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type PaymentRequirements struct {
@@ -10257,6 +10891,304 @@ func (p *PaymentRequirements) MarshalJSON() ([]byte, error) {
 }
 
 func (p *PaymentRequirements) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type PaymentsBatchPaymentRequest struct {
+	PayerBankAccountId string                 `json:"payer_bank_account_id" url:"payer_bank_account_id"`
+	PaymentIntents     []*SinglePaymentIntent `json:"payment_intents" url:"payment_intents"`
+	paymentMethod      string
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PaymentsBatchPaymentRequest) GetPayerBankAccountId() string {
+	if p == nil {
+		return ""
+	}
+	return p.PayerBankAccountId
+}
+
+func (p *PaymentsBatchPaymentRequest) GetPaymentIntents() []*SinglePaymentIntent {
+	if p == nil {
+		return nil
+	}
+	return p.PaymentIntents
+}
+
+func (p *PaymentsBatchPaymentRequest) PaymentMethod() string {
+	return p.paymentMethod
+}
+
+func (p *PaymentsBatchPaymentRequest) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PaymentsBatchPaymentRequest) UnmarshalJSON(data []byte) error {
+	type embed PaymentsBatchPaymentRequest
+	var unmarshaler = struct {
+		embed
+		PaymentMethod string `json:"payment_method"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = PaymentsBatchPaymentRequest(unmarshaler.embed)
+	if unmarshaler.PaymentMethod != "us_ach" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", p, "us_ach", unmarshaler.PaymentMethod)
+	}
+	p.paymentMethod = unmarshaler.PaymentMethod
+	extraProperties, err := internal.ExtractExtraProperties(data, *p, "payment_method")
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PaymentsBatchPaymentRequest) MarshalJSON() ([]byte, error) {
+	type embed PaymentsBatchPaymentRequest
+	var marshaler = struct {
+		embed
+		PaymentMethod string `json:"payment_method"`
+	}{
+		embed:         embed(*p),
+		PaymentMethod: "us_ach",
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *PaymentsBatchPaymentRequest) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type PaymentsBatchPaymentResponse struct {
+	Id                 string                         `json:"id" url:"id"`
+	CreatedAt          time.Time                      `json:"created_at" url:"created_at"`
+	Error              map[string]interface{}         `json:"error,omitempty" url:"error,omitempty"`
+	PayerBankAccountId string                         `json:"payer_bank_account_id" url:"payer_bank_account_id"`
+	PaymentIntents     []*SinglePaymentIntentResponse `json:"payment_intents" url:"payment_intents"`
+	Status             PaymentsBatchPaymentStatus     `json:"status" url:"status"`
+	TotalAmount        *int                           `json:"total_amount,omitempty" url:"total_amount,omitempty"`
+	paymentMethod      string
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PaymentsBatchPaymentResponse) GetId() string {
+	if p == nil {
+		return ""
+	}
+	return p.Id
+}
+
+func (p *PaymentsBatchPaymentResponse) GetCreatedAt() time.Time {
+	if p == nil {
+		return time.Time{}
+	}
+	return p.CreatedAt
+}
+
+func (p *PaymentsBatchPaymentResponse) GetError() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	return p.Error
+}
+
+func (p *PaymentsBatchPaymentResponse) GetPayerBankAccountId() string {
+	if p == nil {
+		return ""
+	}
+	return p.PayerBankAccountId
+}
+
+func (p *PaymentsBatchPaymentResponse) GetPaymentIntents() []*SinglePaymentIntentResponse {
+	if p == nil {
+		return nil
+	}
+	return p.PaymentIntents
+}
+
+func (p *PaymentsBatchPaymentResponse) GetStatus() PaymentsBatchPaymentStatus {
+	if p == nil {
+		return ""
+	}
+	return p.Status
+}
+
+func (p *PaymentsBatchPaymentResponse) GetTotalAmount() *int {
+	if p == nil {
+		return nil
+	}
+	return p.TotalAmount
+}
+
+func (p *PaymentsBatchPaymentResponse) PaymentMethod() string {
+	return p.paymentMethod
+}
+
+func (p *PaymentsBatchPaymentResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PaymentsBatchPaymentResponse) UnmarshalJSON(data []byte) error {
+	type embed PaymentsBatchPaymentResponse
+	var unmarshaler = struct {
+		embed
+		CreatedAt     *internal.DateTime `json:"created_at"`
+		PaymentMethod string             `json:"payment_method"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = PaymentsBatchPaymentResponse(unmarshaler.embed)
+	p.CreatedAt = unmarshaler.CreatedAt.Time()
+	if unmarshaler.PaymentMethod != "us_ach" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", p, "us_ach", unmarshaler.PaymentMethod)
+	}
+	p.paymentMethod = unmarshaler.PaymentMethod
+	extraProperties, err := internal.ExtractExtraProperties(data, *p, "payment_method")
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PaymentsBatchPaymentResponse) MarshalJSON() ([]byte, error) {
+	type embed PaymentsBatchPaymentResponse
+	var marshaler = struct {
+		embed
+		CreatedAt     *internal.DateTime `json:"created_at"`
+		PaymentMethod string             `json:"payment_method"`
+	}{
+		embed:         embed(*p),
+		CreatedAt:     internal.NewDateTime(p.CreatedAt),
+		PaymentMethod: "us_ach",
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *PaymentsBatchPaymentResponse) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type PaymentsBatchPaymentStatus string
+
+const (
+	PaymentsBatchPaymentStatusCreated             PaymentsBatchPaymentStatus = "created"
+	PaymentsBatchPaymentStatusProcessing          PaymentsBatchPaymentStatus = "processing"
+	PaymentsBatchPaymentStatusPartiallySuccessful PaymentsBatchPaymentStatus = "partially_successful"
+	PaymentsBatchPaymentStatusSucceeded           PaymentsBatchPaymentStatus = "succeeded"
+	PaymentsBatchPaymentStatusFailed              PaymentsBatchPaymentStatus = "failed"
+)
+
+func NewPaymentsBatchPaymentStatusFromString(s string) (PaymentsBatchPaymentStatus, error) {
+	switch s {
+	case "created":
+		return PaymentsBatchPaymentStatusCreated, nil
+	case "processing":
+		return PaymentsBatchPaymentStatusProcessing, nil
+	case "partially_successful":
+		return PaymentsBatchPaymentStatusPartiallySuccessful, nil
+	case "succeeded":
+		return PaymentsBatchPaymentStatusSucceeded, nil
+	case "failed":
+		return PaymentsBatchPaymentStatusFailed, nil
+	}
+	var t PaymentsBatchPaymentStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PaymentsBatchPaymentStatus) Ptr() *PaymentsBatchPaymentStatus {
+	return &p
+}
+
+type PaymentsSettingsResponse struct {
+	PaymentPageDomain *string                   `json:"payment_page_domain,omitempty" url:"payment_page_domain,omitempty"`
+	PaymentPageTheme  *PaymentPageThemeResponse `json:"payment_page_theme,omitempty" url:"payment_page_theme,omitempty"`
+	// The support email address
+	SupportEmail *string `json:"support_email,omitempty" url:"support_email,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PaymentsSettingsResponse) GetPaymentPageDomain() *string {
+	if p == nil {
+		return nil
+	}
+	return p.PaymentPageDomain
+}
+
+func (p *PaymentsSettingsResponse) GetPaymentPageTheme() *PaymentPageThemeResponse {
+	if p == nil {
+		return nil
+	}
+	return p.PaymentPageTheme
+}
+
+func (p *PaymentsSettingsResponse) GetSupportEmail() *string {
+	if p == nil {
+		return nil
+	}
+	return p.SupportEmail
+}
+
+func (p *PaymentsSettingsResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PaymentsSettingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler PaymentsSettingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PaymentsSettingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PaymentsSettingsResponse) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -10977,7 +11909,6 @@ type Platform string
 
 const (
 	PlatformXero                    Platform = "xero"
-	PlatformQuickbooks              Platform = "quickbooks"
 	PlatformQuickbooksOnline        Platform = "quickbooks_online"
 	PlatformQuickbooksOnlineSandbox Platform = "quickbooks_online_sandbox"
 )
@@ -10986,8 +11917,6 @@ func NewPlatformFromString(s string) (Platform, error) {
 	switch s {
 	case "xero":
 		return PlatformXero, nil
-	case "quickbooks":
-		return PlatformQuickbooks, nil
 	case "quickbooks_online":
 		return PlatformQuickbooksOnline, nil
 	case "quickbooks_online_sandbox":
@@ -11002,7 +11931,73 @@ func (p Platform) Ptr() *Platform {
 }
 
 // A preview image generated for a file.
-type PreviewSchema struct {
+type PreviewSchema3 struct {
+	// The image URL.
+	Url string `json:"url" url:"url"`
+	// The image width in pixels.
+	Width int `json:"width" url:"width"`
+	// The image height in pixels.
+	Height int `json:"height" url:"height"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PreviewSchema3) GetUrl() string {
+	if p == nil {
+		return ""
+	}
+	return p.Url
+}
+
+func (p *PreviewSchema3) GetWidth() int {
+	if p == nil {
+		return 0
+	}
+	return p.Width
+}
+
+func (p *PreviewSchema3) GetHeight() int {
+	if p == nil {
+		return 0
+	}
+	return p.Height
+}
+
+func (p *PreviewSchema3) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PreviewSchema3) UnmarshalJSON(data []byte) error {
+	type unmarshaler PreviewSchema3
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PreviewSchema3(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PreviewSchema3) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// A preview image generated for a file.
+type PreviewSchema4 struct {
 	// The image height in pixels.
 	Height int `json:"height" url:"height"`
 	// The image URL.
@@ -11014,38 +12009,38 @@ type PreviewSchema struct {
 	rawJSON         json.RawMessage
 }
 
-func (p *PreviewSchema) GetHeight() int {
+func (p *PreviewSchema4) GetHeight() int {
 	if p == nil {
 		return 0
 	}
 	return p.Height
 }
 
-func (p *PreviewSchema) GetUrl() string {
+func (p *PreviewSchema4) GetUrl() string {
 	if p == nil {
 		return ""
 	}
 	return p.Url
 }
 
-func (p *PreviewSchema) GetWidth() int {
+func (p *PreviewSchema4) GetWidth() int {
 	if p == nil {
 		return 0
 	}
 	return p.Width
 }
 
-func (p *PreviewSchema) GetExtraProperties() map[string]interface{} {
+func (p *PreviewSchema4) GetExtraProperties() map[string]interface{} {
 	return p.extraProperties
 }
 
-func (p *PreviewSchema) UnmarshalJSON(data []byte) error {
-	type unmarshaler PreviewSchema
+func (p *PreviewSchema4) UnmarshalJSON(data []byte) error {
+	type unmarshaler PreviewSchema4
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*p = PreviewSchema(value)
+	*p = PreviewSchema4(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
@@ -11055,7 +12050,7 @@ func (p *PreviewSchema) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PreviewSchema) String() string {
+func (p *PreviewSchema4) String() string {
 	if len(p.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
@@ -11450,6 +12445,64 @@ func (p ProductServiceTypeEnum) Ptr() *ProductServiceTypeEnum {
 	return &p
 }
 
+type ReceivableSettingsResponse struct {
+	CreateWithoutPersonalInfo bool    `json:"create_without_personal_info" url:"create_without_personal_info"`
+	DeductionTitle            *string `json:"deduction_title,omitempty" url:"deduction_title,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *ReceivableSettingsResponse) GetCreateWithoutPersonalInfo() bool {
+	if r == nil {
+		return false
+	}
+	return r.CreateWithoutPersonalInfo
+}
+
+func (r *ReceivableSettingsResponse) GetDeductionTitle() *string {
+	if r == nil {
+		return nil
+	}
+	return r.DeductionTitle
+}
+
+func (r *ReceivableSettingsResponse) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *ReceivableSettingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ReceivableSettingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = ReceivableSettingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *ReceivableSettingsResponse) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+// This Enum the results of combining two types of statuses from
+// QuoteStateEnum, CreditNoteStateEnum and InvoiceStateEnum. You shouldn't use
+// it in your scenarios if only for edge cases in workers, but ideally need to
+// remove this shared Enum.
 type ReceivablesStatusEnum string
 
 const (
@@ -11557,14 +12610,10 @@ func (r *Recipient) String() string {
 }
 
 type RecipientAccountResponse struct {
-	// ID of a payment account
-	Id string `json:"id" url:"id"`
-	// List of bank accounts
-	BankAccounts []*BankAccount `json:"bank_accounts,omitempty" url:"bank_accounts,omitempty"`
-	// Display name of a payment account
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
-	// Type of a payment account. Can be `entity` or `counterpart`
-	Type PaymentAccountType `json:"type" url:"type"`
+	Id           string             `json:"id" url:"id"`
+	BankAccounts []*BankAccount     `json:"bank_accounts,omitempty" url:"bank_accounts,omitempty"`
+	Name         *string            `json:"name,omitempty" url:"name,omitempty"`
+	Type         PaymentAccountType `json:"type" url:"type"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -11779,16 +12828,16 @@ func (r *RequirementsError) String() string {
 type RoleResponse struct {
 	// UUID role ID
 	Id string `json:"id" url:"id"`
-	// Role name
-	Name string `json:"name" url:"name"`
-	// Access permissions
-	Permissions *BizObjectsSchemaOutput `json:"permissions" url:"permissions"`
-	// record status, 'active' by default
-	Status StatusEnum `json:"status" url:"status"`
 	// UTC datetime
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// UTC datetime
 	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
+	// Role name
+	Name string `json:"name" url:"name"`
+	// Access permissions
+	Permissions *BizObjectsSchema `json:"permissions" url:"permissions"`
+	// record status, 'active' by default
+	Status StatusEnum `json:"status" url:"status"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -11799,27 +12848,6 @@ func (r *RoleResponse) GetId() string {
 		return ""
 	}
 	return r.Id
-}
-
-func (r *RoleResponse) GetName() string {
-	if r == nil {
-		return ""
-	}
-	return r.Name
-}
-
-func (r *RoleResponse) GetPermissions() *BizObjectsSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Permissions
-}
-
-func (r *RoleResponse) GetStatus() StatusEnum {
-	if r == nil {
-		return ""
-	}
-	return r.Status
 }
 
 func (r *RoleResponse) GetCreatedAt() time.Time {
@@ -11834,6 +12862,27 @@ func (r *RoleResponse) GetUpdatedAt() time.Time {
 		return time.Time{}
 	}
 	return r.UpdatedAt
+}
+
+func (r *RoleResponse) GetName() string {
+	if r == nil {
+		return ""
+	}
+	return r.Name
+}
+
+func (r *RoleResponse) GetPermissions() *BizObjectsSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Permissions
+}
+
+func (r *RoleResponse) GetStatus() StatusEnum {
+	if r == nil {
+		return ""
+	}
+	return r.Status
 }
 
 func (r *RoleResponse) GetExtraProperties() map[string]interface{} {
@@ -11890,242 +12939,234 @@ func (r *RoleResponse) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
-type RootSchemaOutput struct {
+type RootSchema struct {
 	ObjectType            string
-	ApprovalPolicy        *CommonSchemaOutput
-	ApprovalRequest       *CommonSchemaOutput
-	Comment               *CommonSchemaOutput
-	Counterpart           *CommonSchemaOutput
-	CounterpartVatId      *CommonSchemaOutput
-	Entity                *CommonSchemaOutput
-	EntityBankAccount     *CommonSchemaOutput
-	EntityUser            *CommonSchemaOutput
-	EntityVatIds          *CommonSchemaOutput
-	Export                *CommonSchemaOutput
-	Mailbox               *CommonSchemaOutput
-	Onboarding            *CommonSchemaOutput
-	OverdueReminder       *CommonSchemaOutput
-	Payable               *PayableSchemaOutput
-	PayablesPurchaseOrder *CommonSchemaOutput
-	PaymentRecord         *CommonSchemaOutput
-	PaymentReminder       *CommonSchemaOutput
-	Person                *CommonSchemaOutput
-	Product               *CommonSchemaOutput
-	Project               *CommonSchemaOutput
-	Receivable            *CommonSchemaOutput
-	Reconciliation        *CommonSchemaOutput
-	Role                  *CommonSchemaOutput
-	Tag                   *CommonSchemaOutput
-	TodoTask              *CommonSchemaOutput
-	TodoTaskMute          *CommonSchemaOutput
-	Transaction           *CommonSchemaOutput
-	Workflow              *CommonSchemaOutput
+	Person                *CommonSchema
+	Onboarding            *CommonSchema
+	Comment               *CommonSchema
+	Counterpart           *CommonSchema
+	EntityUser            *CommonSchema
+	Entity                *CommonSchema
+	EntityVatIds          *CommonSchema
+	CounterpartVatId      *CommonSchema
+	EntityBankAccount     *CommonSchema
+	Export                *CommonSchema
+	PayablesPurchaseOrder *CommonSchema
+	PaymentReminder       *CommonSchema
+	OverdueReminder       *CommonSchema
+	Product               *CommonSchema
+	Project               *CommonSchema
+	Receivable            *CommonSchema
+	Reconciliation        *CommonSchema
+	Role                  *CommonSchema
+	Tag                   *CommonSchema
+	TodoTask              *CommonSchema
+	TodoTaskMute          *CommonSchema
+	Transaction           *CommonSchema
+	Workflow              *CommonSchema
+	ApprovalRequest       *CommonSchema
+	ApprovalPolicy        *CommonSchema
+	PaymentRecord         *CommonSchema
+	Payable               *PayableSchema
 }
 
-func (r *RootSchemaOutput) GetObjectType() string {
+func (r *RootSchema) GetObjectType() string {
 	if r == nil {
 		return ""
 	}
 	return r.ObjectType
 }
 
-func (r *RootSchemaOutput) GetApprovalPolicy() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.ApprovalPolicy
-}
-
-func (r *RootSchemaOutput) GetApprovalRequest() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.ApprovalRequest
-}
-
-func (r *RootSchemaOutput) GetComment() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Comment
-}
-
-func (r *RootSchemaOutput) GetCounterpart() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Counterpart
-}
-
-func (r *RootSchemaOutput) GetCounterpartVatId() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.CounterpartVatId
-}
-
-func (r *RootSchemaOutput) GetEntity() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Entity
-}
-
-func (r *RootSchemaOutput) GetEntityBankAccount() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.EntityBankAccount
-}
-
-func (r *RootSchemaOutput) GetEntityUser() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.EntityUser
-}
-
-func (r *RootSchemaOutput) GetEntityVatIds() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.EntityVatIds
-}
-
-func (r *RootSchemaOutput) GetExport() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Export
-}
-
-func (r *RootSchemaOutput) GetMailbox() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Mailbox
-}
-
-func (r *RootSchemaOutput) GetOnboarding() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Onboarding
-}
-
-func (r *RootSchemaOutput) GetOverdueReminder() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.OverdueReminder
-}
-
-func (r *RootSchemaOutput) GetPayable() *PayableSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.Payable
-}
-
-func (r *RootSchemaOutput) GetPayablesPurchaseOrder() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.PayablesPurchaseOrder
-}
-
-func (r *RootSchemaOutput) GetPaymentRecord() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.PaymentRecord
-}
-
-func (r *RootSchemaOutput) GetPaymentReminder() *CommonSchemaOutput {
-	if r == nil {
-		return nil
-	}
-	return r.PaymentReminder
-}
-
-func (r *RootSchemaOutput) GetPerson() *CommonSchemaOutput {
+func (r *RootSchema) GetPerson() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Person
 }
 
-func (r *RootSchemaOutput) GetProduct() *CommonSchemaOutput {
+func (r *RootSchema) GetOnboarding() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Onboarding
+}
+
+func (r *RootSchema) GetComment() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Comment
+}
+
+func (r *RootSchema) GetCounterpart() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Counterpart
+}
+
+func (r *RootSchema) GetEntityUser() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.EntityUser
+}
+
+func (r *RootSchema) GetEntity() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Entity
+}
+
+func (r *RootSchema) GetEntityVatIds() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.EntityVatIds
+}
+
+func (r *RootSchema) GetCounterpartVatId() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.CounterpartVatId
+}
+
+func (r *RootSchema) GetEntityBankAccount() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.EntityBankAccount
+}
+
+func (r *RootSchema) GetExport() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Export
+}
+
+func (r *RootSchema) GetPayablesPurchaseOrder() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.PayablesPurchaseOrder
+}
+
+func (r *RootSchema) GetPaymentReminder() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.PaymentReminder
+}
+
+func (r *RootSchema) GetOverdueReminder() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.OverdueReminder
+}
+
+func (r *RootSchema) GetProduct() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Product
 }
 
-func (r *RootSchemaOutput) GetProject() *CommonSchemaOutput {
+func (r *RootSchema) GetProject() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Project
 }
 
-func (r *RootSchemaOutput) GetReceivable() *CommonSchemaOutput {
+func (r *RootSchema) GetReceivable() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Receivable
 }
 
-func (r *RootSchemaOutput) GetReconciliation() *CommonSchemaOutput {
+func (r *RootSchema) GetReconciliation() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Reconciliation
 }
 
-func (r *RootSchemaOutput) GetRole() *CommonSchemaOutput {
+func (r *RootSchema) GetRole() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Role
 }
 
-func (r *RootSchemaOutput) GetTag() *CommonSchemaOutput {
+func (r *RootSchema) GetTag() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Tag
 }
 
-func (r *RootSchemaOutput) GetTodoTask() *CommonSchemaOutput {
+func (r *RootSchema) GetTodoTask() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.TodoTask
 }
 
-func (r *RootSchemaOutput) GetTodoTaskMute() *CommonSchemaOutput {
+func (r *RootSchema) GetTodoTaskMute() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.TodoTaskMute
 }
 
-func (r *RootSchemaOutput) GetTransaction() *CommonSchemaOutput {
+func (r *RootSchema) GetTransaction() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Transaction
 }
 
-func (r *RootSchemaOutput) GetWorkflow() *CommonSchemaOutput {
+func (r *RootSchema) GetWorkflow() *CommonSchema {
 	if r == nil {
 		return nil
 	}
 	return r.Workflow
 }
 
-func (r *RootSchemaOutput) UnmarshalJSON(data []byte) error {
+func (r *RootSchema) GetApprovalRequest() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.ApprovalRequest
+}
+
+func (r *RootSchema) GetApprovalPolicy() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.ApprovalPolicy
+}
+
+func (r *RootSchema) GetPaymentRecord() *CommonSchema {
+	if r == nil {
+		return nil
+	}
+	return r.PaymentRecord
+}
+
+func (r *RootSchema) GetPayable() *PayableSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Payable
+}
+
+func (r *RootSchema) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		ObjectType string `json:"object_type"`
 	}
@@ -12137,187 +13178,178 @@ func (r *RootSchemaOutput) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("%T did not include discriminant object_type", r)
 	}
 	switch unmarshaler.ObjectType {
-	case "approval_policy":
-		value := new(CommonSchemaOutput)
+	case "person":
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		r.ApprovalPolicy = value
-	case "approval_request":
-		value := new(CommonSchemaOutput)
+		r.Person = value
+	case "onboarding":
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		r.ApprovalRequest = value
+		r.Onboarding = value
 	case "comment":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Comment = value
 	case "counterpart":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Counterpart = value
-	case "counterpart_vat_id":
-		value := new(CommonSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.CounterpartVatId = value
-	case "entity":
-		value := new(CommonSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.Entity = value
-	case "entity_bank_account":
-		value := new(CommonSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.EntityBankAccount = value
 	case "entity_user":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.EntityUser = value
+	case "entity":
+		value := new(CommonSchema)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Entity = value
 	case "entity_vat_ids":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.EntityVatIds = value
+	case "counterpart_vat_id":
+		value := new(CommonSchema)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.CounterpartVatId = value
+	case "entity_bank_account":
+		value := new(CommonSchema)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.EntityBankAccount = value
 	case "export":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Export = value
-	case "mailbox":
-		value := new(CommonSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.Mailbox = value
-	case "onboarding":
-		value := new(CommonSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.Onboarding = value
-	case "overdue_reminder":
-		value := new(CommonSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.OverdueReminder = value
-	case "payable":
-		value := new(PayableSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.Payable = value
 	case "payables_purchase_order":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.PayablesPurchaseOrder = value
-	case "payment_record":
-		value := new(CommonSchemaOutput)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		r.PaymentRecord = value
 	case "payment_reminder":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.PaymentReminder = value
-	case "person":
-		value := new(CommonSchemaOutput)
+	case "overdue_reminder":
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
-		r.Person = value
+		r.OverdueReminder = value
 	case "product":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Product = value
 	case "project":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Project = value
 	case "receivable":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Receivable = value
 	case "reconciliation":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Reconciliation = value
 	case "role":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Role = value
 	case "tag":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Tag = value
 	case "todo_task":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.TodoTask = value
 	case "todo_task_mute":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.TodoTaskMute = value
 	case "transaction":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Transaction = value
 	case "workflow":
-		value := new(CommonSchemaOutput)
+		value := new(CommonSchema)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		r.Workflow = value
+	case "approval_request":
+		value := new(CommonSchema)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.ApprovalRequest = value
+	case "approval_policy":
+		value := new(CommonSchema)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.ApprovalPolicy = value
+	case "payment_record":
+		value := new(CommonSchema)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.PaymentRecord = value
+	case "payable":
+		value := new(PayableSchema)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Payable = value
 	}
 	return nil
 }
 
-func (r RootSchemaOutput) MarshalJSON() ([]byte, error) {
-	if err := r.validate(); err != nil {
-		return nil, err
+func (r RootSchema) MarshalJSON() ([]byte, error) {
+	if r.Person != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Person, "object_type", "person")
 	}
-	if r.ApprovalPolicy != nil {
-		return internal.MarshalJSONWithExtraProperty(r.ApprovalPolicy, "object_type", "approval_policy")
-	}
-	if r.ApprovalRequest != nil {
-		return internal.MarshalJSONWithExtraProperty(r.ApprovalRequest, "object_type", "approval_request")
+	if r.Onboarding != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Onboarding, "object_type", "onboarding")
 	}
 	if r.Comment != nil {
 		return internal.MarshalJSONWithExtraProperty(r.Comment, "object_type", "comment")
@@ -12325,47 +13357,32 @@ func (r RootSchemaOutput) MarshalJSON() ([]byte, error) {
 	if r.Counterpart != nil {
 		return internal.MarshalJSONWithExtraProperty(r.Counterpart, "object_type", "counterpart")
 	}
-	if r.CounterpartVatId != nil {
-		return internal.MarshalJSONWithExtraProperty(r.CounterpartVatId, "object_type", "counterpart_vat_id")
+	if r.EntityUser != nil {
+		return internal.MarshalJSONWithExtraProperty(r.EntityUser, "object_type", "entity_user")
 	}
 	if r.Entity != nil {
 		return internal.MarshalJSONWithExtraProperty(r.Entity, "object_type", "entity")
 	}
-	if r.EntityBankAccount != nil {
-		return internal.MarshalJSONWithExtraProperty(r.EntityBankAccount, "object_type", "entity_bank_account")
-	}
-	if r.EntityUser != nil {
-		return internal.MarshalJSONWithExtraProperty(r.EntityUser, "object_type", "entity_user")
-	}
 	if r.EntityVatIds != nil {
 		return internal.MarshalJSONWithExtraProperty(r.EntityVatIds, "object_type", "entity_vat_ids")
+	}
+	if r.CounterpartVatId != nil {
+		return internal.MarshalJSONWithExtraProperty(r.CounterpartVatId, "object_type", "counterpart_vat_id")
+	}
+	if r.EntityBankAccount != nil {
+		return internal.MarshalJSONWithExtraProperty(r.EntityBankAccount, "object_type", "entity_bank_account")
 	}
 	if r.Export != nil {
 		return internal.MarshalJSONWithExtraProperty(r.Export, "object_type", "export")
 	}
-	if r.Mailbox != nil {
-		return internal.MarshalJSONWithExtraProperty(r.Mailbox, "object_type", "mailbox")
-	}
-	if r.Onboarding != nil {
-		return internal.MarshalJSONWithExtraProperty(r.Onboarding, "object_type", "onboarding")
-	}
-	if r.OverdueReminder != nil {
-		return internal.MarshalJSONWithExtraProperty(r.OverdueReminder, "object_type", "overdue_reminder")
-	}
-	if r.Payable != nil {
-		return internal.MarshalJSONWithExtraProperty(r.Payable, "object_type", "payable")
-	}
 	if r.PayablesPurchaseOrder != nil {
 		return internal.MarshalJSONWithExtraProperty(r.PayablesPurchaseOrder, "object_type", "payables_purchase_order")
-	}
-	if r.PaymentRecord != nil {
-		return internal.MarshalJSONWithExtraProperty(r.PaymentRecord, "object_type", "payment_record")
 	}
 	if r.PaymentReminder != nil {
 		return internal.MarshalJSONWithExtraProperty(r.PaymentReminder, "object_type", "payment_reminder")
 	}
-	if r.Person != nil {
-		return internal.MarshalJSONWithExtraProperty(r.Person, "object_type", "person")
+	if r.OverdueReminder != nil {
+		return internal.MarshalJSONWithExtraProperty(r.OverdueReminder, "object_type", "overdue_reminder")
 	}
 	if r.Product != nil {
 		return internal.MarshalJSONWithExtraProperty(r.Product, "object_type", "product")
@@ -12397,46 +13414,57 @@ func (r RootSchemaOutput) MarshalJSON() ([]byte, error) {
 	if r.Workflow != nil {
 		return internal.MarshalJSONWithExtraProperty(r.Workflow, "object_type", "workflow")
 	}
+	if r.ApprovalRequest != nil {
+		return internal.MarshalJSONWithExtraProperty(r.ApprovalRequest, "object_type", "approval_request")
+	}
+	if r.ApprovalPolicy != nil {
+		return internal.MarshalJSONWithExtraProperty(r.ApprovalPolicy, "object_type", "approval_policy")
+	}
+	if r.PaymentRecord != nil {
+		return internal.MarshalJSONWithExtraProperty(r.PaymentRecord, "object_type", "payment_record")
+	}
+	if r.Payable != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Payable, "object_type", "payable")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", r)
 }
 
-type RootSchemaOutputVisitor interface {
-	VisitApprovalPolicy(*CommonSchemaOutput) error
-	VisitApprovalRequest(*CommonSchemaOutput) error
-	VisitComment(*CommonSchemaOutput) error
-	VisitCounterpart(*CommonSchemaOutput) error
-	VisitCounterpartVatId(*CommonSchemaOutput) error
-	VisitEntity(*CommonSchemaOutput) error
-	VisitEntityBankAccount(*CommonSchemaOutput) error
-	VisitEntityUser(*CommonSchemaOutput) error
-	VisitEntityVatIds(*CommonSchemaOutput) error
-	VisitExport(*CommonSchemaOutput) error
-	VisitMailbox(*CommonSchemaOutput) error
-	VisitOnboarding(*CommonSchemaOutput) error
-	VisitOverdueReminder(*CommonSchemaOutput) error
-	VisitPayable(*PayableSchemaOutput) error
-	VisitPayablesPurchaseOrder(*CommonSchemaOutput) error
-	VisitPaymentRecord(*CommonSchemaOutput) error
-	VisitPaymentReminder(*CommonSchemaOutput) error
-	VisitPerson(*CommonSchemaOutput) error
-	VisitProduct(*CommonSchemaOutput) error
-	VisitProject(*CommonSchemaOutput) error
-	VisitReceivable(*CommonSchemaOutput) error
-	VisitReconciliation(*CommonSchemaOutput) error
-	VisitRole(*CommonSchemaOutput) error
-	VisitTag(*CommonSchemaOutput) error
-	VisitTodoTask(*CommonSchemaOutput) error
-	VisitTodoTaskMute(*CommonSchemaOutput) error
-	VisitTransaction(*CommonSchemaOutput) error
-	VisitWorkflow(*CommonSchemaOutput) error
+type RootSchemaVisitor interface {
+	VisitPerson(*CommonSchema) error
+	VisitOnboarding(*CommonSchema) error
+	VisitComment(*CommonSchema) error
+	VisitCounterpart(*CommonSchema) error
+	VisitEntityUser(*CommonSchema) error
+	VisitEntity(*CommonSchema) error
+	VisitEntityVatIds(*CommonSchema) error
+	VisitCounterpartVatId(*CommonSchema) error
+	VisitEntityBankAccount(*CommonSchema) error
+	VisitExport(*CommonSchema) error
+	VisitPayablesPurchaseOrder(*CommonSchema) error
+	VisitPaymentReminder(*CommonSchema) error
+	VisitOverdueReminder(*CommonSchema) error
+	VisitProduct(*CommonSchema) error
+	VisitProject(*CommonSchema) error
+	VisitReceivable(*CommonSchema) error
+	VisitReconciliation(*CommonSchema) error
+	VisitRole(*CommonSchema) error
+	VisitTag(*CommonSchema) error
+	VisitTodoTask(*CommonSchema) error
+	VisitTodoTaskMute(*CommonSchema) error
+	VisitTransaction(*CommonSchema) error
+	VisitWorkflow(*CommonSchema) error
+	VisitApprovalRequest(*CommonSchema) error
+	VisitApprovalPolicy(*CommonSchema) error
+	VisitPaymentRecord(*CommonSchema) error
+	VisitPayable(*PayableSchema) error
 }
 
-func (r *RootSchemaOutput) Accept(visitor RootSchemaOutputVisitor) error {
-	if r.ApprovalPolicy != nil {
-		return visitor.VisitApprovalPolicy(r.ApprovalPolicy)
+func (r *RootSchema) Accept(visitor RootSchemaVisitor) error {
+	if r.Person != nil {
+		return visitor.VisitPerson(r.Person)
 	}
-	if r.ApprovalRequest != nil {
-		return visitor.VisitApprovalRequest(r.ApprovalRequest)
+	if r.Onboarding != nil {
+		return visitor.VisitOnboarding(r.Onboarding)
 	}
 	if r.Comment != nil {
 		return visitor.VisitComment(r.Comment)
@@ -12444,47 +13472,32 @@ func (r *RootSchemaOutput) Accept(visitor RootSchemaOutputVisitor) error {
 	if r.Counterpart != nil {
 		return visitor.VisitCounterpart(r.Counterpart)
 	}
-	if r.CounterpartVatId != nil {
-		return visitor.VisitCounterpartVatId(r.CounterpartVatId)
+	if r.EntityUser != nil {
+		return visitor.VisitEntityUser(r.EntityUser)
 	}
 	if r.Entity != nil {
 		return visitor.VisitEntity(r.Entity)
 	}
-	if r.EntityBankAccount != nil {
-		return visitor.VisitEntityBankAccount(r.EntityBankAccount)
-	}
-	if r.EntityUser != nil {
-		return visitor.VisitEntityUser(r.EntityUser)
-	}
 	if r.EntityVatIds != nil {
 		return visitor.VisitEntityVatIds(r.EntityVatIds)
+	}
+	if r.CounterpartVatId != nil {
+		return visitor.VisitCounterpartVatId(r.CounterpartVatId)
+	}
+	if r.EntityBankAccount != nil {
+		return visitor.VisitEntityBankAccount(r.EntityBankAccount)
 	}
 	if r.Export != nil {
 		return visitor.VisitExport(r.Export)
 	}
-	if r.Mailbox != nil {
-		return visitor.VisitMailbox(r.Mailbox)
-	}
-	if r.Onboarding != nil {
-		return visitor.VisitOnboarding(r.Onboarding)
-	}
-	if r.OverdueReminder != nil {
-		return visitor.VisitOverdueReminder(r.OverdueReminder)
-	}
-	if r.Payable != nil {
-		return visitor.VisitPayable(r.Payable)
-	}
 	if r.PayablesPurchaseOrder != nil {
 		return visitor.VisitPayablesPurchaseOrder(r.PayablesPurchaseOrder)
-	}
-	if r.PaymentRecord != nil {
-		return visitor.VisitPaymentRecord(r.PaymentRecord)
 	}
 	if r.PaymentReminder != nil {
 		return visitor.VisitPaymentReminder(r.PaymentReminder)
 	}
-	if r.Person != nil {
-		return visitor.VisitPerson(r.Person)
+	if r.OverdueReminder != nil {
+		return visitor.VisitOverdueReminder(r.OverdueReminder)
 	}
 	if r.Product != nil {
 		return visitor.VisitProduct(r.Product)
@@ -12516,119 +13529,19 @@ func (r *RootSchemaOutput) Accept(visitor RootSchemaOutputVisitor) error {
 	if r.Workflow != nil {
 		return visitor.VisitWorkflow(r.Workflow)
 	}
-	return fmt.Errorf("type %T does not define a non-empty union type", r)
-}
-
-func (r *RootSchemaOutput) validate() error {
-	if r == nil {
-		return fmt.Errorf("type %T is nil", r)
-	}
-	var fields []string
-	if r.ApprovalPolicy != nil {
-		fields = append(fields, "approval_policy")
-	}
 	if r.ApprovalRequest != nil {
-		fields = append(fields, "approval_request")
+		return visitor.VisitApprovalRequest(r.ApprovalRequest)
 	}
-	if r.Comment != nil {
-		fields = append(fields, "comment")
-	}
-	if r.Counterpart != nil {
-		fields = append(fields, "counterpart")
-	}
-	if r.CounterpartVatId != nil {
-		fields = append(fields, "counterpart_vat_id")
-	}
-	if r.Entity != nil {
-		fields = append(fields, "entity")
-	}
-	if r.EntityBankAccount != nil {
-		fields = append(fields, "entity_bank_account")
-	}
-	if r.EntityUser != nil {
-		fields = append(fields, "entity_user")
-	}
-	if r.EntityVatIds != nil {
-		fields = append(fields, "entity_vat_ids")
-	}
-	if r.Export != nil {
-		fields = append(fields, "export")
-	}
-	if r.Mailbox != nil {
-		fields = append(fields, "mailbox")
-	}
-	if r.Onboarding != nil {
-		fields = append(fields, "onboarding")
-	}
-	if r.OverdueReminder != nil {
-		fields = append(fields, "overdue_reminder")
-	}
-	if r.Payable != nil {
-		fields = append(fields, "payable")
-	}
-	if r.PayablesPurchaseOrder != nil {
-		fields = append(fields, "payables_purchase_order")
+	if r.ApprovalPolicy != nil {
+		return visitor.VisitApprovalPolicy(r.ApprovalPolicy)
 	}
 	if r.PaymentRecord != nil {
-		fields = append(fields, "payment_record")
+		return visitor.VisitPaymentRecord(r.PaymentRecord)
 	}
-	if r.PaymentReminder != nil {
-		fields = append(fields, "payment_reminder")
+	if r.Payable != nil {
+		return visitor.VisitPayable(r.Payable)
 	}
-	if r.Person != nil {
-		fields = append(fields, "person")
-	}
-	if r.Product != nil {
-		fields = append(fields, "product")
-	}
-	if r.Project != nil {
-		fields = append(fields, "project")
-	}
-	if r.Receivable != nil {
-		fields = append(fields, "receivable")
-	}
-	if r.Reconciliation != nil {
-		fields = append(fields, "reconciliation")
-	}
-	if r.Role != nil {
-		fields = append(fields, "role")
-	}
-	if r.Tag != nil {
-		fields = append(fields, "tag")
-	}
-	if r.TodoTask != nil {
-		fields = append(fields, "todo_task")
-	}
-	if r.TodoTaskMute != nil {
-		fields = append(fields, "todo_task_mute")
-	}
-	if r.Transaction != nil {
-		fields = append(fields, "transaction")
-	}
-	if r.Workflow != nil {
-		fields = append(fields, "workflow")
-	}
-	if len(fields) == 0 {
-		if r.ObjectType != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", r, r.ObjectType)
-		}
-		return fmt.Errorf("type %T is empty", r)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", r, fields)
-	}
-	if r.ObjectType != "" {
-		field := fields[0]
-		if r.ObjectType != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				r,
-				r.ObjectType,
-				r,
-			)
-		}
-	}
-	return nil
+	return fmt.Errorf("type %T does not define a non-empty union type", r)
 }
 
 type ServiceProvidersEnum string
@@ -12653,29 +13566,195 @@ func (s ServiceProvidersEnum) Ptr() *ServiceProvidersEnum {
 	return &s
 }
 
-type SourceOfPayableDataEnum string
+type SinglePaymentIntent struct {
+	Object *PaymentObjectPayable `json:"object" url:"object"`
+	// Must be provided if payable's document id is missing.
+	PaymentReference *string                  `json:"payment_reference,omitempty" url:"payment_reference,omitempty"`
+	Recipient        *PaymentIntentsRecipient `json:"recipient" url:"recipient"`
 
-const (
-	SourceOfPayableDataEnumOcr           SourceOfPayableDataEnum = "ocr"
-	SourceOfPayableDataEnumUserSpecified SourceOfPayableDataEnum = "user_specified"
-	SourceOfPayableDataEnumEinvoicing    SourceOfPayableDataEnum = "einvoicing"
-)
-
-func NewSourceOfPayableDataEnumFromString(s string) (SourceOfPayableDataEnum, error) {
-	switch s {
-	case "ocr":
-		return SourceOfPayableDataEnumOcr, nil
-	case "user_specified":
-		return SourceOfPayableDataEnumUserSpecified, nil
-	case "einvoicing":
-		return SourceOfPayableDataEnumEinvoicing, nil
-	}
-	var t SourceOfPayableDataEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
 }
 
-func (s SourceOfPayableDataEnum) Ptr() *SourceOfPayableDataEnum {
-	return &s
+func (s *SinglePaymentIntent) GetObject() *PaymentObjectPayable {
+	if s == nil {
+		return nil
+	}
+	return s.Object
+}
+
+func (s *SinglePaymentIntent) GetPaymentReference() *string {
+	if s == nil {
+		return nil
+	}
+	return s.PaymentReference
+}
+
+func (s *SinglePaymentIntent) GetRecipient() *PaymentIntentsRecipient {
+	if s == nil {
+		return nil
+	}
+	return s.Recipient
+}
+
+func (s *SinglePaymentIntent) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinglePaymentIntent) UnmarshalJSON(data []byte) error {
+	type unmarshaler SinglePaymentIntent
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SinglePaymentIntent(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SinglePaymentIntent) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SinglePaymentIntentResponse struct {
+	Id               string                   `json:"id" url:"id"`
+	CreatedAt        time.Time                `json:"created_at" url:"created_at"`
+	Amount           int                      `json:"amount" url:"amount"`
+	Currency         CurrencyEnum             `json:"currency" url:"currency"`
+	Error            map[string]interface{}   `json:"error,omitempty" url:"error,omitempty"`
+	Object           *PaymentObjectPayable    `json:"object" url:"object"`
+	PaymentReference string                   `json:"payment_reference" url:"payment_reference"`
+	Recipient        *PaymentIntentsRecipient `json:"recipient" url:"recipient"`
+	Status           string                   `json:"status" url:"status"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SinglePaymentIntentResponse) GetId() string {
+	if s == nil {
+		return ""
+	}
+	return s.Id
+}
+
+func (s *SinglePaymentIntentResponse) GetCreatedAt() time.Time {
+	if s == nil {
+		return time.Time{}
+	}
+	return s.CreatedAt
+}
+
+func (s *SinglePaymentIntentResponse) GetAmount() int {
+	if s == nil {
+		return 0
+	}
+	return s.Amount
+}
+
+func (s *SinglePaymentIntentResponse) GetCurrency() CurrencyEnum {
+	if s == nil {
+		return ""
+	}
+	return s.Currency
+}
+
+func (s *SinglePaymentIntentResponse) GetError() map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Error
+}
+
+func (s *SinglePaymentIntentResponse) GetObject() *PaymentObjectPayable {
+	if s == nil {
+		return nil
+	}
+	return s.Object
+}
+
+func (s *SinglePaymentIntentResponse) GetPaymentReference() string {
+	if s == nil {
+		return ""
+	}
+	return s.PaymentReference
+}
+
+func (s *SinglePaymentIntentResponse) GetRecipient() *PaymentIntentsRecipient {
+	if s == nil {
+		return nil
+	}
+	return s.Recipient
+}
+
+func (s *SinglePaymentIntentResponse) GetStatus() string {
+	if s == nil {
+		return ""
+	}
+	return s.Status
+}
+
+func (s *SinglePaymentIntentResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SinglePaymentIntentResponse) UnmarshalJSON(data []byte) error {
+	type embed SinglePaymentIntentResponse
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = SinglePaymentIntentResponse(unmarshaler.embed)
+	s.CreatedAt = unmarshaler.CreatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SinglePaymentIntentResponse) MarshalJSON() ([]byte, error) {
+	type embed SinglePaymentIntentResponse
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed:     embed(*s),
+		CreatedAt: internal.NewDateTime(s.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *SinglePaymentIntentResponse) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type StatusEnum string
@@ -13194,7 +14273,7 @@ type TaxComponentResponse struct {
 	// A flag to indicate with the tax is calculated using the principle of compounding.
 	IsCompound *bool   `json:"is_compound,omitempty" url:"is_compound,omitempty"`
 	Name       *string `json:"name,omitempty" url:"name,omitempty"`
-	// Component tax rate in percent [minor units](https://docs.monite.com/references/currencies#minor-units). Example: 12.5% is 1250.
+	// Component tax rate in percent [minor units](https://docs.monite.com/docs/currencies#minor-units). Example: 12.5% is 1250.
 	Rate *int `json:"rate,omitempty" url:"rate,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -13256,7 +14335,7 @@ func (t *TaxComponentResponse) String() string {
 
 type TaxRateAccountCursorFields = string
 
-type TermsOfServiceAcceptanceInput struct {
+type TermsOfServiceAcceptance struct {
 	// The date and time (in the ISO 8601 format) when the entity representative accepted the service agreement.
 	Date *time.Time `json:"date,omitempty" url:"date,omitempty"`
 	// The IP address from which the entity representative accepted the service agreement. If omitted or set to `null` in the request, the IP address is inferred from the request origin or the `X-Forwarded-For` request header.
@@ -13266,26 +14345,26 @@ type TermsOfServiceAcceptanceInput struct {
 	rawJSON         json.RawMessage
 }
 
-func (t *TermsOfServiceAcceptanceInput) GetDate() *time.Time {
+func (t *TermsOfServiceAcceptance) GetDate() *time.Time {
 	if t == nil {
 		return nil
 	}
 	return t.Date
 }
 
-func (t *TermsOfServiceAcceptanceInput) GetIp() *string {
+func (t *TermsOfServiceAcceptance) GetIp() *string {
 	if t == nil {
 		return nil
 	}
 	return t.Ip
 }
 
-func (t *TermsOfServiceAcceptanceInput) GetExtraProperties() map[string]interface{} {
+func (t *TermsOfServiceAcceptance) GetExtraProperties() map[string]interface{} {
 	return t.extraProperties
 }
 
-func (t *TermsOfServiceAcceptanceInput) UnmarshalJSON(data []byte) error {
-	type embed TermsOfServiceAcceptanceInput
+func (t *TermsOfServiceAcceptance) UnmarshalJSON(data []byte) error {
+	type embed TermsOfServiceAcceptance
 	var unmarshaler = struct {
 		embed
 		Date *internal.DateTime `json:"date,omitempty"`
@@ -13295,7 +14374,7 @@ func (t *TermsOfServiceAcceptanceInput) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*t = TermsOfServiceAcceptanceInput(unmarshaler.embed)
+	*t = TermsOfServiceAcceptance(unmarshaler.embed)
 	t.Date = unmarshaler.Date.TimePtr()
 	extraProperties, err := internal.ExtractExtraProperties(data, *t)
 	if err != nil {
@@ -13306,8 +14385,8 @@ func (t *TermsOfServiceAcceptanceInput) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (t *TermsOfServiceAcceptanceInput) MarshalJSON() ([]byte, error) {
-	type embed TermsOfServiceAcceptanceInput
+func (t *TermsOfServiceAcceptance) MarshalJSON() ([]byte, error) {
+	type embed TermsOfServiceAcceptance
 	var marshaler = struct {
 		embed
 		Date *internal.DateTime `json:"date,omitempty"`
@@ -13318,7 +14397,7 @@ func (t *TermsOfServiceAcceptanceInput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(marshaler)
 }
 
-func (t *TermsOfServiceAcceptanceInput) String() string {
+func (t *TermsOfServiceAcceptance) String() string {
 	if len(t.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
 			return value
@@ -13330,78 +14409,58 @@ func (t *TermsOfServiceAcceptanceInput) String() string {
 	return fmt.Sprintf("%#v", t)
 }
 
-type TermsOfServiceAcceptanceOutput struct {
-	// The date and time (in the ISO 8601 format) when the entity representative accepted the service agreement.
-	Date *time.Time `json:"date,omitempty" url:"date,omitempty"`
-	// The IP address from which the entity representative accepted the service agreement. If omitted or set to `null` in the request, the IP address is inferred from the request origin or the `X-Forwarded-For` request header.
-	Ip *string `json:"ip,omitempty" url:"ip,omitempty"`
+type Unit struct {
+	Designation string `json:"designation" url:"designation"`
+	Name        string `json:"name" url:"name"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (t *TermsOfServiceAcceptanceOutput) GetDate() *time.Time {
-	if t == nil {
-		return nil
+func (u *Unit) GetDesignation() string {
+	if u == nil {
+		return ""
 	}
-	return t.Date
+	return u.Designation
 }
 
-func (t *TermsOfServiceAcceptanceOutput) GetIp() *string {
-	if t == nil {
-		return nil
+func (u *Unit) GetName() string {
+	if u == nil {
+		return ""
 	}
-	return t.Ip
+	return u.Name
 }
 
-func (t *TermsOfServiceAcceptanceOutput) GetExtraProperties() map[string]interface{} {
-	return t.extraProperties
+func (u *Unit) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
-func (t *TermsOfServiceAcceptanceOutput) UnmarshalJSON(data []byte) error {
-	type embed TermsOfServiceAcceptanceOutput
-	var unmarshaler = struct {
-		embed
-		Date *internal.DateTime `json:"date,omitempty"`
-	}{
-		embed: embed(*t),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+func (u *Unit) UnmarshalJSON(data []byte) error {
+	type unmarshaler Unit
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*t = TermsOfServiceAcceptanceOutput(unmarshaler.embed)
-	t.Date = unmarshaler.Date.TimePtr()
-	extraProperties, err := internal.ExtractExtraProperties(data, *t)
+	*u = Unit(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
 	if err != nil {
 		return err
 	}
-	t.extraProperties = extraProperties
-	t.rawJSON = json.RawMessage(data)
+	u.extraProperties = extraProperties
+	u.rawJSON = json.RawMessage(data)
 	return nil
 }
 
-func (t *TermsOfServiceAcceptanceOutput) MarshalJSON() ([]byte, error) {
-	type embed TermsOfServiceAcceptanceOutput
-	var marshaler = struct {
-		embed
-		Date *internal.DateTime `json:"date,omitempty"`
-	}{
-		embed: embed(*t),
-		Date:  internal.NewOptionalDateTime(t.Date),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (t *TermsOfServiceAcceptanceOutput) String() string {
-	if len(t.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(t.rawJSON); err == nil {
+func (u *Unit) String() string {
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := internal.StringifyJSON(t); err == nil {
+	if value, err := internal.StringifyJSON(u); err == nil {
 		return value
 	}
-	return fmt.Sprintf("%#v", t)
+	return fmt.Sprintf("%#v", u)
 }
 
 type UnitRequest struct {
@@ -13547,16 +14606,16 @@ type UpdateEntityRequest struct {
 	Address *UpdateEntityAddressSchema `json:"address,omitempty" url:"address,omitempty"`
 	// An official email address of the entity
 	Email *string `json:"email,omitempty" url:"email,omitempty"`
-	// The contact phone number of the entity. Required for US organizations to use payments.
-	Phone *string `json:"phone,omitempty" url:"phone,omitempty"`
-	// A website of the entity
-	Website *string `json:"website,omitempty" url:"website,omitempty"`
-	// The entity's taxpayer identification number or tax ID. This field is required for entities that are non-VAT registered.
-	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
-	// A set of meta data describing the organization
-	Organization *OptionalOrganizationSchema `json:"organization,omitempty" url:"organization,omitempty"`
 	// A set of meta data describing the individual
 	Individual *OptionalIndividualSchema `json:"individual,omitempty" url:"individual,omitempty"`
+	// A set of meta data describing the organization
+	Organization *OptionalOrganizationSchema `json:"organization,omitempty" url:"organization,omitempty"`
+	// A phone number of the entity
+	Phone *string `json:"phone,omitempty" url:"phone,omitempty"`
+	// The entity's taxpayer identification number or tax ID. This field is required for entities that are non-VAT registered.
+	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
+	// A website of the entity
+	Website *string `json:"website,omitempty" url:"website,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -13576,25 +14635,11 @@ func (u *UpdateEntityRequest) GetEmail() *string {
 	return u.Email
 }
 
-func (u *UpdateEntityRequest) GetPhone() *string {
+func (u *UpdateEntityRequest) GetIndividual() *OptionalIndividualSchema {
 	if u == nil {
 		return nil
 	}
-	return u.Phone
-}
-
-func (u *UpdateEntityRequest) GetWebsite() *string {
-	if u == nil {
-		return nil
-	}
-	return u.Website
-}
-
-func (u *UpdateEntityRequest) GetTaxId() *string {
-	if u == nil {
-		return nil
-	}
-	return u.TaxId
+	return u.Individual
 }
 
 func (u *UpdateEntityRequest) GetOrganization() *OptionalOrganizationSchema {
@@ -13604,11 +14649,25 @@ func (u *UpdateEntityRequest) GetOrganization() *OptionalOrganizationSchema {
 	return u.Organization
 }
 
-func (u *UpdateEntityRequest) GetIndividual() *OptionalIndividualSchema {
+func (u *UpdateEntityRequest) GetPhone() *string {
 	if u == nil {
 		return nil
 	}
-	return u.Individual
+	return u.Phone
+}
+
+func (u *UpdateEntityRequest) GetTaxId() *string {
+	if u == nil {
+		return nil
+	}
+	return u.TaxId
+}
+
+func (u *UpdateEntityRequest) GetWebsite() *string {
+	if u == nil {
+		return nil
+	}
+	return u.Website
 }
 
 func (u *UpdateEntityRequest) GetExtraProperties() map[string]interface{} {
@@ -14180,13 +15239,6 @@ func (v *VerificationRequest) GetAirwallexPlaid() *VerificationAirwallexPlaidReq
 	return v.AirwallexPlaid
 }
 
-func (v *VerificationRequest) GetType() BankAccountVerificationType {
-	if v == nil {
-		return ""
-	}
-	return v.Type
-}
-
 func (v *VerificationRequest) GetExtraProperties() map[string]interface{} {
 	return v.extraProperties
 }
@@ -14232,13 +15284,6 @@ func (v *VerificationResponse) GetAirwallexPlaid() *VerificationAirwallexPlaidRe
 		return nil
 	}
 	return v.AirwallexPlaid
-}
-
-func (v *VerificationResponse) GetType() BankAccountVerificationType {
-	if v == nil {
-		return ""
-	}
-	return v.Type
 }
 
 func (v *VerificationResponse) GetExtraProperties() map[string]interface{} {
@@ -14302,11 +15347,9 @@ type WebhookObjectType string
 
 const (
 	WebhookObjectTypeAccount                    WebhookObjectType = "account"
-	WebhookObjectTypeAccountingConnection       WebhookObjectType = "accounting_connection"
 	WebhookObjectTypeApproval                   WebhookObjectType = "approval"
 	WebhookObjectTypeApprovalRequest            WebhookObjectType = "approval_request"
 	WebhookObjectTypeApprovalPolicy             WebhookObjectType = "approval_policy"
-	WebhookObjectTypeApprovalPolicyProcess      WebhookObjectType = "approval_policy_process"
 	WebhookObjectTypeBatchPayment               WebhookObjectType = "batch_payment"
 	WebhookObjectTypeComment                    WebhookObjectType = "comment"
 	WebhookObjectTypeCounterpart                WebhookObjectType = "counterpart"
@@ -14320,18 +15363,14 @@ const (
 	WebhookObjectTypeEntitySettings             WebhookObjectType = "entity_settings"
 	WebhookObjectTypeEntityUser                 WebhookObjectType = "entity_user"
 	WebhookObjectTypeExport                     WebhookObjectType = "export"
-	WebhookObjectTypeOverdueReminder            WebhookObjectType = "overdue_reminder"
 	WebhookObjectTypePartnerSettings            WebhookObjectType = "partner_settings"
 	WebhookObjectTypePayable                    WebhookObjectType = "payable"
-	WebhookObjectTypePayablesCreditNote         WebhookObjectType = "payables_credit_note"
 	WebhookObjectTypePayablesPurchaseOrder      WebhookObjectType = "payables_purchase_order"
 	WebhookObjectTypePayableLineItem            WebhookObjectType = "payable.line_item"
 	WebhookObjectTypePayment                    WebhookObjectType = "payment"
 	WebhookObjectTypePaymentIntent              WebhookObjectType = "payment_intent"
 	WebhookObjectTypePaymentLink                WebhookObjectType = "payment_link"
-	WebhookObjectTypePaymentReminder            WebhookObjectType = "payment_reminder"
 	WebhookObjectTypeProduct                    WebhookObjectType = "product"
-	WebhookObjectTypeProject                    WebhookObjectType = "project"
 	WebhookObjectTypeReceivable                 WebhookObjectType = "receivable"
 	WebhookObjectTypeRecurrence                 WebhookObjectType = "recurrence"
 	WebhookObjectTypeRole                       WebhookObjectType = "role"
@@ -14339,22 +15378,22 @@ const (
 	WebhookObjectTypeTodoTask                   WebhookObjectType = "todo_task"
 	WebhookObjectTypeWorkflow                   WebhookObjectType = "workflow"
 	WebhookObjectTypeWorkflowPipeline           WebhookObjectType = "workflow_pipeline"
+	WebhookObjectTypeOverdueReminder            WebhookObjectType = "overdue_reminder"
+	WebhookObjectTypePaymentReminder            WebhookObjectType = "payment_reminder"
+	WebhookObjectTypeAccountingConnection       WebhookObjectType = "accounting_connection"
+	WebhookObjectTypeProject                    WebhookObjectType = "project"
 )
 
 func NewWebhookObjectTypeFromString(s string) (WebhookObjectType, error) {
 	switch s {
 	case "account":
 		return WebhookObjectTypeAccount, nil
-	case "accounting_connection":
-		return WebhookObjectTypeAccountingConnection, nil
 	case "approval":
 		return WebhookObjectTypeApproval, nil
 	case "approval_request":
 		return WebhookObjectTypeApprovalRequest, nil
 	case "approval_policy":
 		return WebhookObjectTypeApprovalPolicy, nil
-	case "approval_policy_process":
-		return WebhookObjectTypeApprovalPolicyProcess, nil
 	case "batch_payment":
 		return WebhookObjectTypeBatchPayment, nil
 	case "comment":
@@ -14381,14 +15420,10 @@ func NewWebhookObjectTypeFromString(s string) (WebhookObjectType, error) {
 		return WebhookObjectTypeEntityUser, nil
 	case "export":
 		return WebhookObjectTypeExport, nil
-	case "overdue_reminder":
-		return WebhookObjectTypeOverdueReminder, nil
 	case "partner_settings":
 		return WebhookObjectTypePartnerSettings, nil
 	case "payable":
 		return WebhookObjectTypePayable, nil
-	case "payables_credit_note":
-		return WebhookObjectTypePayablesCreditNote, nil
 	case "payables_purchase_order":
 		return WebhookObjectTypePayablesPurchaseOrder, nil
 	case "payable.line_item":
@@ -14399,12 +15434,8 @@ func NewWebhookObjectTypeFromString(s string) (WebhookObjectType, error) {
 		return WebhookObjectTypePaymentIntent, nil
 	case "payment_link":
 		return WebhookObjectTypePaymentLink, nil
-	case "payment_reminder":
-		return WebhookObjectTypePaymentReminder, nil
 	case "product":
 		return WebhookObjectTypeProduct, nil
-	case "project":
-		return WebhookObjectTypeProject, nil
 	case "receivable":
 		return WebhookObjectTypeReceivable, nil
 	case "recurrence":
@@ -14419,6 +15450,14 @@ func NewWebhookObjectTypeFromString(s string) (WebhookObjectType, error) {
 		return WebhookObjectTypeWorkflow, nil
 	case "workflow_pipeline":
 		return WebhookObjectTypeWorkflowPipeline, nil
+	case "overdue_reminder":
+		return WebhookObjectTypeOverdueReminder, nil
+	case "payment_reminder":
+		return WebhookObjectTypePaymentReminder, nil
+	case "accounting_connection":
+		return WebhookObjectTypeAccountingConnection, nil
+	case "project":
+		return WebhookObjectTypeProject, nil
 	}
 	var t WebhookObjectType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

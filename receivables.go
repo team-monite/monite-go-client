@@ -21,7 +21,7 @@ type ReceivableDeclinePayload struct {
 
 type ReceivablesGetRequest struct {
 	// Sort order (ascending by default). Typically used together with the `sort` parameter.
-	Order *OrderEnum `json:"-" url:"order,omitempty"`
+	Order *OrderEnum2 `json:"-" url:"order,omitempty"`
 	// The number of items (0 .. 100) to return in a single page of the response. The response may contain fewer items if it is the last or only page.
 	//
 	// When using pagination with a non-default `limit`, you must provide the `limit` value alongside `pagination_token` in all subsequent pagination requests. Unlike other query parameters, `limit` is not inferred from `pagination_token`.
@@ -61,18 +61,7 @@ type ReceivablesGetRequest struct {
 	// `tag_ids__in=<tagA>&tag_ids__in=<tagB>` will return receivables 1, 2, 3, and 5.
 	//
 	// Valid but nonexistent tag IDs do not raise errors but produce no results.
-	TagIdsIn []*string `json:"-" url:"tag_ids__in,omitempty"`
-	// Return only receivables whose [tags](https://docs.monite.com/common/tags) include all of the tags with the specified IDs and optionally other tags that are not specified.
-	//
-	// For example, given receivables with the following tags:
-	// 1. tagA
-	// 2. tagB
-	// 3. tagA, tagB
-	// 4. tagC
-	// 5. tagA, tagB, tagC
-	//
-	// `tag_ids=<tagA>&tag_ids=<tagB>` will return receivables 3 and 5.
-	TagIds                   []*string                    `json:"-" url:"tag_ids,omitempty"`
+	TagIdsIn                 []*string                    `json:"-" url:"tag_ids__in,omitempty"`
 	Type                     *ReceivableType              `json:"-" url:"type,omitempty"`
 	DocumentId               *string                      `json:"-" url:"document_id,omitempty"`
 	DocumentIdContains       *string                      `json:"-" url:"document_id__contains,omitempty"`
@@ -106,32 +95,24 @@ type ReceivablesGetRequest struct {
 
 type ReceivablesGetHistoryRequest struct {
 	// Order by
-	Order *OrderEnum `json:"-" url:"order,omitempty"`
+	Order *OrderEnum3 `json:"-" url:"order,omitempty"`
 	// Max is 100
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// A token, obtained from previous page. Prior over other filters
 	PaginationToken *string `json:"-" url:"pagination_token,omitempty"`
 	// Allowed sort fields
-	Sort *ReceivableHistoryCursorFields `json:"-" url:"sort,omitempty"`
-	// Return only the specified [event types](https://docs.monite.com/accounts-receivable/document-history#event-types). To include multiple types, repeat this parameter for each value:
-	// `event_type__in=receivable_updated&event_type__in=status_changed`
-	EventTypeIn []*ReceivableHistoryEventTypeEnum `json:"-" url:"event_type__in,omitempty"`
-	// Return only events caused by the entity users with the specified IDs. To specify multiple user IDs, repeat this parameter for each ID:
-	// `entity_user_id__in=<user1>&entity_user_id__in=<user2>`
-	EntityUserIdIn []*string `json:"-" url:"entity_user_id__in,omitempty"`
-	// Return only events that occurred after the specified date and time. The value must be in the ISO 8601 format `YYYY-MM-DDThh:mm[:ss[.ffffff]][Z|±hh:mm]`.
-	TimestampGt *time.Time `json:"-" url:"timestamp__gt,omitempty"`
-	// Return only events that occurred before the specified date and time.
-	TimestampLt *time.Time `json:"-" url:"timestamp__lt,omitempty"`
-	// Return only events that occurred on or after the specified date and time.
-	TimestampGte *time.Time `json:"-" url:"timestamp__gte,omitempty"`
-	// Return only events that occurred before or on the specified date and time.
-	TimestampLte *time.Time `json:"-" url:"timestamp__lte,omitempty"`
+	Sort           *ReceivableHistoryCursorFields    `json:"-" url:"sort,omitempty"`
+	EventTypeIn    []*ReceivableHistoryEventTypeEnum `json:"-" url:"event_type__in,omitempty"`
+	EntityUserIdIn []*string                         `json:"-" url:"entity_user_id__in,omitempty"`
+	TimestampGt    *time.Time                        `json:"-" url:"timestamp__gt,omitempty"`
+	TimestampLt    *time.Time                        `json:"-" url:"timestamp__lt,omitempty"`
+	TimestampGte   *time.Time                        `json:"-" url:"timestamp__gte,omitempty"`
+	TimestampLte   *time.Time                        `json:"-" url:"timestamp__lte,omitempty"`
 }
 
 type ReceivablesGetMailsRequest struct {
 	// Order by
-	Order *OrderEnum `json:"-" url:"order,omitempty"`
+	Order *OrderEnum3 `json:"-" url:"order,omitempty"`
 	// Max is 100
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// A token, obtained from previous page. Prior over other filters
@@ -200,7 +181,9 @@ type ReceivablePreviewRequest struct {
 
 type ReceivableSendRequest struct {
 	// Body text of the content
-	BodyText   string      `json:"body_text" url:"-"`
+	BodyText string `json:"body_text" url:"-"`
+	// Lowercase ISO code of language
+	Language   *string     `json:"language,omitempty" url:"-"`
 	Recipients *Recipients `json:"recipients,omitempty" url:"-"`
 	// Subject text of the content
 	SubjectText string `json:"subject_text" url:"-"`
@@ -212,13 +195,9 @@ type ReceivableSendTestReminderPayload struct {
 	ReminderType ReminderTypeEnum `json:"reminder_type" url:"-"`
 }
 
-// In invoice history, this object contains information about a credit note created for this invoice.
-// In quote history, it contains information about an invoice created from this quote.
 type BasedOnReceivableCreatedEventData struct {
-	// The ID of the newly created receivable document.
-	ReceivableId string `json:"receivable_id" url:"receivable_id"`
-	// The type of the receivable document that was created based on the current document.
-	Type ReceivableType `json:"type" url:"type"`
+	ReceivableId string         `json:"receivable_id" url:"receivable_id"`
+	Type         ReceivableType `json:"type" url:"type"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -329,7 +308,7 @@ type CreditNoteResponsePayload struct {
 	DeductionMemo *string `json:"deduction_memo,omitempty" url:"deduction_memo,omitempty"`
 	// The discount for a receivable.
 	Discount *Discount `json:"discount,omitempty" url:"discount,omitempty"`
-	// Total price of the receivable with discounts before taxes [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// Total price of the receivable with discounts before taxes [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	DiscountedSubtotal *int `json:"discounted_subtotal,omitempty" url:"discounted_subtotal,omitempty"`
 	// The sequential code systematically assigned to invoices.
 	DocumentId *string `json:"document_id,omitempty" url:"document_id,omitempty"`
@@ -341,6 +320,7 @@ type CreditNoteResponsePayload struct {
 	// The entity user who created this document.
 	EntityUserId *string                        `json:"entity_user_id,omitempty" url:"entity_user_id,omitempty"`
 	EntityVatId  *ReceivableEntityVatIdResponse `json:"entity_vat_id,omitempty" url:"entity_vat_id,omitempty"`
+	File         *ReceivableFileSchema          `json:"file,omitempty" url:"file,omitempty"`
 	// The language of the customer-facing PDF file (`file_url`). The value matches the counterpart's `language` at the time when this PDF file was generated.
 	FileLanguage LanguageCodeEnum `json:"file_language" url:"file_language"`
 	// The receivable's PDF URL in the counterpart's default language.
@@ -362,13 +342,13 @@ type CreditNoteResponsePayload struct {
 	PurchaseOrder *string `json:"purchase_order,omitempty" url:"purchase_order,omitempty"`
 	// The status of the Credit Note inside the receivable workflow.
 	Status CreditNoteStateEnum `json:"status" url:"status"`
-	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	Subtotal *int `json:"subtotal,omitempty" url:"subtotal,omitempty"`
 	// The list of tags for this receivable.
 	Tags []*TagReadSchema `json:"tags,omitempty" url:"tags,omitempty"`
-	// Total price of the receivable in [minor units](https://docs.monite.com/references/currencies#minor-units). Calculated as a subtotal + total_vat_amount.
+	// Total price of the receivable in [minor units](https://docs.monite.com/docs/currencies#minor-units). Calculated as a subtotal + total_vat_amount.
 	TotalAmount *int `json:"total_amount,omitempty" url:"total_amount,omitempty"`
-	// The total VAT of all line items, in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The total VAT of all line items, in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	TotalVatAmount int `json:"total_vat_amount" url:"total_vat_amount"`
 	// List of total vat amount for each VAT, presented in receivable
 	TotalVatAmounts []*TotalVatAmountItem `json:"total_vat_amounts,omitempty" url:"total_vat_amounts,omitempty"`
@@ -576,6 +556,13 @@ func (c *CreditNoteResponsePayload) GetEntityVatId() *ReceivableEntityVatIdRespo
 		return nil
 	}
 	return c.EntityVatId
+}
+
+func (c *CreditNoteResponsePayload) GetFile() *ReceivableFileSchema {
+	if c == nil {
+		return nil
+	}
+	return c.File
 }
 
 func (c *CreditNoteResponsePayload) GetFileLanguage() LanguageCodeEnum {
@@ -846,9 +833,6 @@ func (c *CreditNoteResponsePayloadEntity) UnmarshalJSON(data []byte) error {
 }
 
 func (c CreditNoteResponsePayloadEntity) MarshalJSON() ([]byte, error) {
-	if err := c.validate(); err != nil {
-		return nil, err
-	}
 	if c.Organization != nil {
 		return internal.MarshalJSONWithExtraProperty(c.Organization, "type", "organization")
 	}
@@ -873,42 +857,33 @@ func (c *CreditNoteResponsePayloadEntity) Accept(visitor CreditNoteResponsePaylo
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
 }
 
-func (c *CreditNoteResponsePayloadEntity) validate() error {
-	if c == nil {
-		return fmt.Errorf("type %T is nil", c)
+type CreditNoteStateEnum string
+
+const (
+	CreditNoteStateEnumDraft   CreditNoteStateEnum = "draft"
+	CreditNoteStateEnumIssued  CreditNoteStateEnum = "issued"
+	CreditNoteStateEnumDeleted CreditNoteStateEnum = "deleted"
+)
+
+func NewCreditNoteStateEnumFromString(s string) (CreditNoteStateEnum, error) {
+	switch s {
+	case "draft":
+		return CreditNoteStateEnumDraft, nil
+	case "issued":
+		return CreditNoteStateEnumIssued, nil
+	case "deleted":
+		return CreditNoteStateEnumDeleted, nil
 	}
-	var fields []string
-	if c.Organization != nil {
-		fields = append(fields, "organization")
-	}
-	if c.Individual != nil {
-		fields = append(fields, "individual")
-	}
-	if len(fields) == 0 {
-		if c.Type != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", c, c.Type)
-		}
-		return fmt.Errorf("type %T is empty", c)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", c, fields)
-	}
-	if c.Type != "" {
-		field := fields[0]
-		if c.Type != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				c,
-				c.Type,
-				c,
-			)
-		}
-	}
-	return nil
+	var t CreditNoteStateEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CreditNoteStateEnum) Ptr() *CreditNoteStateEnum {
+	return &c
 }
 
 type Discount struct {
-	// The actual discount of the product in [minor units](https://docs.monite.com/references/currencies#minor-units) if type field equals amount, else in percent minor units
+	// The actual discount of the product in [minor units](https://docs.monite.com/docs/currencies#minor-units) if type field equals amount, else in percent minor units
 	Amount int `json:"amount" url:"amount"`
 	// The field specifies whether to use product currency or %.
 	Type DiscountType `json:"type" url:"type"`
@@ -991,11 +966,11 @@ type InvoiceResponsePayload struct {
 	CreatedAt time.Time `json:"created_at" url:"created_at"`
 	// Time at which the receivable was last updated. Timestamps follow the ISO 8601 standard.
 	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
-	// How much is left to be paid in [minor units](https://docs.monite.com/references/currencies#minor-units). Equal 0 if the Invoice is fully paid.
+	// How much is left to be paid in [minor units](https://docs.monite.com/docs/currencies#minor-units). Equal 0 if the Invoice is fully paid.
 	AmountDue int `json:"amount_due" url:"amount_due"`
-	// How much has been paid [minor units](https://docs.monite.com/references/currencies#minor-units)
+	// How much has been paid [minor units](https://docs.monite.com/docs/currencies#minor-units)
 	AmountPaid int `json:"amount_paid" url:"amount_paid"`
-	// How much is left to be paid in in [minor units](https://docs.monite.com/references/currencies#minor-units), including payment_term discounts.
+	// How much is left to be paid in in [minor units](https://docs.monite.com/docs/currencies#minor-units), including payment_term discounts.
 	AmountToPay *int `json:"amount_to_pay,omitempty" url:"amount_to_pay,omitempty"`
 	// The unique ID of a previous document related to the receivable if applicable.
 	BasedOn *string `json:"based_on,omitempty" url:"based_on,omitempty"`
@@ -1030,7 +1005,7 @@ type InvoiceResponsePayload struct {
 	DeductionMemo *string `json:"deduction_memo,omitempty" url:"deduction_memo,omitempty"`
 	// The discount for a receivable.
 	Discount *Discount `json:"discount,omitempty" url:"discount,omitempty"`
-	// Total price of the receivable with discounts before taxes [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// Total price of the receivable with discounts before taxes [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	DiscountedSubtotal *int `json:"discounted_subtotal,omitempty" url:"discounted_subtotal,omitempty"`
 	// The sequential code systematically assigned to invoices.
 	DocumentId *string `json:"document_id,omitempty" url:"document_id,omitempty"`
@@ -1042,13 +1017,15 @@ type InvoiceResponsePayload struct {
 	// The entity user who created this document.
 	EntityUserId *string                        `json:"entity_user_id,omitempty" url:"entity_user_id,omitempty"`
 	EntityVatId  *ReceivableEntityVatIdResponse `json:"entity_vat_id,omitempty" url:"entity_vat_id,omitempty"`
+	File         *ReceivableFileSchema          `json:"file,omitempty" url:"file,omitempty"`
 	// The language of the customer-facing PDF file (`file_url`). The value matches the counterpart's `language` at the time when this PDF file was generated.
 	FileLanguage LanguageCodeEnum `json:"file_language" url:"file_language"`
 	// The receivable's PDF URL in the counterpart's default language.
 	FileUrl *string `json:"file_url,omitempty" url:"file_url,omitempty"`
-	// The date when the goods are shipped or the service is provided. Can be a current, past, or future date.
+	// The date when the goods are shipped or the service is provided.
 	//
-	// If omitted or `null`, defaults to the invoice issue date and the value is automatically set when the invoice is moved to the `issued` status.
+	// If omitted, defaults to the invoice issue date,
+	// and the value is automatically set when the invoice status changes to `issued`.
 	FulfillmentDate *string `json:"fulfillment_date,omitempty" url:"fulfillment_date,omitempty"`
 	// Optional field for the issue of the entry.
 	IssueDate *time.Time      `json:"issue_date,omitempty" url:"issue_date,omitempty"`
@@ -1078,15 +1055,15 @@ type InvoiceResponsePayload struct {
 	RelatedDocuments *RelatedDocuments `json:"related_documents" url:"related_documents"`
 	// The status of the receivable inside the receivable workflow.
 	Status ReceivablesStatusEnum `json:"status" url:"status"`
-	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	Subtotal *int `json:"subtotal,omitempty" url:"subtotal,omitempty"`
 	// The list of tags for this receivable.
 	Tags []*TagReadSchema `json:"tags,omitempty" url:"tags,omitempty"`
-	// Total price of the receivable in [minor units](https://docs.monite.com/references/currencies#minor-units). Calculated as a subtotal + total_vat_amount.
+	// Total price of the receivable in [minor units](https://docs.monite.com/docs/currencies#minor-units). Calculated as a subtotal + total_vat_amount.
 	TotalAmount *int `json:"total_amount,omitempty" url:"total_amount,omitempty"`
-	// The total price of the receivable in [minor units](https://docs.monite.com/references/currencies#minor-units), including VAT and excluding all issued credit notes.
+	// The total price of the receivable in [minor units](https://docs.monite.com/docs/currencies#minor-units), including VAT and excluding all issued credit notes.
 	TotalAmountWithCreditNotes int `json:"total_amount_with_credit_notes" url:"total_amount_with_credit_notes"`
-	// The total VAT of all line items, in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The total VAT of all line items, in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	TotalVatAmount int `json:"total_vat_amount" url:"total_vat_amount"`
 	// List of total vat amount for each VAT, presented in receivable
 	TotalVatAmounts []*TotalVatAmountItem `json:"total_vat_amounts,omitempty" url:"total_vat_amounts,omitempty"`
@@ -1322,6 +1299,13 @@ func (i *InvoiceResponsePayload) GetEntityVatId() *ReceivableEntityVatIdResponse
 		return nil
 	}
 	return i.EntityVatId
+}
+
+func (i *InvoiceResponsePayload) GetFile() *ReceivableFileSchema {
+	if i == nil {
+		return nil
+	}
+	return i.File
 }
 
 func (i *InvoiceResponsePayload) GetFileLanguage() LanguageCodeEnum {
@@ -1659,9 +1643,6 @@ func (i *InvoiceResponsePayloadEntity) UnmarshalJSON(data []byte) error {
 }
 
 func (i InvoiceResponsePayloadEntity) MarshalJSON() ([]byte, error) {
-	if err := i.validate(); err != nil {
-		return nil, err
-	}
 	if i.Organization != nil {
 		return internal.MarshalJSONWithExtraProperty(i.Organization, "type", "organization")
 	}
@@ -1684,40 +1665,6 @@ func (i *InvoiceResponsePayloadEntity) Accept(visitor InvoiceResponsePayloadEnti
 		return visitor.VisitIndividual(i.Individual)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", i)
-}
-
-func (i *InvoiceResponsePayloadEntity) validate() error {
-	if i == nil {
-		return fmt.Errorf("type %T is nil", i)
-	}
-	var fields []string
-	if i.Organization != nil {
-		fields = append(fields, "organization")
-	}
-	if i.Individual != nil {
-		fields = append(fields, "individual")
-	}
-	if len(fields) == 0 {
-		if i.Type != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", i, i.Type)
-		}
-		return fmt.Errorf("type %T is empty", i)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", i, fields)
-	}
-	if i.Type != "" {
-		field := fields[0]
-		if i.Type != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				i,
-				i.Type,
-				i,
-			)
-		}
-	}
-	return nil
 }
 
 type LineItem struct {
@@ -1815,12 +1762,20 @@ func (l *LineItem) String() string {
 type LineItemProduct struct {
 	// Unique ID of the product.
 	Id string `json:"id" url:"id"`
+	// Time at which the product was created. Timestamps follow the ISO 8601 standard.
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// Time at which the product was last updated. Timestamps follow the ISO 8601 standard.
+	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
 	// Description of the product.
-	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	Description  *string `json:"description,omitempty" url:"description,omitempty"`
+	EntityId     string  `json:"entity_id" url:"entity_id"`
+	EntityUserId *string `json:"entity_user_id,omitempty" url:"entity_user_id,omitempty"`
 	// Indicates whether the product is inline
 	IsInline        *bool                       `json:"is_inline,omitempty" url:"is_inline,omitempty"`
 	LedgerAccountId *string                     `json:"ledger_account_id,omitempty" url:"ledger_account_id,omitempty"`
 	MeasureUnit     *LineItemProductMeasureUnit `json:"measure_unit,omitempty" url:"measure_unit,omitempty"`
+	// The unique ID reference of the unit used to measure the quantity of this product (e.g. items, meters, kilograms).
+	MeasureUnitId *string `json:"measure_unit_id,omitempty" url:"measure_unit_id,omitempty"`
 	// Name of the product.
 	Name          string `json:"name" url:"name"`
 	Price         *Price `json:"price" url:"price"`
@@ -1842,11 +1797,39 @@ func (l *LineItemProduct) GetId() string {
 	return l.Id
 }
 
+func (l *LineItemProduct) GetCreatedAt() time.Time {
+	if l == nil {
+		return time.Time{}
+	}
+	return l.CreatedAt
+}
+
+func (l *LineItemProduct) GetUpdatedAt() time.Time {
+	if l == nil {
+		return time.Time{}
+	}
+	return l.UpdatedAt
+}
+
 func (l *LineItemProduct) GetDescription() *string {
 	if l == nil {
 		return nil
 	}
 	return l.Description
+}
+
+func (l *LineItemProduct) GetEntityId() string {
+	if l == nil {
+		return ""
+	}
+	return l.EntityId
+}
+
+func (l *LineItemProduct) GetEntityUserId() *string {
+	if l == nil {
+		return nil
+	}
+	return l.EntityUserId
 }
 
 func (l *LineItemProduct) GetIsInline() *bool {
@@ -1868,6 +1851,13 @@ func (l *LineItemProduct) GetMeasureUnit() *LineItemProductMeasureUnit {
 		return nil
 	}
 	return l.MeasureUnit
+}
+
+func (l *LineItemProduct) GetMeasureUnitId() *string {
+	if l == nil {
+		return nil
+	}
+	return l.MeasureUnitId
 }
 
 func (l *LineItemProduct) GetName() string {
@@ -1917,12 +1907,20 @@ func (l *LineItemProduct) GetExtraProperties() map[string]interface{} {
 }
 
 func (l *LineItemProduct) UnmarshalJSON(data []byte) error {
-	type unmarshaler LineItemProduct
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed LineItemProduct
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*l),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*l = LineItemProduct(value)
+	*l = LineItemProduct(unmarshaler.embed)
+	l.CreatedAt = unmarshaler.CreatedAt.Time()
+	l.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
@@ -1930,6 +1928,20 @@ func (l *LineItemProduct) UnmarshalJSON(data []byte) error {
 	l.extraProperties = extraProperties
 	l.rawJSON = json.RawMessage(data)
 	return nil
+}
+
+func (l *LineItemProduct) MarshalJSON() ([]byte, error) {
+	type embed LineItemProduct
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*l),
+		CreatedAt: internal.NewDateTime(l.CreatedAt),
+		UpdatedAt: internal.NewDateTime(l.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (l *LineItemProduct) String() string {
@@ -2043,9 +2055,11 @@ func (l *LineItemProductCreate) String() string {
 }
 
 type LineItemProductMeasureUnit struct {
-	Id          *string `json:"id,omitempty" url:"id,omitempty"`
-	Description *string `json:"description,omitempty" url:"description,omitempty"`
-	Name        string  `json:"name" url:"name"`
+	Id          *string   `json:"id,omitempty" url:"id,omitempty"`
+	CreatedAt   time.Time `json:"created_at" url:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" url:"updated_at"`
+	Description *string   `json:"description,omitempty" url:"description,omitempty"`
+	Name        string    `json:"name" url:"name"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -2056,6 +2070,20 @@ func (l *LineItemProductMeasureUnit) GetId() *string {
 		return nil
 	}
 	return l.Id
+}
+
+func (l *LineItemProductMeasureUnit) GetCreatedAt() time.Time {
+	if l == nil {
+		return time.Time{}
+	}
+	return l.CreatedAt
+}
+
+func (l *LineItemProductMeasureUnit) GetUpdatedAt() time.Time {
+	if l == nil {
+		return time.Time{}
+	}
+	return l.UpdatedAt
 }
 
 func (l *LineItemProductMeasureUnit) GetDescription() *string {
@@ -2077,12 +2105,20 @@ func (l *LineItemProductMeasureUnit) GetExtraProperties() map[string]interface{}
 }
 
 func (l *LineItemProductMeasureUnit) UnmarshalJSON(data []byte) error {
-	type unmarshaler LineItemProductMeasureUnit
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed LineItemProductMeasureUnit
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
+	}{
+		embed: embed(*l),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*l = LineItemProductMeasureUnit(value)
+	*l = LineItemProductMeasureUnit(unmarshaler.embed)
+	l.CreatedAt = unmarshaler.CreatedAt.Time()
+	l.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
@@ -2090,6 +2126,20 @@ func (l *LineItemProductMeasureUnit) UnmarshalJSON(data []byte) error {
 	l.extraProperties = extraProperties
 	l.rawJSON = json.RawMessage(data)
 	return nil
+}
+
+func (l *LineItemProductMeasureUnit) MarshalJSON() ([]byte, error) {
+	type embed LineItemProductMeasureUnit
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+		UpdatedAt *internal.DateTime `json:"updated_at"`
+	}{
+		embed:     embed(*l),
+		CreatedAt: internal.NewDateTime(l.CreatedAt),
+		UpdatedAt: internal.NewDateTime(l.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (l *LineItemProductMeasureUnit) String() string {
@@ -2172,7 +2222,7 @@ func (l *LineItemProductVatRate) String() string {
 type LineItemUpdate struct {
 	// The discount for a product.
 	Discount *Discount `json:"discount,omitempty" url:"discount,omitempty"`
-	// The actual price of the product in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The actual price of the product in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	Price *int `json:"price,omitempty" url:"price,omitempty"`
 	// The quantity of each of the goods, materials, or services listed in the receivable.
 	Quantity *float64 `json:"quantity,omitempty" url:"quantity,omitempty"`
@@ -2298,13 +2348,9 @@ func (l *LineItemsResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
-// Contains information about a sent email.
 type MailSentEventData struct {
-	// ID of the email sending operation. Can be used to get the email sending status from `GET /receivables/{receivable_id}/mails/{mail_id}`.
-	MailId string `json:"mail_id" url:"mail_id"`
-	// The overall email sending status across all recipients.
-	MailStatus ReceivableMailStatusEnum `json:"mail_status" url:"mail_status"`
-	// Contains a list of email recipients (To, CC, BCC) and the email sending status for each recipient.
+	MailId     string                    `json:"mail_id" url:"mail_id"`
+	MailStatus ReceivableMailStatusEnum  `json:"mail_status" url:"mail_status"`
 	Recipients *ReceivableMailRecipients `json:"recipients" url:"recipients"`
 
 	extraProperties map[string]interface{}
@@ -2503,14 +2549,32 @@ func (m *MissingLineItemFields) String() string {
 	return fmt.Sprintf("%#v", m)
 }
 
-// Contains information about a payment received for an invoice.
+type OrderEnum2 string
+
+const (
+	OrderEnum2Asc  OrderEnum2 = "asc"
+	OrderEnum2Desc OrderEnum2 = "desc"
+)
+
+func NewOrderEnum2FromString(s string) (OrderEnum2, error) {
+	switch s {
+	case "asc":
+		return OrderEnum2Asc, nil
+	case "desc":
+		return OrderEnum2Desc, nil
+	}
+	var t OrderEnum2
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (o OrderEnum2) Ptr() *OrderEnum2 {
+	return &o
+}
+
 type PaymentReceivedEventData struct {
-	// The remainimg amount due of the invoice, in [minor units](https://docs.monite.com/references/currencies#minor-units) of the currency. For example, $12.5 is represented as 1250.
-	AmountDue int `json:"amount_due" url:"amount_due"`
-	// The payment amount, in minor units of the currency.
-	AmountPaid int `json:"amount_paid" url:"amount_paid"`
-	// A user-defined comment about this payment, or `null` if no comment was provided. Comments are available only for payments recorded via `POST /receivables/{receivable_id}/mark_as_paid` and `POST /receivables/{receivable_id}/mark_as_partially_paid`.
-	Comment *string `json:"comment,omitempty" url:"comment,omitempty"`
+	AmountDue  int     `json:"amount_due" url:"amount_due"`
+	AmountPaid int     `json:"amount_paid" url:"amount_paid"`
+	Comment    *string `json:"comment,omitempty" url:"comment,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -2753,7 +2817,7 @@ type QuoteResponsePayload struct {
 	DeductionMemo *string `json:"deduction_memo,omitempty" url:"deduction_memo,omitempty"`
 	// The discount for a receivable.
 	Discount *Discount `json:"discount,omitempty" url:"discount,omitempty"`
-	// Total price of the receivable with discounts before taxes [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// Total price of the receivable with discounts before taxes [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	DiscountedSubtotal *int `json:"discounted_subtotal,omitempty" url:"discounted_subtotal,omitempty"`
 	// The sequential code systematically assigned to invoices.
 	DocumentId *string `json:"document_id,omitempty" url:"document_id,omitempty"`
@@ -2766,7 +2830,8 @@ type QuoteResponsePayload struct {
 	EntityUserId *string                        `json:"entity_user_id,omitempty" url:"entity_user_id,omitempty"`
 	EntityVatId  *ReceivableEntityVatIdResponse `json:"entity_vat_id,omitempty" url:"entity_vat_id,omitempty"`
 	// The date (in ISO 8601 format) until which the quote is valid.
-	ExpiryDate *string `json:"expiry_date,omitempty" url:"expiry_date,omitempty"`
+	ExpiryDate *string               `json:"expiry_date,omitempty" url:"expiry_date,omitempty"`
+	File       *ReceivableFileSchema `json:"file,omitempty" url:"file,omitempty"`
 	// The language of the customer-facing PDF file (`file_url`). The value matches the counterpart's `language` at the time when this PDF file was generated.
 	FileLanguage LanguageCodeEnum `json:"file_language" url:"file_language"`
 	// The receivable's PDF URL in the counterpart's default language.
@@ -2790,13 +2855,13 @@ type QuoteResponsePayload struct {
 	SignatureRequired *bool `json:"signature_required,omitempty" url:"signature_required,omitempty"`
 	// The status of the Quote inside the receivable workflow.
 	Status QuoteStateEnum `json:"status" url:"status"`
-	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The subtotal (excluding VAT), in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	Subtotal *int `json:"subtotal,omitempty" url:"subtotal,omitempty"`
 	// The list of tags for this receivable.
 	Tags []*TagReadSchema `json:"tags,omitempty" url:"tags,omitempty"`
-	// Total price of the receivable in [minor units](https://docs.monite.com/references/currencies#minor-units). Calculated as a subtotal + total_vat_amount.
+	// Total price of the receivable in [minor units](https://docs.monite.com/docs/currencies#minor-units). Calculated as a subtotal + total_vat_amount.
 	TotalAmount *int `json:"total_amount,omitempty" url:"total_amount,omitempty"`
-	// The total VAT of all line items, in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The total VAT of all line items, in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	TotalVatAmount int `json:"total_vat_amount" url:"total_vat_amount"`
 	// List of total vat amount for each VAT, presented in receivable
 	TotalVatAmounts []*TotalVatAmountItem `json:"total_vat_amounts,omitempty" url:"total_vat_amounts,omitempty"`
@@ -3018,6 +3083,13 @@ func (q *QuoteResponsePayload) GetExpiryDate() *string {
 		return nil
 	}
 	return q.ExpiryDate
+}
+
+func (q *QuoteResponsePayload) GetFile() *ReceivableFileSchema {
+	if q == nil {
+		return nil
+	}
+	return q.File
 }
 
 func (q *QuoteResponsePayload) GetFileLanguage() LanguageCodeEnum {
@@ -3295,9 +3367,6 @@ func (q *QuoteResponsePayloadEntity) UnmarshalJSON(data []byte) error {
 }
 
 func (q QuoteResponsePayloadEntity) MarshalJSON() ([]byte, error) {
-	if err := q.validate(); err != nil {
-		return nil, err
-	}
 	if q.Organization != nil {
 		return internal.MarshalJSONWithExtraProperty(q.Organization, "type", "organization")
 	}
@@ -3320,40 +3389,6 @@ func (q *QuoteResponsePayloadEntity) Accept(visitor QuoteResponsePayloadEntityVi
 		return visitor.VisitIndividual(q.Individual)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", q)
-}
-
-func (q *QuoteResponsePayloadEntity) validate() error {
-	if q == nil {
-		return fmt.Errorf("type %T is nil", q)
-	}
-	var fields []string
-	if q.Organization != nil {
-		fields = append(fields, "organization")
-	}
-	if q.Individual != nil {
-		fields = append(fields, "individual")
-	}
-	if len(fields) == 0 {
-		if q.Type != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", q, q.Type)
-		}
-		return fmt.Errorf("type %T is empty", q)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", q, fields)
-	}
-	if q.Type != "" {
-		field := fields[0]
-		if q.Type != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				q,
-				q.Type,
-				q,
-			)
-		}
-	}
-	return nil
 }
 
 type QuoteStateEnum string
@@ -3636,43 +3671,6 @@ func (r *ReceivableCreateBasedOnPayload) UnmarshalJSON(data []byte) error {
 }
 
 func (r *ReceivableCreateBasedOnPayload) String() string {
-	if len(r.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(r); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", r)
-}
-
-type ReceivableCreatedEventData struct {
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (r *ReceivableCreatedEventData) GetExtraProperties() map[string]interface{} {
-	return r.extraProperties
-}
-
-func (r *ReceivableCreatedEventData) UnmarshalJSON(data []byte) error {
-	type unmarshaler ReceivableCreatedEventData
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*r = ReceivableCreatedEventData(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *r)
-	if err != nil {
-		return err
-	}
-	r.extraProperties = extraProperties
-	r.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (r *ReceivableCreatedEventData) String() string {
 	if len(r.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
@@ -4389,17 +4387,16 @@ type ReceivableFacadeCreateInvoicePayload struct {
 	// A note with additional information about a tax deduction
 	DeductionMemo *string `json:"deduction_memo,omitempty" url:"deduction_memo,omitempty"`
 	// The discount for a receivable.
-	Discount *Discount `json:"discount,omitempty" url:"discount,omitempty"`
-	// The document number of the receivable, which will appear in the PDF document. Can be set manually only in the [non-compliant mode](https://docs.monite.com/accounts-receivable/regulatory-compliance/invoice-compliance). Otherwise (or if omitted), it will be generated automatically based on the entity's [document number customization](https://docs.monite.com/advanced/document-number-customization) settings when the document is issued.
-	DocumentId *string               `json:"document_id,omitempty" url:"document_id,omitempty"`
-	Entity     *ReceivableEntityBase `json:"entity,omitempty" url:"entity,omitempty"`
+	Discount *Discount             `json:"discount,omitempty" url:"discount,omitempty"`
+	Entity   *ReceivableEntityBase `json:"entity,omitempty" url:"entity,omitempty"`
 	// Entity bank account ID
 	EntityBankAccountId *string `json:"entity_bank_account_id,omitempty" url:"entity_bank_account_id,omitempty"`
 	// Entity VAT ID id
 	EntityVatIdId *string `json:"entity_vat_id_id,omitempty" url:"entity_vat_id_id,omitempty"`
-	// The date when the goods are shipped or the service is provided. Can be a current, past, or future date.
+	// The date when the goods are shipped or the service is provided.
 	//
-	// If omitted or `null`, defaults to the invoice issue date and the value is automatically set when the invoice is moved to the `issued` status.
+	// If omitted, defaults to the invoice issue date,
+	// and the value is automatically set when the invoice status changes to `issued`.
 	FulfillmentDate *string     `json:"fulfillment_date,omitempty" url:"fulfillment_date,omitempty"`
 	LineItems       []*LineItem `json:"line_items" url:"line_items"`
 	// A note with additional information for a receivable
@@ -4502,13 +4499,6 @@ func (r *ReceivableFacadeCreateInvoicePayload) GetDiscount() *Discount {
 		return nil
 	}
 	return r.Discount
-}
-
-func (r *ReceivableFacadeCreateInvoicePayload) GetDocumentId() *string {
-	if r == nil {
-		return nil
-	}
-	return r.DocumentId
 }
 
 func (r *ReceivableFacadeCreateInvoicePayload) GetEntity() *ReceivableEntityBase {
@@ -4801,10 +4791,8 @@ type ReceivableFacadeCreateQuotePayload struct {
 	// A note with additional information about a tax deduction
 	DeductionMemo *string `json:"deduction_memo,omitempty" url:"deduction_memo,omitempty"`
 	// The discount for a receivable.
-	Discount *Discount `json:"discount,omitempty" url:"discount,omitempty"`
-	// The document number of the receivable, which will appear in the PDF document. Can be set manually only in the [non-compliant mode](https://docs.monite.com/accounts-receivable/regulatory-compliance/invoice-compliance). Otherwise (or if omitted), it will be generated automatically based on the entity's [document number customization](https://docs.monite.com/advanced/document-number-customization) settings when the document is issued.
-	DocumentId *string               `json:"document_id,omitempty" url:"document_id,omitempty"`
-	Entity     *ReceivableEntityBase `json:"entity,omitempty" url:"entity,omitempty"`
+	Discount *Discount             `json:"discount,omitempty" url:"discount,omitempty"`
+	Entity   *ReceivableEntityBase `json:"entity,omitempty" url:"entity,omitempty"`
 	// Entity bank account ID
 	EntityBankAccountId *string `json:"entity_bank_account_id,omitempty" url:"entity_bank_account_id,omitempty"`
 	// Entity VAT ID id
@@ -4909,13 +4897,6 @@ func (r *ReceivableFacadeCreateQuotePayload) GetDiscount() *Discount {
 		return nil
 	}
 	return r.Discount
-}
-
-func (r *ReceivableFacadeCreateQuotePayload) GetDocumentId() *string {
-	if r == nil {
-		return nil
-	}
-	return r.DocumentId
 }
 
 func (r *ReceivableFacadeCreateQuotePayload) GetEntity() *ReceivableEntityBase {
@@ -5087,6 +5068,162 @@ func (r *ReceivableFacadeCreateQuotePayload) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
+// Represents a file (such as a PDF invoice) that was uploaded to Monite.
+type ReceivableFileSchema struct {
+	// A unique ID of this file.
+	Id string `json:"id" url:"id"`
+	// UTC date and time when this workflow was uploaded to Monite. Timestamps follow the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// The type of the business object associated with this file.
+	FileType string `json:"file_type" url:"file_type"`
+	// The MD5 hash of the file.
+	Md5 string `json:"md5" url:"md5"`
+	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
+	Mimetype string `json:"mimetype" url:"mimetype"`
+	// The original file name (if available).
+	Name string `json:"name" url:"name"`
+	// If the file is a PDF document, this property contains individual pages extracted from the file. Otherwise, an empty array.
+	Pages []*ReceivablePageSchema `json:"pages,omitempty" url:"pages,omitempty"`
+	// Preview images generated for this file. There can be multiple images with different sizes.
+	Previews []*ReceivablePreviewSchema `json:"previews,omitempty" url:"previews,omitempty"`
+	// Geographical region of the data center where the file is stored.
+	Region string `json:"region" url:"region"`
+	// The file size in bytes.
+	Size int `json:"size" url:"size"`
+	// The URL to download the file.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *ReceivableFileSchema) GetId() string {
+	if r == nil {
+		return ""
+	}
+	return r.Id
+}
+
+func (r *ReceivableFileSchema) GetCreatedAt() time.Time {
+	if r == nil {
+		return time.Time{}
+	}
+	return r.CreatedAt
+}
+
+func (r *ReceivableFileSchema) GetFileType() string {
+	if r == nil {
+		return ""
+	}
+	return r.FileType
+}
+
+func (r *ReceivableFileSchema) GetMd5() string {
+	if r == nil {
+		return ""
+	}
+	return r.Md5
+}
+
+func (r *ReceivableFileSchema) GetMimetype() string {
+	if r == nil {
+		return ""
+	}
+	return r.Mimetype
+}
+
+func (r *ReceivableFileSchema) GetName() string {
+	if r == nil {
+		return ""
+	}
+	return r.Name
+}
+
+func (r *ReceivableFileSchema) GetPages() []*ReceivablePageSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Pages
+}
+
+func (r *ReceivableFileSchema) GetPreviews() []*ReceivablePreviewSchema {
+	if r == nil {
+		return nil
+	}
+	return r.Previews
+}
+
+func (r *ReceivableFileSchema) GetRegion() string {
+	if r == nil {
+		return ""
+	}
+	return r.Region
+}
+
+func (r *ReceivableFileSchema) GetSize() int {
+	if r == nil {
+		return 0
+	}
+	return r.Size
+}
+
+func (r *ReceivableFileSchema) GetUrl() string {
+	if r == nil {
+		return ""
+	}
+	return r.Url
+}
+
+func (r *ReceivableFileSchema) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *ReceivableFileSchema) UnmarshalJSON(data []byte) error {
+	type embed ReceivableFileSchema
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed: embed(*r),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*r = ReceivableFileSchema(unmarshaler.embed)
+	r.CreatedAt = unmarshaler.CreatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *ReceivableFileSchema) MarshalJSON() ([]byte, error) {
+	type embed ReceivableFileSchema
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed:     embed(*r),
+		CreatedAt: internal.NewDateTime(r.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (r *ReceivableFileSchema) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 type ReceivableFileUrl struct {
 	// The receivable's PDF URL in the counterpart's default language.
 	FileUrl *string `json:"file_url,omitempty" url:"file_url,omitempty"`
@@ -5149,21 +5286,16 @@ type ReceivableHistoryEventTypeEnum string
 
 const (
 	ReceivableHistoryEventTypeEnumStatusChanged            ReceivableHistoryEventTypeEnum = "status_changed"
-	ReceivableHistoryEventTypeEnumReceivableCreated        ReceivableHistoryEventTypeEnum = "receivable_created"
 	ReceivableHistoryEventTypeEnumReceivableUpdated        ReceivableHistoryEventTypeEnum = "receivable_updated"
 	ReceivableHistoryEventTypeEnumBasedOnReceivableCreated ReceivableHistoryEventTypeEnum = "based_on_receivable_created"
 	ReceivableHistoryEventTypeEnumPaymentReceived          ReceivableHistoryEventTypeEnum = "payment_received"
 	ReceivableHistoryEventTypeEnumMailSent                 ReceivableHistoryEventTypeEnum = "mail_sent"
-	ReceivableHistoryEventTypeEnumPaymentReminderMailSent  ReceivableHistoryEventTypeEnum = "payment_reminder_mail_sent"
-	ReceivableHistoryEventTypeEnumOverdueReminderMailSent  ReceivableHistoryEventTypeEnum = "overdue_reminder_mail_sent"
 )
 
 func NewReceivableHistoryEventTypeEnumFromString(s string) (ReceivableHistoryEventTypeEnum, error) {
 	switch s {
 	case "status_changed":
 		return ReceivableHistoryEventTypeEnumStatusChanged, nil
-	case "receivable_created":
-		return ReceivableHistoryEventTypeEnumReceivableCreated, nil
 	case "receivable_updated":
 		return ReceivableHistoryEventTypeEnumReceivableUpdated, nil
 	case "based_on_receivable_created":
@@ -5172,10 +5304,6 @@ func NewReceivableHistoryEventTypeEnumFromString(s string) (ReceivableHistoryEve
 		return ReceivableHistoryEventTypeEnumPaymentReceived, nil
 	case "mail_sent":
 		return ReceivableHistoryEventTypeEnumMailSent, nil
-	case "payment_reminder_mail_sent":
-		return ReceivableHistoryEventTypeEnumPaymentReminderMailSent, nil
-	case "overdue_reminder_mail_sent":
-		return ReceivableHistoryEventTypeEnumOverdueReminderMailSent, nil
 	}
 	var t ReceivableHistoryEventTypeEnum
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -5185,7 +5313,6 @@ func (r ReceivableHistoryEventTypeEnum) Ptr() *ReceivableHistoryEventTypeEnum {
 	return &r
 }
 
-// A paginated list of change history records.
 type ReceivableHistoryPaginationResponse struct {
 	Data []*ReceivableHistoryResponse `json:"data" url:"data"`
 	// A token that can be sent in the `pagination_token` query parameter to get the next page of results, or `null` if there is no next page (i.e. you've reached the last page).
@@ -5250,25 +5377,19 @@ func (r *ReceivableHistoryPaginationResponse) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
-// Represents an entry in the change history of an accounts receivable document.
 type ReceivableHistoryResponse struct {
-	// A unique ID of the history record.
+	// ID of the history record.
 	Id string `json:"id" url:"id"`
-	// A URL of the PDF file that shows the document state after the change. Available only for the following event types: `receivable_created`, `receivable_updated`, `status_changed`, and `payment_received`. In other event types the `current_pdf_url` value is `null`.
-	//
-	// In `payment_received` events, the `current_pdf_url` value is available only in case of full payments and only if the entity setting `generate_paid_invoice_pdf` is `true`.
-	//
-	// Note that Monite generates PDFs asynchronously. This means that the initial value of `current_pdf_url` for the abovementioned events right after they occurred is usually `null` and the value gets populated later after the PDF document has been generated.
+	// Link, that will lead to the PDF that shows the state of the document after this change. If this change doesn’t change PDF - this field will be empty.
 	CurrentPdfUrl *string `json:"current_pdf_url,omitempty" url:"current_pdf_url,omitempty"`
-	// ID of the entity user who made the change or trigger the event, or `null` if it was done by using a partner access token.
-	EntityUserId *string `json:"entity_user_id,omitempty" url:"entity_user_id,omitempty"`
-	// An object containing additional information about the event or change. The object structure varies based on the `event_type`. In `receivable_created` and `receivable_updated` events, `event_data` is an empty object `{}`.
+	EntityUserId  *string `json:"entity_user_id,omitempty" url:"entity_user_id,omitempty"`
+	// Payload of the event.
 	EventData *ReceivableHistoryResponseEventData `json:"event_data" url:"event_data"`
-	// The type of the event or change. See [Event types](https://docs.monite.com/accounts-receivable/document-history#event-types).
+	// The type of event.
 	EventType ReceivableHistoryEventTypeEnum `json:"event_type" url:"event_type"`
-	// ID of the receivable document that was changed or triggered an event.
+	// ID of receivable that was changed.
 	ReceivableId string `json:"receivable_id" url:"receivable_id"`
-	// UTC date and time when the event or change occurred.
+	// Timestamp when the event has happened.
 	Timestamp time.Time `json:"timestamp" url:"timestamp"`
 
 	extraProperties map[string]interface{}
@@ -5374,15 +5495,13 @@ func (r *ReceivableHistoryResponse) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
-// An object containing additional information about the event or change. The object structure varies based on the `event_type`. In `receivable_created` and `receivable_updated` events, `event_data` is an empty object `{}`.
+// Payload of the event.
 type ReceivableHistoryResponseEventData struct {
 	StatusChangedEventData            *StatusChangedEventData
 	ReceivableUpdatedEventData        *ReceivableUpdatedEventData
-	ReceivableCreatedEventData        *ReceivableCreatedEventData
 	BasedOnReceivableCreatedEventData *BasedOnReceivableCreatedEventData
 	PaymentReceivedEventData          *PaymentReceivedEventData
 	MailSentEventData                 *MailSentEventData
-	ReminderMailSentEventData         *ReminderMailSentEventData
 
 	typ string
 }
@@ -5399,13 +5518,6 @@ func (r *ReceivableHistoryResponseEventData) GetReceivableUpdatedEventData() *Re
 		return nil
 	}
 	return r.ReceivableUpdatedEventData
-}
-
-func (r *ReceivableHistoryResponseEventData) GetReceivableCreatedEventData() *ReceivableCreatedEventData {
-	if r == nil {
-		return nil
-	}
-	return r.ReceivableCreatedEventData
 }
 
 func (r *ReceivableHistoryResponseEventData) GetBasedOnReceivableCreatedEventData() *BasedOnReceivableCreatedEventData {
@@ -5429,13 +5541,6 @@ func (r *ReceivableHistoryResponseEventData) GetMailSentEventData() *MailSentEve
 	return r.MailSentEventData
 }
 
-func (r *ReceivableHistoryResponseEventData) GetReminderMailSentEventData() *ReminderMailSentEventData {
-	if r == nil {
-		return nil
-	}
-	return r.ReminderMailSentEventData
-}
-
 func (r *ReceivableHistoryResponseEventData) UnmarshalJSON(data []byte) error {
 	valueStatusChangedEventData := new(StatusChangedEventData)
 	if err := json.Unmarshal(data, &valueStatusChangedEventData); err == nil {
@@ -5447,12 +5552,6 @@ func (r *ReceivableHistoryResponseEventData) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &valueReceivableUpdatedEventData); err == nil {
 		r.typ = "ReceivableUpdatedEventData"
 		r.ReceivableUpdatedEventData = valueReceivableUpdatedEventData
-		return nil
-	}
-	valueReceivableCreatedEventData := new(ReceivableCreatedEventData)
-	if err := json.Unmarshal(data, &valueReceivableCreatedEventData); err == nil {
-		r.typ = "ReceivableCreatedEventData"
-		r.ReceivableCreatedEventData = valueReceivableCreatedEventData
 		return nil
 	}
 	valueBasedOnReceivableCreatedEventData := new(BasedOnReceivableCreatedEventData)
@@ -5473,12 +5572,6 @@ func (r *ReceivableHistoryResponseEventData) UnmarshalJSON(data []byte) error {
 		r.MailSentEventData = valueMailSentEventData
 		return nil
 	}
-	valueReminderMailSentEventData := new(ReminderMailSentEventData)
-	if err := json.Unmarshal(data, &valueReminderMailSentEventData); err == nil {
-		r.typ = "ReminderMailSentEventData"
-		r.ReminderMailSentEventData = valueReminderMailSentEventData
-		return nil
-	}
 	return fmt.Errorf("%s cannot be deserialized as a %T", data, r)
 }
 
@@ -5489,9 +5582,6 @@ func (r ReceivableHistoryResponseEventData) MarshalJSON() ([]byte, error) {
 	if r.typ == "ReceivableUpdatedEventData" || r.ReceivableUpdatedEventData != nil {
 		return json.Marshal(r.ReceivableUpdatedEventData)
 	}
-	if r.typ == "ReceivableCreatedEventData" || r.ReceivableCreatedEventData != nil {
-		return json.Marshal(r.ReceivableCreatedEventData)
-	}
 	if r.typ == "BasedOnReceivableCreatedEventData" || r.BasedOnReceivableCreatedEventData != nil {
 		return json.Marshal(r.BasedOnReceivableCreatedEventData)
 	}
@@ -5501,20 +5591,15 @@ func (r ReceivableHistoryResponseEventData) MarshalJSON() ([]byte, error) {
 	if r.typ == "MailSentEventData" || r.MailSentEventData != nil {
 		return json.Marshal(r.MailSentEventData)
 	}
-	if r.typ == "ReminderMailSentEventData" || r.ReminderMailSentEventData != nil {
-		return json.Marshal(r.ReminderMailSentEventData)
-	}
 	return nil, fmt.Errorf("type %T does not include a non-empty union type", r)
 }
 
 type ReceivableHistoryResponseEventDataVisitor interface {
 	VisitStatusChangedEventData(*StatusChangedEventData) error
 	VisitReceivableUpdatedEventData(*ReceivableUpdatedEventData) error
-	VisitReceivableCreatedEventData(*ReceivableCreatedEventData) error
 	VisitBasedOnReceivableCreatedEventData(*BasedOnReceivableCreatedEventData) error
 	VisitPaymentReceivedEventData(*PaymentReceivedEventData) error
 	VisitMailSentEventData(*MailSentEventData) error
-	VisitReminderMailSentEventData(*ReminderMailSentEventData) error
 }
 
 func (r *ReceivableHistoryResponseEventData) Accept(visitor ReceivableHistoryResponseEventDataVisitor) error {
@@ -5524,9 +5609,6 @@ func (r *ReceivableHistoryResponseEventData) Accept(visitor ReceivableHistoryRes
 	if r.typ == "ReceivableUpdatedEventData" || r.ReceivableUpdatedEventData != nil {
 		return visitor.VisitReceivableUpdatedEventData(r.ReceivableUpdatedEventData)
 	}
-	if r.typ == "ReceivableCreatedEventData" || r.ReceivableCreatedEventData != nil {
-		return visitor.VisitReceivableCreatedEventData(r.ReceivableCreatedEventData)
-	}
 	if r.typ == "BasedOnReceivableCreatedEventData" || r.BasedOnReceivableCreatedEventData != nil {
 		return visitor.VisitBasedOnReceivableCreatedEventData(r.BasedOnReceivableCreatedEventData)
 	}
@@ -5535,9 +5617,6 @@ func (r *ReceivableHistoryResponseEventData) Accept(visitor ReceivableHistoryRes
 	}
 	if r.typ == "MailSentEventData" || r.MailSentEventData != nil {
 		return visitor.VisitMailSentEventData(r.MailSentEventData)
-	}
-	if r.typ == "ReminderMailSentEventData" || r.ReminderMailSentEventData != nil {
-		return visitor.VisitReminderMailSentEventData(r.ReminderMailSentEventData)
 	}
 	return fmt.Errorf("type %T does not include a non-empty union type", r)
 }
@@ -5892,6 +5971,91 @@ func (r ReceivableMailStatusEnum) Ptr() *ReceivableMailStatusEnum {
 	return &r
 }
 
+// When a PDF document is uploaded to Monite, it extracts individual pages from the document
+// and saves them as PNG images. This object contains the image and metadata of a single page.
+type ReceivablePageSchema struct {
+	// A unique ID of the image.
+	Id string `json:"id" url:"id"`
+	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of the image.
+	Mimetype string `json:"mimetype" url:"mimetype"`
+	// The page number in the PDF document, from 0.
+	Number int `json:"number" url:"number"`
+	// Image file size, in bytes.
+	Size int `json:"size" url:"size"`
+	// The URL to download the image.
+	Url string `json:"url" url:"url"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *ReceivablePageSchema) GetId() string {
+	if r == nil {
+		return ""
+	}
+	return r.Id
+}
+
+func (r *ReceivablePageSchema) GetMimetype() string {
+	if r == nil {
+		return ""
+	}
+	return r.Mimetype
+}
+
+func (r *ReceivablePageSchema) GetNumber() int {
+	if r == nil {
+		return 0
+	}
+	return r.Number
+}
+
+func (r *ReceivablePageSchema) GetSize() int {
+	if r == nil {
+		return 0
+	}
+	return r.Size
+}
+
+func (r *ReceivablePageSchema) GetUrl() string {
+	if r == nil {
+		return ""
+	}
+	return r.Url
+}
+
+func (r *ReceivablePageSchema) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *ReceivablePageSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler ReceivablePageSchema
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = ReceivablePageSchema(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *ReceivablePageSchema) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 // A paginated list of receivables
 type ReceivablePaginationResponse struct {
 	Data []*ReceivableResponse `json:"data" url:"data"`
@@ -6012,6 +6176,72 @@ func (r *ReceivablePreviewResponse) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
+// A preview image generated for a file.
+type ReceivablePreviewSchema struct {
+	// The image height in pixels.
+	Height int `json:"height" url:"height"`
+	// The image URL.
+	Url string `json:"url" url:"url"`
+	// The image width in pixels.
+	Width int `json:"width" url:"width"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *ReceivablePreviewSchema) GetHeight() int {
+	if r == nil {
+		return 0
+	}
+	return r.Height
+}
+
+func (r *ReceivablePreviewSchema) GetUrl() string {
+	if r == nil {
+		return ""
+	}
+	return r.Url
+}
+
+func (r *ReceivablePreviewSchema) GetWidth() int {
+	if r == nil {
+		return 0
+	}
+	return r.Width
+}
+
+func (r *ReceivablePreviewSchema) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *ReceivablePreviewSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler ReceivablePreviewSchema
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = ReceivablePreviewSchema(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *ReceivablePreviewSchema) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 type ReceivableResponse struct {
 	Type       string
 	Quote      *QuoteResponsePayload
@@ -6082,9 +6312,6 @@ func (r *ReceivableResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (r ReceivableResponse) MarshalJSON() ([]byte, error) {
-	if err := r.validate(); err != nil {
-		return nil, err
-	}
 	if r.Quote != nil {
 		return internal.MarshalJSONWithExtraProperty(r.Quote, "type", "quote")
 	}
@@ -6114,43 +6341,6 @@ func (r *ReceivableResponse) Accept(visitor ReceivableResponseVisitor) error {
 		return visitor.VisitCreditNote(r.CreditNote)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", r)
-}
-
-func (r *ReceivableResponse) validate() error {
-	if r == nil {
-		return fmt.Errorf("type %T is nil", r)
-	}
-	var fields []string
-	if r.Quote != nil {
-		fields = append(fields, "quote")
-	}
-	if r.Invoice != nil {
-		fields = append(fields, "invoice")
-	}
-	if r.CreditNote != nil {
-		fields = append(fields, "credit_note")
-	}
-	if len(fields) == 0 {
-		if r.Type != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", r, r.Type)
-		}
-		return fmt.Errorf("type %T is empty", r)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", r, fields)
-	}
-	if r.Type != "" {
-		field := fields[0]
-		if r.Type != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				r,
-				r.Type,
-				r,
-			)
-		}
-	}
-	return nil
 }
 
 // A schema for returning a response an email with a link to receivable document has been sent
@@ -6969,86 +7159,6 @@ func (r *RelatedDocuments) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
-// Contains information about an invoice reminder sent via email.
-type ReminderMailSentEventData struct {
-	// ID of the email sending operation. Can be used to get the email sending status from `GET /receivables/{receivable_id}/mails/{mail_id}`.
-	MailId string `json:"mail_id" url:"mail_id"`
-	// The overall email sending status across all recipients.
-	MailStatus ReceivableMailStatusEnum `json:"mail_status" url:"mail_status"`
-	// Contains a list of email recipients (To, CC, BCC) and the email sending status for each recipient.
-	Recipients *ReceivableMailRecipients `json:"recipients" url:"recipients"`
-	// Invoice reminder type:
-	//
-	// * `term_1` - [payment reminder](https://docs.monite.com/accounts-receivable/invoices/payment-reminders) sent before discount date 1,
-	// * `term_2` - payment reminder sent before discount date 2,
-	// * `term_final` - payment reminder sent before the invoice due date.
-	// * `overdue` - [overdue reminder](https://docs.monite.com/accounts-receivable/invoices/overdue-reminders) sent after the due date.
-	Term ReminderTypeEnum `json:"term" url:"term"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (r *ReminderMailSentEventData) GetMailId() string {
-	if r == nil {
-		return ""
-	}
-	return r.MailId
-}
-
-func (r *ReminderMailSentEventData) GetMailStatus() ReceivableMailStatusEnum {
-	if r == nil {
-		return ""
-	}
-	return r.MailStatus
-}
-
-func (r *ReminderMailSentEventData) GetRecipients() *ReceivableMailRecipients {
-	if r == nil {
-		return nil
-	}
-	return r.Recipients
-}
-
-func (r *ReminderMailSentEventData) GetTerm() ReminderTypeEnum {
-	if r == nil {
-		return ""
-	}
-	return r.Term
-}
-
-func (r *ReminderMailSentEventData) GetExtraProperties() map[string]interface{} {
-	return r.extraProperties
-}
-
-func (r *ReminderMailSentEventData) UnmarshalJSON(data []byte) error {
-	type unmarshaler ReminderMailSentEventData
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*r = ReminderMailSentEventData(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *r)
-	if err != nil {
-		return err
-	}
-	r.extraProperties = extraProperties
-	r.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (r *ReminderMailSentEventData) String() string {
-	if len(r.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(r); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", r)
-}
-
 type ReminderTypeEnum string
 
 const (
@@ -7083,8 +7193,8 @@ type ResponseItem struct {
 	Product  *LineItemProduct `json:"product" url:"product"`
 	// The quantity of each of the goods, materials, or services listed in the receivable.
 	Quantity float64 `json:"quantity" url:"quantity"`
-	// Total of line_item before VAT in [minor units](https://docs.monite.com/references/currencies#minor-units).
-	TotalBeforeVat int `json:"total_before_vat" url:"total_before_vat"`
+	// Total of line_item before VAT in [minor units](https://docs.monite.com/docs/currencies#minor-units).
+	TotalBeforeVat *int `json:"total_before_vat,omitempty" url:"total_before_vat,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -7111,9 +7221,9 @@ func (r *ResponseItem) GetQuantity() float64 {
 	return r.Quantity
 }
 
-func (r *ResponseItem) GetTotalBeforeVat() int {
+func (r *ResponseItem) GetTotalBeforeVat() *int {
 	if r == nil {
-		return 0
+		return nil
 	}
 	return r.TotalBeforeVat
 }
@@ -7215,14 +7325,8 @@ func (s *Signature) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Contains information about a document's status change. See the applicable
-// [invoice statuses](https://docs.monite.com/accounts-receivable/invoices/index),
-// [quote statuses](https://docs.monite.com/accounts-receivable/quotes/index),
-// and [credit note statuses](https://docs.monite.com/accounts-receivable/credit-notes#credit-note-lifecycle).
 type StatusChangedEventData struct {
-	// The new status of a document.
 	NewStatus ReceivablesStatusEnum `json:"new_status" url:"new_status"`
-	// The old status of a document.
 	OldStatus ReceivablesStatusEnum `json:"old_status" url:"old_status"`
 
 	extraProperties map[string]interface{}
@@ -7378,7 +7482,7 @@ func (t *TermFinalWithDate) String() string {
 
 type TotalVatAmountItem struct {
 	Id *string `json:"id,omitempty" url:"id,omitempty"`
-	// The total VAT of all line items, in [minor units](https://docs.monite.com/references/currencies#minor-units).
+	// The total VAT of all line items, in [minor units](https://docs.monite.com/docs/currencies#minor-units).
 	Amount int `json:"amount" url:"amount"`
 	// Percent minor units. Example: 12.5% is 1250.
 	Value int `json:"value" url:"value"`
@@ -7603,6 +7707,7 @@ func (u *UpdateCreditNotePayload) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+// Raise if None was explicitly passed to given fields
 type UpdateInvoice struct {
 	// Unique ID of the counterpart contact.
 	ContactId *string `json:"contact_id,omitempty" url:"contact_id,omitempty"`
@@ -7626,9 +7731,10 @@ type UpdateInvoice struct {
 	EntityBankAccountId *string `json:"entity_bank_account_id,omitempty" url:"entity_bank_account_id,omitempty"`
 	// Entity VAT ID id
 	EntityVatIdId *string `json:"entity_vat_id_id,omitempty" url:"entity_vat_id_id,omitempty"`
-	// The date when the goods are shipped or the service is provided. Can be a current, past, or future date.
+	// The date when the goods are shipped or the service is provided.
 	//
-	// If omitted or `null`, defaults to the invoice issue date and the value is automatically set when the invoice is moved to the `issued` status.
+	// If omitted, defaults to the invoice issue date,
+	// and the value is automatically set when the invoice status changes to `issued`.
 	FulfillmentDate *string           `json:"fulfillment_date,omitempty" url:"fulfillment_date,omitempty"`
 	LineItems       []*LineItemUpdate `json:"line_items,omitempty" url:"line_items,omitempty"`
 	// A note with additional information for a receivable
@@ -7918,6 +8024,7 @@ func (u *UpdateInvoicePayload) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+// Raise if None was explicitly passed to given fields
 type UpdateIssuedInvoice struct {
 	// Unique ID of the counterpart contact.
 	ContactId *string `json:"contact_id,omitempty" url:"contact_id,omitempty"`
@@ -7929,7 +8036,10 @@ type UpdateIssuedInvoice struct {
 	EntityAddress      *ReceivableEntityAddressSchema `json:"entity_address,omitempty" url:"entity_address,omitempty"`
 	// Entity VAT ID id
 	EntityVatIdId *string `json:"entity_vat_id_id,omitempty" url:"entity_vat_id_id,omitempty"`
-	// The date when the goods are shipped or the service is provided. Can be a current, past, or future date.
+	// The date when the goods are shipped or the service is provided.
+	//
+	// If omitted, defaults to the invoice issue date,
+	// and the value is automatically set when the invoice status changes to `issued`.
 	FulfillmentDate *string `json:"fulfillment_date,omitempty" url:"fulfillment_date,omitempty"`
 	// A note with additional information for a receivable
 	Memo              *string `json:"memo,omitempty" url:"memo,omitempty"`
@@ -8133,9 +8243,6 @@ func (u *UpdateIssuedInvoiceEntity) UnmarshalJSON(data []byte) error {
 }
 
 func (u UpdateIssuedInvoiceEntity) MarshalJSON() ([]byte, error) {
-	if err := u.validate(); err != nil {
-		return nil, err
-	}
 	if u.Organization != nil {
 		return internal.MarshalJSONWithExtraProperty(u.Organization, "type", "organization")
 	}
@@ -8158,40 +8265,6 @@ func (u *UpdateIssuedInvoiceEntity) Accept(visitor UpdateIssuedInvoiceEntityVisi
 		return visitor.VisitIndividual(u.Individual)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", u)
-}
-
-func (u *UpdateIssuedInvoiceEntity) validate() error {
-	if u == nil {
-		return fmt.Errorf("type %T is nil", u)
-	}
-	var fields []string
-	if u.Organization != nil {
-		fields = append(fields, "organization")
-	}
-	if u.Individual != nil {
-		fields = append(fields, "individual")
-	}
-	if len(fields) == 0 {
-		if u.Type != "" {
-			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", u, u.Type)
-		}
-		return fmt.Errorf("type %T is empty", u)
-	}
-	if len(fields) > 1 {
-		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", u, fields)
-	}
-	if u.Type != "" {
-		field := fields[0]
-		if u.Type != field {
-			return fmt.Errorf(
-				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
-				u,
-				u.Type,
-				u,
-			)
-		}
-	}
-	return nil
 }
 
 type UpdateIssuedInvoicePayload struct {
@@ -8308,6 +8381,7 @@ func (u *UpdateProductForCreditNote) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+// Raise if None was explicitly passed to given fields
 type UpdateQuote struct {
 	// Unique ID of the counterpart contact.
 	ContactId *string `json:"contact_id,omitempty" url:"contact_id,omitempty"`

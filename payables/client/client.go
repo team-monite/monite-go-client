@@ -38,9 +38,9 @@ func NewClient(opts ...option.RequestOption) *Client {
 // Lists all payables from the connected entity.
 //
 // If you already have the data of the payable (amount in [minor units](
-// https://docs.monite.com/references/currencies#minor-units), currency, vendor information, and other details)
+// https://docs.monite.com/docs/currencies#minor-units), currency, vendor information, and other details)
 // stored somewhere as individual attributes, you can create a payable with these attributes by calling [POST
-// /payables](https://docs.monite.com/api/payables/post-payables) and providing the [base64-encoded](
+// /payables](https://docs.monite.com/reference/post_payables) and providing the [base64-encoded](
 // https://en.wikipedia.org/wiki/Base64) contents of the original invoice file in the field `base64_encoded_file`.
 //
 // A payable is a financial document given by an entity`s supplier itemizing the purchase of a good or a service and
@@ -50,22 +50,22 @@ func NewClient(opts ...option.RequestOption) *Client {
 // to automatically set `suggested_payment_term`, this object can be omitted from the request body.
 //
 // The `id` generated for this payable can be used in other API calls to update the data of this payable or trigger [
-// status transitions](https://docs.monite.com/accounts-payable/approvals/manual-transition), for example. essential data
+// status transitions](https://docs.monite.com/docs/payable-status-transitions), for example. essential data
 // fields to move from `draft` to `new`
 //
-// Related guide: [Create a payable from data](https://docs.monite.com/accounts-payable/payables/collect#create-a-payable-from-data)
+// Related guide: [Create a payable from data](https://docs.monite.com/docs/collect-payables#create-a-payable-from-data)
 //
 // See also:
 //
-// [Automatic calculation of due date](https://docs.monite.com/accounts-payable/payables/collect#automatic-calculation-of-due-date)
+// [Automatic calculation of due date](https://docs.monite.com/docs/collect-payables#automatic-calculation-of-due-date)
 //
-// [Suggested payment date](https://docs.monite.com/accounts-payable/payables/collect#suggested-payment-date)
+// [Suggested payment date](https://docs.monite.com/docs/collect-payables#suggested-payment-date)
 //
-// [Attach file](https://docs.monite.com/accounts-payable/payables/collect#attach-file)
+// [Attach file](https://docs.monite.com/docs/collect-payables#attach-file)
 //
-// [Collect payables by email](https://docs.monite.com/accounts-payable/payables/collect#send-payables-by-email)
+// [Collect payables by email](https://docs.monite.com/docs/collect-payables#send-payables-by-email)
 //
-// [Manage line items](https://docs.monite.com/accounts-payable/payables/line-items)
+// [Manage line items](https://docs.monite.com/docs/manage-line-items)
 func (c *Client) Get(
 	ctx context.Context,
 	request *monitegoclient.PayablesGetRequest,
@@ -148,7 +148,7 @@ func (c *Client) Get(
 // You can use this endpoint to bypass the Monite OCR service and provide the data directly
 // (for example, if you already have the data in place).
 //
-// A newly created payable has the the `draft` [status](https://docs.monite.com/accounts-payable/payables/index).
+// A newly created payable has the the `draft` [status](https://docs.monite.com/docs/payables-lifecycle).
 func (c *Client) Create(
 	ctx context.Context,
 	request *monitegoclient.PayableUploadWithDataSchema,
@@ -216,8 +216,6 @@ func (c *Client) Create(
 }
 
 // Retrieve aggregated statistics for payables, including total amount and count, both overall and by status.
-//
-// For more flexible configuration and retrieval of other data types, use `GET /analytics/payables`.
 func (c *Client) GetAnalytics(
 	ctx context.Context,
 	request *monitegoclient.PayablesGetAnalyticsRequest,
@@ -1071,84 +1069,6 @@ func (c *Client) CancelById(
 	return response, nil
 }
 
-// Request to cancel the OCR processing of the specified payable.
-func (c *Client) PostPayablesIdCancelOcr(
-	ctx context.Context,
-	payableId string,
-	opts ...option.RequestOption,
-) (*monitegoclient.PayableResponseSchema, error) {
-	options := core.NewRequestOptions(opts...)
-	baseURL := internal.ResolveBaseURL(
-		options.BaseURL,
-		c.baseURL,
-		"https://api.sandbox.monite.com/v1",
-	)
-	endpointURL := internal.EncodeURL(
-		baseURL+"/payables/%v/cancel_ocr",
-		payableId,
-	)
-	headers := internal.MergeHeaders(
-		c.header.Clone(),
-		options.ToHeader(),
-	)
-	errorCodes := internal.ErrorCodes{
-		400: func(apiError *core.APIError) error {
-			return &monitegoclient.BadRequestError{
-				APIError: apiError,
-			}
-		},
-		401: func(apiError *core.APIError) error {
-			return &monitegoclient.UnauthorizedError{
-				APIError: apiError,
-			}
-		},
-		403: func(apiError *core.APIError) error {
-			return &monitegoclient.ForbiddenError{
-				APIError: apiError,
-			}
-		},
-		404: func(apiError *core.APIError) error {
-			return &monitegoclient.NotFoundError{
-				APIError: apiError,
-			}
-		},
-		409: func(apiError *core.APIError) error {
-			return &monitegoclient.ConflictError{
-				APIError: apiError,
-			}
-		},
-		422: func(apiError *core.APIError) error {
-			return &monitegoclient.UnprocessableEntityError{
-				APIError: apiError,
-			}
-		},
-		500: func(apiError *core.APIError) error {
-			return &monitegoclient.InternalServerError{
-				APIError: apiError,
-			}
-		},
-	}
-
-	var response *monitegoclient.PayableResponseSchema
-	if err := c.caller.Call(
-		ctx,
-		&internal.CallParams{
-			URL:             endpointURL,
-			Method:          http.MethodPost,
-			Headers:         headers,
-			MaxAttempts:     options.MaxAttempts,
-			BodyProperties:  options.BodyProperties,
-			QueryParameters: options.QueryParameters,
-			Client:          options.HTTPClient,
-			Response:        &response,
-			ErrorDecoder:    internal.NewErrorDecoder(errorCodes),
-		},
-	); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
 // Mark a payable as paid.
 //
 // Payables can be paid using the payment channels offered by Monite or through external payment channels. In the latter
@@ -1165,13 +1085,13 @@ func (c *Client) PostPayablesIdCancelOcr(
 // - The `amount_to_pay` field is automatically calculated based on the `amount_due` less the percentage described
 // in the `payment_terms.discount` value.
 //
-// Related guide: [Mark a payable as paid](https://docs.monite.com/accounts-payable/approvals/manual-transition#mark-as-paid)
+// Related guide: [Mark a payable as paid](https://docs.monite.com/docs/payable-status-transitions#mark-as-paid)
 //
 // See also:
 //
-// [Payables lifecycle](https://docs.monite.com/accounts-payable/payables/index)
+// [Payables lifecycle](https://docs.monite.com/docs/payables-lifecycle)
 //
-// [Payables status transitions](https://docs.monite.com/accounts-payable/payables/collect#suggested-payment-date)
+// [Payables status transitions](https://docs.monite.com/docs/collect-payables#suggested-payment-date)
 func (c *Client) MarkAsPaidById(
 	ctx context.Context,
 	payableId string,
@@ -1269,15 +1189,15 @@ func (c *Client) MarkAsPaidById(
 // - The `amount_to_pay` field is automatically calculated based on the `amount_due` less the percentage described
 // in the `payment_terms.discount` value.
 //
-// Related guide: [Mark a payable as partially paid](https://docs.monite.com/accounts-payable/approvals/manual-transition#mark-as-partially-paid)
+// Related guide: [Mark a payable as partially paid](https://docs.monite.com/docs/payable-status-transitions#mark-as-partially-paid)
 //
 // See also:
 //
-// [Payables lifecycle](https://docs.monite.com/accounts-payable/payables/index)
+// [Payables lifecycle](https://docs.monite.com/docs/payables-lifecycle)
 //
-// [Payables status transitions](https://docs.monite.com/accounts-payable/payables/collect#suggested-payment-date)
+// [Payables status transitions](https://docs.monite.com/docs/collect-payables#suggested-payment-date)
 //
-// [Mark a payable as paid](https://docs.monite.com/accounts-payable/approvals/manual-transition#mark-as-paid)
+// [Mark a payable as paid](https://docs.monite.com/docs/payable-status-transitions#mark-as-paid)
 func (c *Client) MarkAsPartiallyPaidById(
 	ctx context.Context,
 	payableId string,

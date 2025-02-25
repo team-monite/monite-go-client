@@ -10,7 +10,7 @@ import (
 )
 
 type CreatePaymentLinkRequest struct {
-	// The payment amount in [minor units](https://docs.monite.com/references/currencies#minor-units). Required if `object` is not specified.
+	// The payment amount in [minor units](https://docs.monite.com/docs/currencies#minor-units). Required if `object` is not specified.
 	Amount *int `json:"amount,omitempty" url:"-"`
 	// The payment currency. Required if `object` is not specified.
 	Currency  *CurrencyEnum `json:"currency,omitempty" url:"-"`
@@ -23,8 +23,7 @@ type CreatePaymentLinkRequest struct {
 	// A payment reference number that the recipient can use to identify the payer or purpose of the transaction. Required if `object` is not specified.
 	PaymentReference *string               `json:"payment_reference,omitempty" url:"-"`
 	Recipient        *PaymentAccountObject `json:"recipient,omitempty" url:"-"`
-	// The URL where to redirect the payer after the payment. If `return_url` is specified, then after the payment is completed the payment page will display the "Return to platform" link that navigates to this URL.
-	ReturnUrl *string `json:"return_url,omitempty" url:"-"`
+	ReturnUrl        *string               `json:"return_url,omitempty" url:"-"`
 }
 
 func (c *CreatePaymentLinkRequest) UnmarshalJSON(data []byte) error {
@@ -50,9 +49,7 @@ func (c *CreatePaymentLinkRequest) MarshalJSON() ([]byte, error) {
 }
 
 type PaymentAccountObject struct {
-	// ID of a payment account
-	Id string `json:"id" url:"id"`
-	// Type of a payment account. Can be `entity` or `counterpart`
+	Id   string             `json:"id" url:"id"`
 	Type PaymentAccountType `json:"type" url:"type"`
 
 	extraProperties map[string]interface{}
@@ -223,16 +220,15 @@ type PublicPaymentLinkResponse struct {
 	Currency         CurrencyEnum              `json:"currency" url:"currency"`
 	ExpiresAt        time.Time                 `json:"expires_at" url:"expires_at"`
 	Invoice          *Invoice                  `json:"invoice,omitempty" url:"invoice,omitempty"`
-	Payer            *PayerAccountResponse     `json:"payer,omitempty" url:"payer,omitempty"`
+	Payer            *AccountResponse          `json:"payer,omitempty" url:"payer,omitempty"`
 	PaymentIntent    *PaymentIntent            `json:"payment_intent,omitempty" url:"payment_intent,omitempty"`
 	PaymentIntentId  string                    `json:"payment_intent_id" url:"payment_intent_id"`
 	PaymentMethods   []string                  `json:"payment_methods" url:"payment_methods"`
 	PaymentPageUrl   string                    `json:"payment_page_url" url:"payment_page_url"`
 	PaymentReference *string                   `json:"payment_reference,omitempty" url:"payment_reference,omitempty"`
 	Recipient        *RecipientAccountResponse `json:"recipient" url:"recipient"`
-	// The URL where to redirect the payer after the payment. If `return_url` is specified, then after the payment is completed the payment page will display the "Return to platform" link that navigates to this URL.
-	ReturnUrl *string `json:"return_url,omitempty" url:"return_url,omitempty"`
-	Status    string  `json:"status" url:"status"`
+	ReturnUrl        *string                   `json:"return_url,omitempty" url:"return_url,omitempty"`
+	Status           string                    `json:"status" url:"status"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -273,7 +269,7 @@ func (p *PublicPaymentLinkResponse) GetInvoice() *Invoice {
 	return p.Invoice
 }
 
-func (p *PublicPaymentLinkResponse) GetPayer() *PayerAccountResponse {
+func (p *PublicPaymentLinkResponse) GetPayer() *AccountResponse {
 	if p == nil {
 		return nil
 	}

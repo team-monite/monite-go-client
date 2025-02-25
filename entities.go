@@ -15,30 +15,28 @@ type CreateEntityRequest struct {
 	Address *EntityAddressSchema `json:"address,omitempty" url:"-"`
 	// An official email address of the entity
 	Email string `json:"email" url:"-"`
-	// The contact phone number of the entity. Required for US organizations to use payments.
-	Phone *string `json:"phone,omitempty" url:"-"`
-	// A website of the entity
-	Website *string `json:"website,omitempty" url:"-"`
-	// A set of meta data describing the organization
-	Organization *OrganizationSchema `json:"organization,omitempty" url:"-"`
 	// A set of meta data describing the individual
 	Individual *IndividualSchema `json:"individual,omitempty" url:"-"`
+	// A set of meta data describing the organization
+	Organization *OrganizationSchema `json:"organization,omitempty" url:"-"`
+	// A phone number of the entity
+	Phone *string `json:"phone,omitempty" url:"-"`
 	// The entity's taxpayer identification number or tax ID. This field is required for entities that are non-VAT registered.
 	TaxId *string `json:"tax_id,omitempty" url:"-"`
 	// A type for an entity
 	Type EntityTypeEnum `json:"type" url:"-"`
+	// A website of the entity
+	Website *string `json:"website,omitempty" url:"-"`
 }
 
 type EntitiesGetRequest struct {
-	// Sort order (ascending by default). Typically used together with the `sort` parameter.
+	// Order by
 	Order *OrderEnum `json:"-" url:"order,omitempty"`
-	// The number of items (0 .. 100) to return in a single page of the response. The response may contain fewer items if it is the last or only page.
+	// Max is 100
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// A pagination token obtained from a previous call to this endpoint. Use it to get the next or previous page of results for your initial query. If `pagination_token` is specified, all other query parameters are ignored and inferred from the initial query.
-	//
-	// If not specified, the first page of results will be returned.
+	// A token, obtained from previous page. Prior over other filters
 	PaginationToken *string `json:"-" url:"pagination_token,omitempty"`
-	// The field to sort the results by. Typically used together with the `order` parameter.
+	// Allowed sort fields
 	Sort         *EntityCursorFields `json:"-" url:"sort,omitempty"`
 	Type         *EntityTypeEnum     `json:"-" url:"type,omitempty"`
 	CreatedAtGt  *time.Time          `json:"-" url:"created_at__gt,omitempty"`
@@ -52,130 +50,20 @@ type EntitiesGetRequest struct {
 	EmailNotIn   []*string           `json:"-" url:"email__not_in,omitempty"`
 }
 
-type AccountingSettings struct {
-	// Default ledger accounts that will be used for various objects pushed into an accounting system. Use `GET /ledger_accounts` to get the IDs of these ledger accounts.
-	LedgerAccountIds *DefaultLedgerAccountIDs `json:"ledger_account_ids,omitempty" url:"ledger_account_ids,omitempty"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (a *AccountingSettings) GetLedgerAccountIds() *DefaultLedgerAccountIDs {
-	if a == nil {
-		return nil
-	}
-	return a.LedgerAccountIds
-}
-
-func (a *AccountingSettings) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AccountingSettings) UnmarshalJSON(data []byte) error {
-	type unmarshaler AccountingSettings
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AccountingSettings(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-	a.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AccountingSettings) String() string {
-	if len(a.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type DefaultLedgerAccountIDs struct {
-	// ID of the ledger account to which all payment records will be pushed. Changing this value affects only future data pushes and does not affect payment records that already exist in the accounting system.
-	Payments *string `json:"payments,omitempty" url:"payments,omitempty"`
-	// ID of the ledger account to which products without a `ledger_account_id` specified will be pushed. Changing this value affects only future data pushes and does not affect products that already exist in the accounting system.
-	Products *string `json:"products,omitempty" url:"products,omitempty"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (d *DefaultLedgerAccountIDs) GetPayments() *string {
-	if d == nil {
-		return nil
-	}
-	return d.Payments
-}
-
-func (d *DefaultLedgerAccountIDs) GetProducts() *string {
-	if d == nil {
-		return nil
-	}
-	return d.Products
-}
-
-func (d *DefaultLedgerAccountIDs) GetExtraProperties() map[string]interface{} {
-	return d.extraProperties
-}
-
-func (d *DefaultLedgerAccountIDs) UnmarshalJSON(data []byte) error {
-	type unmarshaler DefaultLedgerAccountIDs
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*d = DefaultLedgerAccountIDs(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *d)
-	if err != nil {
-		return err
-	}
-	d.extraProperties = extraProperties
-	d.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *DefaultLedgerAccountIDs) String() string {
-	if len(d.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
 type DocumentIDsSettings struct {
-	// Prefixes for each document_type.
-	DocumentTypePrefix *DocumentTypePrefix `json:"document_type_prefix,omitempty" url:"document_type_prefix,omitempty"`
-	// Optionally add 4-digit of the current year.
+	// Optionally add 4-digit of the current year
 	IncludeDate *bool `json:"include_date,omitempty" url:"include_date,omitempty"`
-	// Minimal size of number in document ID Number will be left padded with zeros if less.
-	MinDigits *int `json:"min_digits,omitempty" url:"min_digits,omitempty"`
-	// Optional prefix. Does not substitute document_type prefix.
+	// Optional prefix. Does not substitute document_type prefix
 	Prefix *string `json:"prefix,omitempty" url:"prefix,omitempty"`
-	// Which character should separate each part of the document_id.
+	// Which character should separate each part of the document_id
 	Separator *DocumentIdSeparators `json:"separator,omitempty" url:"separator,omitempty"`
+	// Prefixes for each document_type
+	DocumentTypePrefix *DocumentTypePrefix `json:"document_type_prefix,omitempty" url:"document_type_prefix,omitempty"`
+	// Minimal size of number in document ID Number will be left padded with zeros if less
+	MinDigits *int `json:"min_digits,omitempty" url:"min_digits,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
-}
-
-func (d *DocumentIDsSettings) GetDocumentTypePrefix() *DocumentTypePrefix {
-	if d == nil {
-		return nil
-	}
-	return d.DocumentTypePrefix
 }
 
 func (d *DocumentIDsSettings) GetIncludeDate() *bool {
@@ -183,13 +71,6 @@ func (d *DocumentIDsSettings) GetIncludeDate() *bool {
 		return nil
 	}
 	return d.IncludeDate
-}
-
-func (d *DocumentIDsSettings) GetMinDigits() *int {
-	if d == nil {
-		return nil
-	}
-	return d.MinDigits
 }
 
 func (d *DocumentIDsSettings) GetPrefix() *string {
@@ -204,6 +85,20 @@ func (d *DocumentIDsSettings) GetSeparator() *DocumentIdSeparators {
 		return nil
 	}
 	return d.Separator
+}
+
+func (d *DocumentIDsSettings) GetDocumentTypePrefix() *DocumentTypePrefix {
+	if d == nil {
+		return nil
+	}
+	return d.DocumentTypePrefix
+}
+
+func (d *DocumentIDsSettings) GetMinDigits() *int {
+	if d == nil {
+		return nil
+	}
+	return d.MinDigits
 }
 
 func (d *DocumentIDsSettings) GetExtraProperties() map[string]interface{} {
@@ -239,20 +134,20 @@ func (d *DocumentIDsSettings) String() string {
 }
 
 type DocumentIDsSettingsNextNumber struct {
-	CreditNote    *int `json:"credit_note,omitempty" url:"credit_note,omitempty"`
-	Invoice       *int `json:"invoice,omitempty" url:"invoice,omitempty"`
-	PurchaseOrder *int `json:"purchase_order,omitempty" url:"purchase_order,omitempty"`
 	Quote         *int `json:"quote,omitempty" url:"quote,omitempty"`
+	Invoice       *int `json:"invoice,omitempty" url:"invoice,omitempty"`
+	CreditNote    *int `json:"credit_note,omitempty" url:"credit_note,omitempty"`
+	PurchaseOrder *int `json:"purchase_order,omitempty" url:"purchase_order,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (d *DocumentIDsSettingsNextNumber) GetCreditNote() *int {
+func (d *DocumentIDsSettingsNextNumber) GetQuote() *int {
 	if d == nil {
 		return nil
 	}
-	return d.CreditNote
+	return d.Quote
 }
 
 func (d *DocumentIDsSettingsNextNumber) GetInvoice() *int {
@@ -262,18 +157,18 @@ func (d *DocumentIDsSettingsNextNumber) GetInvoice() *int {
 	return d.Invoice
 }
 
+func (d *DocumentIDsSettingsNextNumber) GetCreditNote() *int {
+	if d == nil {
+		return nil
+	}
+	return d.CreditNote
+}
+
 func (d *DocumentIDsSettingsNextNumber) GetPurchaseOrder() *int {
 	if d == nil {
 		return nil
 	}
 	return d.PurchaseOrder
-}
-
-func (d *DocumentIDsSettingsNextNumber) GetQuote() *int {
-	if d == nil {
-		return nil
-	}
-	return d.Quote
 }
 
 func (d *DocumentIDsSettingsNextNumber) GetExtraProperties() map[string]interface{} {
@@ -309,28 +204,21 @@ func (d *DocumentIDsSettingsNextNumber) String() string {
 }
 
 type DocumentIDsSettingsRequest struct {
-	// Prefixes for each document_type.
-	DocumentTypePrefix *DocumentTypePrefix `json:"document_type_prefix,omitempty" url:"document_type_prefix,omitempty"`
-	// Optionally add 4-digit of the current year.
+	// Optionally add 4-digit of the current year
 	IncludeDate *bool `json:"include_date,omitempty" url:"include_date,omitempty"`
-	// Minimal size of number in document ID Number will be left padded with zeros if less.
-	MinDigits *int `json:"min_digits,omitempty" url:"min_digits,omitempty"`
-	// Write-only field. Changes which number will be issued next. Can't be less than the last issued document number.
-	NextNumber *DocumentIDsSettingsNextNumber `json:"next_number,omitempty" url:"next_number,omitempty"`
-	// Optional prefix. Does not substitute document_type prefix.
+	// Optional prefix. Does not substitute document_type prefix
 	Prefix *string `json:"prefix,omitempty" url:"prefix,omitempty"`
-	// Which character should separate each part of the document_id.
+	// Which character should separate each part of the document_id
 	Separator *DocumentIdSeparators `json:"separator,omitempty" url:"separator,omitempty"`
+	// Prefixes for each document_type
+	DocumentTypePrefix *DocumentTypePrefix `json:"document_type_prefix,omitempty" url:"document_type_prefix,omitempty"`
+	// Minimal size of number in document ID Number will be left padded with zeros if less
+	MinDigits *int `json:"min_digits,omitempty" url:"min_digits,omitempty"`
+	// Write-only field. Changes which number will be issued next. Can't be less than the last issued document number
+	NextNumber *DocumentIDsSettingsNextNumber `json:"next_number,omitempty" url:"next_number,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
-}
-
-func (d *DocumentIDsSettingsRequest) GetDocumentTypePrefix() *DocumentTypePrefix {
-	if d == nil {
-		return nil
-	}
-	return d.DocumentTypePrefix
 }
 
 func (d *DocumentIDsSettingsRequest) GetIncludeDate() *bool {
@@ -338,20 +226,6 @@ func (d *DocumentIDsSettingsRequest) GetIncludeDate() *bool {
 		return nil
 	}
 	return d.IncludeDate
-}
-
-func (d *DocumentIDsSettingsRequest) GetMinDigits() *int {
-	if d == nil {
-		return nil
-	}
-	return d.MinDigits
-}
-
-func (d *DocumentIDsSettingsRequest) GetNextNumber() *DocumentIDsSettingsNextNumber {
-	if d == nil {
-		return nil
-	}
-	return d.NextNumber
 }
 
 func (d *DocumentIDsSettingsRequest) GetPrefix() *string {
@@ -366,6 +240,27 @@ func (d *DocumentIDsSettingsRequest) GetSeparator() *DocumentIdSeparators {
 		return nil
 	}
 	return d.Separator
+}
+
+func (d *DocumentIDsSettingsRequest) GetDocumentTypePrefix() *DocumentTypePrefix {
+	if d == nil {
+		return nil
+	}
+	return d.DocumentTypePrefix
+}
+
+func (d *DocumentIDsSettingsRequest) GetMinDigits() *int {
+	if d == nil {
+		return nil
+	}
+	return d.MinDigits
+}
+
+func (d *DocumentIDsSettingsRequest) GetNextNumber() *DocumentIDsSettingsNextNumber {
+	if d == nil {
+		return nil
+	}
+	return d.NextNumber
 }
 
 func (d *DocumentIDsSettingsRequest) GetExtraProperties() map[string]interface{} {
@@ -432,20 +327,20 @@ func (d DocumentIdSeparators) Ptr() *DocumentIdSeparators {
 }
 
 type DocumentTypePrefix struct {
-	CreditNote    *string `json:"credit_note,omitempty" url:"credit_note,omitempty"`
-	Invoice       *string `json:"invoice,omitempty" url:"invoice,omitempty"`
-	PurchaseOrder *string `json:"purchase_order,omitempty" url:"purchase_order,omitempty"`
 	Quote         *string `json:"quote,omitempty" url:"quote,omitempty"`
+	Invoice       *string `json:"invoice,omitempty" url:"invoice,omitempty"`
+	CreditNote    *string `json:"credit_note,omitempty" url:"credit_note,omitempty"`
+	PurchaseOrder *string `json:"purchase_order,omitempty" url:"purchase_order,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (d *DocumentTypePrefix) GetCreditNote() *string {
+func (d *DocumentTypePrefix) GetQuote() *string {
 	if d == nil {
 		return nil
 	}
-	return d.CreditNote
+	return d.Quote
 }
 
 func (d *DocumentTypePrefix) GetInvoice() *string {
@@ -455,18 +350,18 @@ func (d *DocumentTypePrefix) GetInvoice() *string {
 	return d.Invoice
 }
 
+func (d *DocumentTypePrefix) GetCreditNote() *string {
+	if d == nil {
+		return nil
+	}
+	return d.CreditNote
+}
+
 func (d *DocumentTypePrefix) GetPurchaseOrder() *string {
 	if d == nil {
 		return nil
 	}
 	return d.PurchaseOrder
-}
-
-func (d *DocumentTypePrefix) GetQuote() *string {
-	if d == nil {
-		return nil
-	}
-	return d.Quote
 }
 
 func (d *DocumentTypePrefix) GetExtraProperties() map[string]interface{} {
@@ -619,10 +514,10 @@ func (e EntityCursorFields) Ptr() *EntityCursorFields {
 type EntityPaginationResponse struct {
 	// A set of entities of different types returned per page
 	Data []*EntityResponse `json:"data" url:"data"`
-	// A token that can be sent in the `pagination_token` query parameter to get the previous page of results, or `null` if there is no previous page (i.e. you've reached the first page).
-	PrevPaginationToken *string `json:"prev_pagination_token,omitempty" url:"prev_pagination_token,omitempty"`
 	// A token that can be sent in the `pagination_token` query parameter to get the next page of results, or `null` if there is no next page (i.e. you've reached the last page).
 	NextPaginationToken *string `json:"next_pagination_token,omitempty" url:"next_pagination_token,omitempty"`
+	// A token that can be sent in the `pagination_token` query parameter to get the previous page of results, or `null` if there is no previous page (i.e. you've reached the first page).
+	PrevPaginationToken *string `json:"prev_pagination_token,omitempty" url:"prev_pagination_token,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -635,18 +530,18 @@ func (e *EntityPaginationResponse) GetData() []*EntityResponse {
 	return e.Data
 }
 
-func (e *EntityPaginationResponse) GetPrevPaginationToken() *string {
-	if e == nil {
-		return nil
-	}
-	return e.PrevPaginationToken
-}
-
 func (e *EntityPaginationResponse) GetNextPaginationToken() *string {
 	if e == nil {
 		return nil
 	}
 	return e.NextPaginationToken
+}
+
+func (e *EntityPaginationResponse) GetPrevPaginationToken() *string {
+	if e == nil {
+		return nil
+	}
+	return e.PrevPaginationToken
 }
 
 func (e *EntityPaginationResponse) GetExtraProperties() map[string]interface{} {
@@ -840,23 +735,254 @@ func (i *IndividualSchema) String() string {
 	return fmt.Sprintf("%#v", i)
 }
 
-type OcrAutoTaggingSettingsRequest struct {
-	// A switch to temporarily disable a keyword without removing it from the list.
-	Enabled bool `json:"enabled" url:"enabled"`
-	// A list of words that will be searched for assigning a tag in the recognized fields of the document after OCR processing. If at least one match is found, the tag will be assigned. Each keyword must be between 2 and 25 characters long.
-	Keywords []string `json:"keywords" url:"keywords"`
-	// Tag identifier that will be assigned to the payable document if one of the words listed in keywords is found during OCR.
-	TagId string `json:"tag_id" url:"tag_id"`
+type MergedSettingsResponse struct {
+	// Settings for the accounting module.
+	Accounting *AccountingSettingsResponse `json:"accounting,omitempty" url:"accounting,omitempty"`
+	// Automatically attempt to find a corresponding purchase order for all incoming payables.
+	AllowPurchaseOrderAutolinking *bool `json:"allow_purchase_order_autolinking,omitempty" url:"allow_purchase_order_autolinking,omitempty"`
+	// Default API version for partner.
+	ApiVersion *ApiVersion `json:"api_version,omitempty" url:"api_version,omitempty"`
+	// Commercial conditions for receivables.
+	CommercialConditions []string `json:"commercial_conditions,omitempty" url:"commercial_conditions,omitempty"`
+	// Custom currency exchange rates.
+	Currency *CurrencySettings `json:"currency,omitempty" url:"currency,omitempty"`
+	// A default role to provision upon new entity creation.
+	DefaultRole map[string]interface{} `json:"default_role,omitempty" url:"default_role,omitempty"`
+	DocumentIds *DocumentIDsSettings   `json:"document_ids,omitempty" url:"document_ids,omitempty"`
+	// Settings for the e-invoicing module.
+	Einvoicing *EInvoicingSettingsResponse `json:"einvoicing,omitempty" url:"einvoicing,omitempty"`
+	// If enabled, the paid invoice's PDF will be in a new layout set by the user
+	GeneratePaidInvoicePdf *bool             `json:"generate_paid_invoice_pdf,omitempty" url:"generate_paid_invoice_pdf,omitempty"`
+	Language               *LanguageCodeEnum `json:"language,omitempty" url:"language,omitempty"`
+	// Settings for email and mailboxes.
+	Mail *MailSettingsResponse `json:"mail,omitempty" url:"mail,omitempty"`
+	// Settings for the payables module.
+	Payable *PayableSettingsResponse `json:"payable,omitempty" url:"payable,omitempty"`
+	// Auto tagging settings for all incoming OCR payable documents.
+	PayablesOcrAutoTagging []*OcrAutoTaggingSettingsRequest `json:"payables_ocr_auto_tagging,omitempty" url:"payables_ocr_auto_tagging,omitempty"`
+	// Payment preferences for entity to automate calculating suggested payment date basing on payment terms and entity preferences
+	PaymentPriority *PaymentPriorityEnum `json:"payment_priority,omitempty" url:"payment_priority,omitempty"`
+	// Settings for the payments module.
+	Payments *PaymentsSettingsResponse `json:"payments,omitempty" url:"payments,omitempty"`
+	// Sets the default behavior of whether a signature is required to accept quotes
+	QuoteSignatureRequired *bool `json:"quote_signature_required,omitempty" url:"quote_signature_required,omitempty"`
+	// Settings for the receivables module.
+	Receivable         *ReceivableSettingsResponse `json:"receivable,omitempty" url:"receivable,omitempty"`
+	ReceivableEditFlow *ReceivableEditFlow         `json:"receivable_edit_flow,omitempty" url:"receivable_edit_flow,omitempty"`
+	Reminder           *RemindersSettings          `json:"reminder,omitempty" url:"reminder,omitempty"`
+	// Measurement units.
+	Units []*Unit `json:"units,omitempty" url:"units,omitempty"`
+	// Defines whether the prices of products in receivables will already include VAT or not.
+	VatMode *VatModeEnum `json:"vat_mode,omitempty" url:"vat_mode,omitempty"`
+	Website *string      `json:"website,omitempty" url:"website,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
 }
 
-func (o *OcrAutoTaggingSettingsRequest) GetEnabled() bool {
-	if o == nil {
-		return false
+func (m *MergedSettingsResponse) GetAccounting() *AccountingSettingsResponse {
+	if m == nil {
+		return nil
 	}
-	return o.Enabled
+	return m.Accounting
+}
+
+func (m *MergedSettingsResponse) GetAllowPurchaseOrderAutolinking() *bool {
+	if m == nil {
+		return nil
+	}
+	return m.AllowPurchaseOrderAutolinking
+}
+
+func (m *MergedSettingsResponse) GetApiVersion() *ApiVersion {
+	if m == nil {
+		return nil
+	}
+	return m.ApiVersion
+}
+
+func (m *MergedSettingsResponse) GetCommercialConditions() []string {
+	if m == nil {
+		return nil
+	}
+	return m.CommercialConditions
+}
+
+func (m *MergedSettingsResponse) GetCurrency() *CurrencySettings {
+	if m == nil {
+		return nil
+	}
+	return m.Currency
+}
+
+func (m *MergedSettingsResponse) GetDefaultRole() map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.DefaultRole
+}
+
+func (m *MergedSettingsResponse) GetDocumentIds() *DocumentIDsSettings {
+	if m == nil {
+		return nil
+	}
+	return m.DocumentIds
+}
+
+func (m *MergedSettingsResponse) GetEinvoicing() *EInvoicingSettingsResponse {
+	if m == nil {
+		return nil
+	}
+	return m.Einvoicing
+}
+
+func (m *MergedSettingsResponse) GetGeneratePaidInvoicePdf() *bool {
+	if m == nil {
+		return nil
+	}
+	return m.GeneratePaidInvoicePdf
+}
+
+func (m *MergedSettingsResponse) GetLanguage() *LanguageCodeEnum {
+	if m == nil {
+		return nil
+	}
+	return m.Language
+}
+
+func (m *MergedSettingsResponse) GetMail() *MailSettingsResponse {
+	if m == nil {
+		return nil
+	}
+	return m.Mail
+}
+
+func (m *MergedSettingsResponse) GetPayable() *PayableSettingsResponse {
+	if m == nil {
+		return nil
+	}
+	return m.Payable
+}
+
+func (m *MergedSettingsResponse) GetPayablesOcrAutoTagging() []*OcrAutoTaggingSettingsRequest {
+	if m == nil {
+		return nil
+	}
+	return m.PayablesOcrAutoTagging
+}
+
+func (m *MergedSettingsResponse) GetPaymentPriority() *PaymentPriorityEnum {
+	if m == nil {
+		return nil
+	}
+	return m.PaymentPriority
+}
+
+func (m *MergedSettingsResponse) GetPayments() *PaymentsSettingsResponse {
+	if m == nil {
+		return nil
+	}
+	return m.Payments
+}
+
+func (m *MergedSettingsResponse) GetQuoteSignatureRequired() *bool {
+	if m == nil {
+		return nil
+	}
+	return m.QuoteSignatureRequired
+}
+
+func (m *MergedSettingsResponse) GetReceivable() *ReceivableSettingsResponse {
+	if m == nil {
+		return nil
+	}
+	return m.Receivable
+}
+
+func (m *MergedSettingsResponse) GetReceivableEditFlow() *ReceivableEditFlow {
+	if m == nil {
+		return nil
+	}
+	return m.ReceivableEditFlow
+}
+
+func (m *MergedSettingsResponse) GetReminder() *RemindersSettings {
+	if m == nil {
+		return nil
+	}
+	return m.Reminder
+}
+
+func (m *MergedSettingsResponse) GetUnits() []*Unit {
+	if m == nil {
+		return nil
+	}
+	return m.Units
+}
+
+func (m *MergedSettingsResponse) GetVatMode() *VatModeEnum {
+	if m == nil {
+		return nil
+	}
+	return m.VatMode
+}
+
+func (m *MergedSettingsResponse) GetWebsite() *string {
+	if m == nil {
+		return nil
+	}
+	return m.Website
+}
+
+func (m *MergedSettingsResponse) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MergedSettingsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler MergedSettingsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MergedSettingsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MergedSettingsResponse) String() string {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type OcrAutoTaggingSettingsRequest struct {
+	// Tag identifier that will be assigned to the payable document if one of the words listed in keywords is found during OCR
+	TagId string `json:"tag_id" url:"tag_id"`
+	// A list of words that will be searched for assigning a tag in the recognized fields of the document after OCR processing. If at least one match is found, the tag will be assigned. Each keyword must be between 2 and 25 characters long
+	Keywords []string `json:"keywords" url:"keywords"`
+	// A switch to temporarily disable a keyword without removing it from the list
+	Enabled bool `json:"enabled" url:"enabled"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (o *OcrAutoTaggingSettingsRequest) GetTagId() string {
+	if o == nil {
+		return ""
+	}
+	return o.TagId
 }
 
 func (o *OcrAutoTaggingSettingsRequest) GetKeywords() []string {
@@ -866,11 +992,11 @@ func (o *OcrAutoTaggingSettingsRequest) GetKeywords() []string {
 	return o.Keywords
 }
 
-func (o *OcrAutoTaggingSettingsRequest) GetTagId() string {
+func (o *OcrAutoTaggingSettingsRequest) GetEnabled() bool {
 	if o == nil {
-		return ""
+		return false
 	}
-	return o.TagId
+	return o.Enabled
 }
 
 func (o *OcrAutoTaggingSettingsRequest) GetExtraProperties() map[string]interface{} {
@@ -1054,7 +1180,7 @@ type OrganizationSchema struct {
 	ExecutivesProvided *bool                    `json:"executives_provided,omitempty" url:"executives_provided,omitempty"`
 	// A code which identifies uniquely a party of a transaction worldwide
 	LegalEntityId *string `json:"legal_entity_id,omitempty" url:"legal_entity_id,omitempty"`
-	// The legal name of the organization. If this organization will use Monite payment rails, this name must be up to 100 characters long, otherwise it can be up to 255 characters long.
+	// A legal name of an organization
 	LegalName              string `json:"legal_name" url:"legal_name"`
 	OwnersProvided         *bool  `json:"owners_provided,omitempty" url:"owners_provided,omitempty"`
 	RepresentativeProvided *bool  `json:"representative_provided,omitempty" url:"representative_provided,omitempty"`
@@ -1336,146 +1462,6 @@ func (r *RemindersSettings) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
-type SettingsResponse struct {
-	Language *LanguageCodeEnum       `json:"language,omitempty" url:"language,omitempty"`
-	Currency *CurrencySettingsOutput `json:"currency,omitempty" url:"currency,omitempty"`
-	Reminder *RemindersSettings      `json:"reminder,omitempty" url:"reminder,omitempty"`
-	// Defines whether the prices of products in receivables will already include VAT or not.
-	VatMode *VatModeEnum `json:"vat_mode,omitempty" url:"vat_mode,omitempty"`
-	// Payment preferences for entity to automate calculating suggested payment date based on payment terms and entity preferences.
-	PaymentPriority *PaymentPriorityEnum `json:"payment_priority,omitempty" url:"payment_priority,omitempty"`
-	// Automatically attempt to find a corresponding purchase order for all incoming payables.
-	AllowPurchaseOrderAutolinking *bool                `json:"allow_purchase_order_autolinking,omitempty" url:"allow_purchase_order_autolinking,omitempty"`
-	ReceivableEditFlow            *ReceivableEditFlow  `json:"receivable_edit_flow,omitempty" url:"receivable_edit_flow,omitempty"`
-	DocumentIds                   *DocumentIDsSettings `json:"document_ids,omitempty" url:"document_ids,omitempty"`
-	// Auto tagging settings for all incoming OCR payable documents.
-	PayablesOcrAutoTagging []*OcrAutoTaggingSettingsRequest `json:"payables_ocr_auto_tagging,omitempty" url:"payables_ocr_auto_tagging,omitempty"`
-	// Sets the default behavior of whether a signature is required to accept quotes.
-	QuoteSignatureRequired *bool `json:"quote_signature_required,omitempty" url:"quote_signature_required,omitempty"`
-	// If enabled, the paid invoice's PDF will be in a new layout set by the user.
-	GeneratePaidInvoicePdf *bool               `json:"generate_paid_invoice_pdf,omitempty" url:"generate_paid_invoice_pdf,omitempty"`
-	Accounting             *AccountingSettings `json:"accounting,omitempty" url:"accounting,omitempty"`
-
-	extraProperties map[string]interface{}
-	rawJSON         json.RawMessage
-}
-
-func (s *SettingsResponse) GetLanguage() *LanguageCodeEnum {
-	if s == nil {
-		return nil
-	}
-	return s.Language
-}
-
-func (s *SettingsResponse) GetCurrency() *CurrencySettingsOutput {
-	if s == nil {
-		return nil
-	}
-	return s.Currency
-}
-
-func (s *SettingsResponse) GetReminder() *RemindersSettings {
-	if s == nil {
-		return nil
-	}
-	return s.Reminder
-}
-
-func (s *SettingsResponse) GetVatMode() *VatModeEnum {
-	if s == nil {
-		return nil
-	}
-	return s.VatMode
-}
-
-func (s *SettingsResponse) GetPaymentPriority() *PaymentPriorityEnum {
-	if s == nil {
-		return nil
-	}
-	return s.PaymentPriority
-}
-
-func (s *SettingsResponse) GetAllowPurchaseOrderAutolinking() *bool {
-	if s == nil {
-		return nil
-	}
-	return s.AllowPurchaseOrderAutolinking
-}
-
-func (s *SettingsResponse) GetReceivableEditFlow() *ReceivableEditFlow {
-	if s == nil {
-		return nil
-	}
-	return s.ReceivableEditFlow
-}
-
-func (s *SettingsResponse) GetDocumentIds() *DocumentIDsSettings {
-	if s == nil {
-		return nil
-	}
-	return s.DocumentIds
-}
-
-func (s *SettingsResponse) GetPayablesOcrAutoTagging() []*OcrAutoTaggingSettingsRequest {
-	if s == nil {
-		return nil
-	}
-	return s.PayablesOcrAutoTagging
-}
-
-func (s *SettingsResponse) GetQuoteSignatureRequired() *bool {
-	if s == nil {
-		return nil
-	}
-	return s.QuoteSignatureRequired
-}
-
-func (s *SettingsResponse) GetGeneratePaidInvoicePdf() *bool {
-	if s == nil {
-		return nil
-	}
-	return s.GeneratePaidInvoicePdf
-}
-
-func (s *SettingsResponse) GetAccounting() *AccountingSettings {
-	if s == nil {
-		return nil
-	}
-	return s.Accounting
-}
-
-func (s *SettingsResponse) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SettingsResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler SettingsResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SettingsResponse(value)
-	extraProperties, err := internal.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-	s.rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SettingsResponse) String() string {
-	if len(s.rawJSON) > 0 {
-		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := internal.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
 type SingleOnboardingRequirementsResponse struct {
 	DisabledReason     *string                          `json:"disabled_reason,omitempty" url:"disabled_reason,omitempty"`
 	PaymentMethod      string                           `json:"payment_method" url:"payment_method"`
@@ -1563,12 +1549,12 @@ func (s *SingleOnboardingRequirementsResponse) String() string {
 }
 
 type PatchSettingsPayload struct {
-	Language *LanguageCodeEnum      `json:"language,omitempty" url:"-"`
-	Currency *CurrencySettingsInput `json:"currency,omitempty" url:"-"`
-	Reminder *RemindersSettings     `json:"reminder,omitempty" url:"-"`
+	Language *LanguageCodeEnum  `json:"language,omitempty" url:"-"`
+	Currency *CurrencySettings  `json:"currency,omitempty" url:"-"`
+	Reminder *RemindersSettings `json:"reminder,omitempty" url:"-"`
 	// Defines whether the prices of products in receivables will already include VAT or not.
 	VatMode *VatModeEnum `json:"vat_mode,omitempty" url:"-"`
-	// Payment preferences for entity to automate calculating suggested payment date based on payment terms and entity preferences.
+	// Payment preferences for entity to automate calculating suggested payment date basing on payment terms and entity preferences
 	PaymentPriority *PaymentPriorityEnum `json:"payment_priority,omitempty" url:"-"`
 	// Automatically attempt to find a corresponding purchase order for all incoming payables.
 	AllowPurchaseOrderAutolinking *bool                       `json:"allow_purchase_order_autolinking,omitempty" url:"-"`
@@ -1576,11 +1562,10 @@ type PatchSettingsPayload struct {
 	DocumentIds                   *DocumentIDsSettingsRequest `json:"document_ids,omitempty" url:"-"`
 	// Auto tagging settings for all incoming OCR payable documents.
 	PayablesOcrAutoTagging []*OcrAutoTaggingSettingsRequest `json:"payables_ocr_auto_tagging,omitempty" url:"-"`
-	// Sets the default behavior of whether a signature is required to accept quotes.
+	// Sets the default behavior of whether a signature is required to accept quotes
 	QuoteSignatureRequired *bool `json:"quote_signature_required,omitempty" url:"-"`
-	// If enabled, the paid invoice's PDF will be in a new layout set by the user.
-	GeneratePaidInvoicePdf *bool               `json:"generate_paid_invoice_pdf,omitempty" url:"-"`
-	Accounting             *AccountingSettings `json:"accounting,omitempty" url:"-"`
+	// If enabled, the paid invoice's PDF will be in a new layout set by the user
+	GeneratePaidInvoicePdf *bool `json:"generate_paid_invoice_pdf,omitempty" url:"-"`
 }
 
 type EntityLogoUploadRequest struct {

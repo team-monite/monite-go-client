@@ -413,124 +413,6 @@ func (c *Client) UpdateById(
 	return response, nil
 }
 
-// Activate an entity to allow it to perform any operations.
-func (c *Client) PostEntitiesIdActivate(
-	ctx context.Context,
-	// A unique ID to specify the entity.
-	entityId string,
-	opts ...option.RequestOption,
-) (*monitegoclient.EntityResponse, error) {
-	options := core.NewRequestOptions(opts...)
-	baseURL := internal.ResolveBaseURL(
-		options.BaseURL,
-		c.baseURL,
-		"https://api.sandbox.monite.com/v1",
-	)
-	endpointURL := internal.EncodeURL(
-		baseURL+"/entities/%v/activate",
-		entityId,
-	)
-	headers := internal.MergeHeaders(
-		c.header.Clone(),
-		options.ToHeader(),
-	)
-	errorCodes := internal.ErrorCodes{
-		400: func(apiError *core.APIError) error {
-			return &monitegoclient.BadRequestError{
-				APIError: apiError,
-			}
-		},
-		422: func(apiError *core.APIError) error {
-			return &monitegoclient.UnprocessableEntityError{
-				APIError: apiError,
-			}
-		},
-		500: func(apiError *core.APIError) error {
-			return &monitegoclient.InternalServerError{
-				APIError: apiError,
-			}
-		},
-	}
-
-	var response *monitegoclient.EntityResponse
-	if err := c.caller.Call(
-		ctx,
-		&internal.CallParams{
-			URL:             endpointURL,
-			Method:          http.MethodPost,
-			Headers:         headers,
-			MaxAttempts:     options.MaxAttempts,
-			BodyProperties:  options.BodyProperties,
-			QueryParameters: options.QueryParameters,
-			Client:          options.HTTPClient,
-			Response:        &response,
-			ErrorDecoder:    internal.NewErrorDecoder(errorCodes),
-		},
-	); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
-// Deactivate an entity to stop it from performing any operations.
-func (c *Client) PostEntitiesIdDeactivate(
-	ctx context.Context,
-	// A unique ID to specify the entity.
-	entityId string,
-	opts ...option.RequestOption,
-) (*monitegoclient.EntityResponse, error) {
-	options := core.NewRequestOptions(opts...)
-	baseURL := internal.ResolveBaseURL(
-		options.BaseURL,
-		c.baseURL,
-		"https://api.sandbox.monite.com/v1",
-	)
-	endpointURL := internal.EncodeURL(
-		baseURL+"/entities/%v/deactivate",
-		entityId,
-	)
-	headers := internal.MergeHeaders(
-		c.header.Clone(),
-		options.ToHeader(),
-	)
-	errorCodes := internal.ErrorCodes{
-		400: func(apiError *core.APIError) error {
-			return &monitegoclient.BadRequestError{
-				APIError: apiError,
-			}
-		},
-		422: func(apiError *core.APIError) error {
-			return &monitegoclient.UnprocessableEntityError{
-				APIError: apiError,
-			}
-		},
-		500: func(apiError *core.APIError) error {
-			return &monitegoclient.InternalServerError{
-				APIError: apiError,
-			}
-		},
-	}
-
-	var response *monitegoclient.EntityResponse
-	if err := c.caller.Call(
-		ctx,
-		&internal.CallParams{
-			URL:             endpointURL,
-			Method:          http.MethodPost,
-			Headers:         headers,
-			MaxAttempts:     options.MaxAttempts,
-			BodyProperties:  options.BodyProperties,
-			QueryParameters: options.QueryParameters,
-			Client:          options.HTTPClient,
-			Response:        &response,
-			ErrorDecoder:    internal.NewErrorDecoder(errorCodes),
-		},
-	); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
 // Entity logo can be PNG, JPG, or GIF, up to 10 MB in size. The logo is used, for example, in PDF documents created by this entity.
 func (c *Client) UploadLogoById(
 	ctx context.Context,
@@ -771,7 +653,7 @@ func (c *Client) GetSettingsById(
 	// A unique ID to specify the entity.
 	entityId string,
 	opts ...option.RequestOption,
-) (*monitegoclient.SettingsResponse, error) {
+) (*monitegoclient.MergedSettingsResponse, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -804,7 +686,7 @@ func (c *Client) GetSettingsById(
 		},
 	}
 
-	var response *monitegoclient.SettingsResponse
+	var response *monitegoclient.MergedSettingsResponse
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{
@@ -831,7 +713,7 @@ func (c *Client) UpdateSettingsById(
 	entityId string,
 	request *monitegoclient.PatchSettingsPayload,
 	opts ...option.RequestOption,
-) (*monitegoclient.SettingsResponse, error) {
+) (*monitegoclient.MergedSettingsResponse, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -865,7 +747,7 @@ func (c *Client) UpdateSettingsById(
 		},
 	}
 
-	var response *monitegoclient.SettingsResponse
+	var response *monitegoclient.MergedSettingsResponse
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{

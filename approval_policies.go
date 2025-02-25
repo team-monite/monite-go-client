@@ -10,10 +10,6 @@ import (
 )
 
 type ApprovalPolicyCreate struct {
-	// The date and time (in the ISO 8601 format) when the approval policy becomes active. Only payables submitted for approval during the policy's active period will trigger this policy. If omitted or `null`, the policy is effective immediately. The value will be converted to UTC.
-	StartsAt *time.Time `json:"starts_at,omitempty" url:"-"`
-	// The date and time (in the ISO 8601 format) when the approval policy stops being active and stops triggering approval workflows.If `ends_at` is provided in the request, then `starts_at` must also be provided and `ends_at` must be later than `starts_at`. The value will be converted to UTC.
-	EndsAt *time.Time `json:"ends_at,omitempty" url:"-"`
 	// The name of the approval policy.
 	Name string `json:"name" url:"-"`
 	// A brief description of the approval policy.
@@ -24,32 +20,7 @@ type ApprovalPolicyCreate struct {
 	Trigger *ApprovalPolicyCreateTrigger `json:"trigger,omitempty" url:"-"`
 }
 
-func (a *ApprovalPolicyCreate) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApprovalPolicyCreate
-	var body unmarshaler
-	if err := json.Unmarshal(data, &body); err != nil {
-		return err
-	}
-	*a = ApprovalPolicyCreate(body)
-	return nil
-}
-
-func (a *ApprovalPolicyCreate) MarshalJSON() ([]byte, error) {
-	type embed ApprovalPolicyCreate
-	var marshaler = struct {
-		embed
-		StartsAt *internal.DateTime `json:"starts_at,omitempty"`
-		EndsAt   *internal.DateTime `json:"ends_at,omitempty"`
-	}{
-		embed:    embed(*a),
-		StartsAt: internal.NewOptionalDateTime(a.StartsAt),
-		EndsAt:   internal.NewOptionalDateTime(a.EndsAt),
-	}
-	return json.Marshal(marshaler)
-}
-
 type ApprovalPoliciesGetRequest struct {
-	ProcessId *string `json:"-" url:"process_id,omitempty"`
 	// Order by
 	Order *OrderEnum `json:"-" url:"order,omitempty"`
 	// Max is 100
@@ -98,10 +69,6 @@ func (a ApprovalPolicyCursorFields) Ptr() *ApprovalPolicyCursorFields {
 }
 
 type ApprovalPolicyResource struct {
-	// The date and time (in the ISO 8601 format) when the approval policy becomes active. Only payables submitted for approval during the policy's active period will trigger this policy. If omitted or `null`, the policy is effective immediately. The value will be converted to UTC.
-	StartsAt *time.Time `json:"starts_at,omitempty" url:"starts_at,omitempty"`
-	// The date and time (in the ISO 8601 format) when the approval policy stops being active and stops triggering approval workflows.If `ends_at` is provided in the request, then `starts_at` must also be provided and `ends_at` must be later than `starts_at`. The value will be converted to UTC.
-	EndsAt *time.Time `json:"ends_at,omitempty" url:"ends_at,omitempty"`
 	// The name of the approval policy.
 	Name string `json:"name" url:"name"`
 	// A brief description of the approval policy.
@@ -120,20 +87,6 @@ type ApprovalPolicyResource struct {
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
-}
-
-func (a *ApprovalPolicyResource) GetStartsAt() *time.Time {
-	if a == nil {
-		return nil
-	}
-	return a.StartsAt
-}
-
-func (a *ApprovalPolicyResource) GetEndsAt() *time.Time {
-	if a == nil {
-		return nil
-	}
-	return a.EndsAt
 }
 
 func (a *ApprovalPolicyResource) GetName() string {
@@ -214,8 +167,6 @@ func (a *ApprovalPolicyResource) UnmarshalJSON(data []byte) error {
 	type embed ApprovalPolicyResource
 	var unmarshaler = struct {
 		embed
-		StartsAt  *internal.DateTime `json:"starts_at,omitempty"`
-		EndsAt    *internal.DateTime `json:"ends_at,omitempty"`
 		CreatedAt *internal.DateTime `json:"created_at"`
 		UpdatedAt *internal.DateTime `json:"updated_at"`
 	}{
@@ -225,8 +176,6 @@ func (a *ApprovalPolicyResource) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = ApprovalPolicyResource(unmarshaler.embed)
-	a.StartsAt = unmarshaler.StartsAt.TimePtr()
-	a.EndsAt = unmarshaler.EndsAt.TimePtr()
 	a.CreatedAt = unmarshaler.CreatedAt.Time()
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	extraProperties, err := internal.ExtractExtraProperties(data, *a)
@@ -242,14 +191,10 @@ func (a *ApprovalPolicyResource) MarshalJSON() ([]byte, error) {
 	type embed ApprovalPolicyResource
 	var marshaler = struct {
 		embed
-		StartsAt  *internal.DateTime `json:"starts_at,omitempty"`
-		EndsAt    *internal.DateTime `json:"ends_at,omitempty"`
 		CreatedAt *internal.DateTime `json:"created_at"`
 		UpdatedAt *internal.DateTime `json:"updated_at"`
 	}{
 		embed:     embed(*a),
-		StartsAt:  internal.NewOptionalDateTime(a.StartsAt),
-		EndsAt:    internal.NewOptionalDateTime(a.EndsAt),
 		CreatedAt: internal.NewDateTime(a.CreatedAt),
 		UpdatedAt: internal.NewDateTime(a.UpdatedAt),
 	}
@@ -1178,10 +1123,6 @@ func (a *ApprovalPolicyUpdateTrigger) Accept(visitor ApprovalPolicyUpdateTrigger
 }
 
 type ApprovalPolicyUpdate struct {
-	// The date and time (in the ISO 8601 format) when the approval policy becomes active. Only payables submitted for approval during the policy's active period will trigger this policy. If omitted or `null`, the policy is effective immediately. The value will be converted to UTC.
-	StartsAt *time.Time `json:"starts_at,omitempty" url:"-"`
-	// The date and time (in the ISO 8601 format) when the approval policy stops being active and stops triggering approval workflows.If `ends_at` is provided in the request, then `starts_at` must also be provided and `ends_at` must be later than `starts_at`. The value will be converted to UTC.
-	EndsAt *time.Time `json:"ends_at,omitempty" url:"-"`
 	// The name of the approval policy.
 	Name *string `json:"name,omitempty" url:"-"`
 	// A brief description of the approval policy.
@@ -1192,28 +1133,4 @@ type ApprovalPolicyUpdate struct {
 	Trigger *ApprovalPolicyUpdateTrigger `json:"trigger,omitempty" url:"-"`
 	// A string that represents the current status of the approval policy.
 	Status *ApprovalPolicyStatus `json:"status,omitempty" url:"-"`
-}
-
-func (a *ApprovalPolicyUpdate) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApprovalPolicyUpdate
-	var body unmarshaler
-	if err := json.Unmarshal(data, &body); err != nil {
-		return err
-	}
-	*a = ApprovalPolicyUpdate(body)
-	return nil
-}
-
-func (a *ApprovalPolicyUpdate) MarshalJSON() ([]byte, error) {
-	type embed ApprovalPolicyUpdate
-	var marshaler = struct {
-		embed
-		StartsAt *internal.DateTime `json:"starts_at,omitempty"`
-		EndsAt   *internal.DateTime `json:"ends_at,omitempty"`
-	}{
-		embed:    embed(*a),
-		StartsAt: internal.NewOptionalDateTime(a.StartsAt),
-		EndsAt:   internal.NewOptionalDateTime(a.EndsAt),
-	}
-	return json.Marshal(marshaler)
 }

@@ -5,6 +5,7 @@ package connections
 import (
 	context "context"
 	monitegoclient "github.com/team-monite/monite-go-client"
+	accounting "github.com/team-monite/monite-go-client/accounting"
 	core "github.com/team-monite/monite-go-client/core"
 	internal "github.com/team-monite/monite-go-client/internal"
 	option "github.com/team-monite/monite-go-client/option"
@@ -83,6 +84,7 @@ func (c *Client) Get(
 // Create new connection
 func (c *Client) Create(
 	ctx context.Context,
+	request *accounting.AccountingConnectionRequest,
 	opts ...option.RequestOption,
 ) (*monitegoclient.AccountingConnectionResponse, error) {
 	options := core.NewRequestOptions(opts...)
@@ -96,6 +98,7 @@ func (c *Client) Create(
 		c.header.Clone(),
 		options.ToHeader(),
 	)
+	headers.Set("Content-Type", "application/json")
 	errorCodes := internal.ErrorCodes{
 		422: func(apiError *core.APIError) error {
 			return &monitegoclient.UnprocessableEntityError{
@@ -120,6 +123,7 @@ func (c *Client) Create(
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
+			Request:         request,
 			Response:        &response,
 			ErrorDecoder:    internal.NewErrorDecoder(errorCodes),
 		},

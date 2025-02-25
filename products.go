@@ -26,7 +26,7 @@ type ProductServiceRequest struct {
 
 type ProductsGetRequest struct {
 	// Order by
-	Order *OrderEnum `json:"-" url:"order,omitempty"`
+	Order *OrderEnum3 `json:"-" url:"order,omitempty"`
 	// Max is 100
 	Limit *int `json:"-" url:"limit,omitempty"`
 	// A token, obtained from previous page. Prior over other filters

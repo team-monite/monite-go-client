@@ -33,13 +33,13 @@ func NewClient(opts ...option.RequestOption) *Client {
 }
 
 // Get a list of all line items related to a specific payable.
-// Related guide: [List all payable line items](https://docs.monite.com/accounts-payable/payables/line-items#list-all-line-items-of-a-payable)
+// Related guide: [List all payable line items](https://docs.monite.com/docs/manage-line-items#list-all-line-items-of-a-payable)
 //
 // See also:
 //
-// [Manage line items](https://docs.monite.com/accounts-payable/payables/line-items)
+// [Manage line items](https://docs.monite.com/docs/manage-line-items)
 //
-// [Collect payables](https://docs.monite.com/accounts-payable/payables/collect)
+// [Collect payables](https://docs.monite.com/docs/collect-payables)
 func (c *Client) Get(
 	ctx context.Context,
 	payableId string,
@@ -127,13 +127,13 @@ func (c *Client) Get(
 //	`quantity`, and `tax` fields, therefore, are read-only and appear only in the response schema. The field
 //	 `ledger_account_id` is required **only** for account integration, otherwise, it is optional.
 //
-// Related guide: [Add line items to a payable](https://docs.monite.com/accounts-payable/payables/line-items#add-line-items-to-a-payable)
+// Related guide: [Add line items to a payable](https://docs.monite.com/docs/manage-line-items#add-line-items-to-a-payable)
 //
 // See also:
 //
-// [Manage line items](https://docs.monite.com/accounts-payable/payables/line-items)
+// [Manage line items](https://docs.monite.com/docs/manage-line-items)
 //
-// [Collect payables](https://docs.monite.com/accounts-payable/payables/collect)
+// [Collect payables](https://docs.monite.com/docs/collect-payables)
 func (c *Client) Create(
 	ctx context.Context,
 	payableId string,
@@ -216,13 +216,13 @@ func (c *Client) Create(
 
 // Replaces the information of all line items of a specific payable.
 //
-// Related guide: [Replace all line items](https://docs.monite.com/accounts-payable/payables/line-items#replace-all-line-items)
+// Related guide: [Replace all line items](https://docs.monite.com/docs/manage-line-items#replace-all-line-items)
 //
 // See also:
 //
-// [Manage line items](https://docs.monite.com/accounts-payable/payables/line-items)
+// [Manage line items](https://docs.monite.com/docs/manage-line-items)
 //
-// [Collect payables](https://docs.monite.com/accounts-payable/payables/collect)
+// [Collect payables](https://docs.monite.com/docs/collect-payables)
 func (c *Client) Replace(
 	ctx context.Context,
 	payableId string,
@@ -310,13 +310,13 @@ func (c *Client) Replace(
 
 // Get information about a specific line item with a given ID.
 //
-// Related guide: [Retrieve a line item](https://docs.monite.com/accounts-payable/payables/line-items#retrieve-a-line-item)
+// Related guide: [Retrieve a line item](https://docs.monite.com/docs/manage-line-items#retrieve-a-line-item)
 //
 // See also:
 //
-// [Manage line items](https://docs.monite.com/accounts-payable/payables/line-items)
+// [Manage line items](https://docs.monite.com/docs/manage-line-items)
 //
-// [Collect payables](https://docs.monite.com/accounts-payable/payables/collect)
+// [Collect payables](https://docs.monite.com/docs/collect-payables)
 func (c *Client) GetById(
 	ctx context.Context,
 	lineItemId string,
@@ -398,13 +398,13 @@ func (c *Client) GetById(
 
 // Delete the line item with the given ID.
 //
-// Related guide: [Remove a line item](https://docs.monite.com/accounts-payable/payables/line-items#remove-a-line-item)
+// Related guide: [Remove a line item](https://docs.monite.com/docs/manage-line-items#remove-a-line-item)
 //
 // See also:
 //
-// [Manage line items](https://docs.monite.com/accounts-payable/payables/line-items)
+// [Manage line items](https://docs.monite.com/docs/manage-line-items)
 //
-// [Collect payables](https://docs.monite.com/accounts-payable/payables/collect)
+// [Collect payables](https://docs.monite.com/docs/collect-payables)
 func (c *Client) DeleteById(
 	ctx context.Context,
 	lineItemId string,
@@ -479,13 +479,13 @@ func (c *Client) DeleteById(
 
 // Edits the information of a specific line item.
 //
-// Related guide: [Update a line item](https://docs.monite.com/accounts-payable/payables/line-items#update-a-line-item)
+// Related guide: [Update a line item](https://docs.monite.com/docs/manage-line-items#update-a-line-item)
 //
 // See also:
 //
-// [Manage line items](https://docs.monite.com/accounts-payable/payables/line-items)
+// [Manage line items](https://docs.monite.com/docs/manage-line-items)
 //
-// [Collect payables](https://docs.monite.com/accounts-payable/payables/collect)
+// [Collect payables](https://docs.monite.com/docs/collect-payables)
 func (c *Client) UpdateById(
 	ctx context.Context,
 	lineItemId string,
