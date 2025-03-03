@@ -63,8 +63,8 @@ func (r *RequestOptions) cloneHeader() http.Header {
 	headers := r.HTTPHeader.Clone()
 	headers.Set("X-Fern-Language", "Go")
 	headers.Set("X-Fern-SDK-Name", "github.com/team-monite/monite-go-client")
-	headers.Set("X-Fern-SDK-Version", "v0.2.0")
-	headers.Set("User-Agent", "github.com/team-monite/monite-go-client/0.2.0")
+	headers.Set("X-Fern-SDK-Version", "v0.2.1")
+	headers.Set("User-Agent", "github.com/team-monite/monite-go-client/0.2.1")
 	return headers
 }
 
