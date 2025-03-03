@@ -10,11 +10,11 @@ import (
 // Possible responses: `Script validation error: {errors}.`
 type BadRequestError struct {
 	*core.APIError
-	Body *ErrorSchemaResponse
+	Body interface{}
 }
 
 func (b *BadRequestError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
+	var body interface{}
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -34,11 +34,11 @@ func (b *BadRequestError) Unwrap() error {
 // Business logic error
 type ConflictError struct {
 	*core.APIError
-	Body *ErrorSchemaResponse
+	Body interface{}
 }
 
 func (c *ConflictError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
+	var body interface{}
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -58,11 +58,11 @@ func (c *ConflictError) Unwrap() error {
 // Forbidden
 type ForbiddenError struct {
 	*core.APIError
-	Body *ErrorSchemaResponse
+	Body interface{}
 }
 
 func (f *ForbiddenError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
+	var body interface{}
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -82,11 +82,11 @@ func (f *ForbiddenError) Unwrap() error {
 // Internal Server Error
 type InternalServerError struct {
 	*core.APIError
-	Body *ErrorSchemaResponse
+	Body interface{}
 }
 
 func (i *InternalServerError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
+	var body interface{}
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -106,11 +106,11 @@ func (i *InternalServerError) Unwrap() error {
 // Not Acceptable
 type NotAcceptableError struct {
 	*core.APIError
-	Body *ErrorSchemaResponse
+	Body interface{}
 }
 
 func (n *NotAcceptableError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
+	var body interface{}
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -130,11 +130,11 @@ func (n *NotAcceptableError) Unwrap() error {
 // Not found
 type NotFoundError struct {
 	*core.APIError
-	Body *ErrorSchemaResponse
+	Body interface{}
 }
 
 func (n *NotFoundError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
+	var body interface{}
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}
@@ -151,38 +151,14 @@ func (n *NotFoundError) Unwrap() error {
 	return n.APIError
 }
 
-// Requested Range Not Satisfiable
-type RangeNotSatisfiableError struct {
-	*core.APIError
-	Body *ErrorSchemaResponse
-}
-
-func (r *RangeNotSatisfiableError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
-	if err := json.Unmarshal(data, &body); err != nil {
-		return err
-	}
-	r.StatusCode = 416
-	r.Body = body
-	return nil
-}
-
-func (r *RangeNotSatisfiableError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(r.Body)
-}
-
-func (r *RangeNotSatisfiableError) Unwrap() error {
-	return r.APIError
-}
-
 // Unauthorized
 type UnauthorizedError struct {
 	*core.APIError
-	Body *ErrorSchemaResponse
+	Body interface{}
 }
 
 func (u *UnauthorizedError) UnmarshalJSON(data []byte) error {
-	var body *ErrorSchemaResponse
+	var body interface{}
 	if err := json.Unmarshal(data, &body); err != nil {
 		return err
 	}

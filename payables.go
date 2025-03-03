@@ -27,10 +27,12 @@ type PayableUploadWithDataSchema struct {
 	CounterpartId *string `json:"counterpart_id,omitempty" url:"-"`
 	// The ID of counterpart VAT ID object stored in counterparts service
 	CounterpartVatIdId *string `json:"counterpart_vat_id_id,omitempty" url:"-"`
-	// The [currency code](https://docs.monite.com/docs/currencies) of the currency used in the payable.
+	// The [currency code](https://docs.monite.com/references/currencies) of the currency used in the payable.
 	Currency *CurrencyEnum `json:"currency,omitempty" url:"-"`
 	// An arbitrary description of this payable.
 	Description *string `json:"description,omitempty" url:"-"`
+	// The value of the additional discount that will be applied to the total amount. in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	Discount *int `json:"discount,omitempty" url:"-"`
 	// A unique invoice number assigned by the invoice issuer for payment tracking purposes.
 	DocumentId *string `json:"document_id,omitempty" url:"-"`
 	// The date by which the payable must be paid, in the YYYY-MM-DD format. If the payable specifies payment terms with early payment discounts, this is the final payment date.
@@ -49,7 +51,7 @@ type PayableUploadWithDataSchema struct {
 	PurchaseOrderId *string `json:"purchase_order_id,omitempty" url:"-"`
 	// The email address from which the invoice was sent to the entity.
 	Sender *string `json:"sender,omitempty" url:"-"`
-	// The subtotal amount to be paid, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The subtotal amount to be paid, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	Subtotal *int `json:"subtotal,omitempty" url:"-"`
 	// The suggested date and corresponding discount in which payable could be paid. The date is in the YYYY-MM-DD format. The discount is calculated as X * (10^-4) - for example, 100 is 1%, 25 is 0,25%, 10000 is 100 %. Date varies depending on the payment terms and may even be equal to the due date with discount 0.
 	SuggestedPaymentTerm *SuggestedPaymentTerm `json:"suggested_payment_term,omitempty" url:"-"`
@@ -57,107 +59,209 @@ type PayableUploadWithDataSchema struct {
 	TagIds []string `json:"tag_ids,omitempty" url:"-"`
 	// Registered tax percentage applied for a service price in minor units, e.g. 200 means 2%. 1050 means 10.5%.
 	Tax *int `json:"tax,omitempty" url:"-"`
-	// Tax amount in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// Tax amount in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	TaxAmount *int `json:"tax_amount,omitempty" url:"-"`
-	// The total amount to be paid, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The total amount to be paid, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	TotalAmount *int `json:"total_amount,omitempty" url:"-"`
 }
 
 type PayablesGetRequest struct {
-	// Order by
+	// Sort order (ascending by default). Typically used together with the `sort` parameter.
 	Order *OrderEnum `json:"-" url:"order,omitempty"`
-	// Max is 100
+	// The number of items (0 .. 100) to return in a single page of the response. The response may contain fewer items if it is the last or only page.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// A token, obtained from previous page. Prior over other filters
+	// A pagination token obtained from a previous call to this endpoint. Use it to get the next or previous page of results for your initial query. If `pagination_token` is specified, all other query parameters are ignored and inferred from the initial query.
+	//
+	// If not specified, the first page of results will be returned.
 	PaginationToken *string `json:"-" url:"pagination_token,omitempty"`
-	// Allowed sort fields
-	Sort                     *PayableCursorFields     `json:"-" url:"sort,omitempty"`
-	CreatedAtGt              *time.Time               `json:"-" url:"created_at__gt,omitempty"`
-	CreatedAtLt              *time.Time               `json:"-" url:"created_at__lt,omitempty"`
-	CreatedAtGte             *time.Time               `json:"-" url:"created_at__gte,omitempty"`
-	CreatedAtLte             *time.Time               `json:"-" url:"created_at__lte,omitempty"`
-	Status                   *PayableStateEnum        `json:"-" url:"status,omitempty"`
-	StatusIn                 []*PayableStateEnum      `json:"-" url:"status__in,omitempty"`
-	IdIn                     []*string                `json:"-" url:"id__in,omitempty"`
-	TotalAmount              *int                     `json:"-" url:"total_amount,omitempty"`
-	TotalAmountGt            *int                     `json:"-" url:"total_amount__gt,omitempty"`
-	TotalAmountLt            *int                     `json:"-" url:"total_amount__lt,omitempty"`
-	TotalAmountGte           *int                     `json:"-" url:"total_amount__gte,omitempty"`
-	TotalAmountLte           *int                     `json:"-" url:"total_amount__lte,omitempty"`
-	Amount                   *int                     `json:"-" url:"amount,omitempty"`
-	AmountGt                 *int                     `json:"-" url:"amount__gt,omitempty"`
-	AmountLt                 *int                     `json:"-" url:"amount__lt,omitempty"`
-	AmountGte                *int                     `json:"-" url:"amount__gte,omitempty"`
-	AmountLte                *int                     `json:"-" url:"amount__lte,omitempty"`
-	Currency                 *CurrencyEnum            `json:"-" url:"currency,omitempty"`
-	CounterpartName          *string                  `json:"-" url:"counterpart_name,omitempty"`
-	CounterpartNameContains  *string                  `json:"-" url:"counterpart_name__contains,omitempty"`
-	CounterpartNameIcontains *string                  `json:"-" url:"counterpart_name__icontains,omitempty"`
-	SearchText               *string                  `json:"-" url:"search_text,omitempty"`
-	DueDate                  *string                  `json:"-" url:"due_date,omitempty"`
-	DueDateGt                *string                  `json:"-" url:"due_date__gt,omitempty"`
-	DueDateLt                *string                  `json:"-" url:"due_date__lt,omitempty"`
-	DueDateGte               *string                  `json:"-" url:"due_date__gte,omitempty"`
-	DueDateLte               *string                  `json:"-" url:"due_date__lte,omitempty"`
-	DocumentId               *string                  `json:"-" url:"document_id,omitempty"`
-	DocumentIdContains       *string                  `json:"-" url:"document_id__contains,omitempty"`
-	DocumentIdIcontains      *string                  `json:"-" url:"document_id__icontains,omitempty"`
-	WasCreatedByUserId       *string                  `json:"-" url:"was_created_by_user_id,omitempty"`
-	CounterpartId            *string                  `json:"-" url:"counterpart_id,omitempty"`
-	SourceOfPayableData      *SourceOfPayableDataEnum `json:"-" url:"source_of_payable_data,omitempty"`
-	OcrStatus                *OcrStatusEnum           `json:"-" url:"ocr_status,omitempty"`
+	// The field to sort the results by. Typically used together with the `order` parameter.
+	Sort *PayableCursorFields `json:"-" url:"sort,omitempty"`
+	// Return only payables created in Monite after the specified date and time. The value must be in the ISO 8601 format YYYY-MM-DDThh:mm[:ss[.ffffff]][Z|±hh:mm].
+	CreatedAtGt *time.Time `json:"-" url:"created_at__gt,omitempty"`
+	// Return only payables created in Monite before the specified date and time.
+	CreatedAtLt *time.Time `json:"-" url:"created_at__lt,omitempty"`
+	// Return only payables created in Monite on or after the specified date and time.
+	CreatedAtGte *time.Time `json:"-" url:"created_at__gte,omitempty"`
+	// Return only payables created in Monite before or on the specified date and time.
+	CreatedAtLte *time.Time `json:"-" url:"created_at__lte,omitempty"`
+	// Return only payables that have the specified [status](https://docs.monite.com/accounts-payable/payables/index).
+	//
+	// To query multiple statuses at once, use the `status__in` parameter instead.
+	Status *PayableStateEnum `json:"-" url:"status,omitempty"`
+	// Return only payables that have the specified [statuses](https://docs.monite.com/accounts-payable/payables/index).
+	//
+	// To specify multiple statuses, repeat this parameter for each value: `status__in=draft&status__in=new`
+	StatusIn []*PayableStateEnum `json:"-" url:"status__in,omitempty"`
+	// Return only payables with specified IDs. Valid but nonexistent IDs do not raise errors but produce no results.
+	//
+	// To specify multiple IDs, repeat this parameter for each value: `id__in=<id1>&id__in=<id2>`
+	IdIn []*string `json:"-" url:"id__in,omitempty"`
+	// Return only payables with the exact specified total amount. The amount must be specified in the minor units of currency. For example, $12.5 is represented as 1250.
+	TotalAmount *int `json:"-" url:"total_amount,omitempty"`
+	// Return only payables whose total amount (in minor units) exceeds the specified value.
+	TotalAmountGt *int `json:"-" url:"total_amount__gt,omitempty"`
+	// Return only payables whose total amount (in minor units) is less than the specified value.
+	TotalAmountLt *int `json:"-" url:"total_amount__lt,omitempty"`
+	// Return only payables whose total amount (in minor units) is greater than or equal to the specified value.
+	TotalAmountGte *int `json:"-" url:"total_amount__gte,omitempty"`
+	// Return only payables whose total amount (in minor units) is less than or equal to the specified value.
+	TotalAmountLte *int `json:"-" url:"total_amount__lte,omitempty"`
+	// Return only payables with the specified amount.
+	Amount *int `json:"-" url:"amount,omitempty"`
+	// Return only payables whose amount (in minor units) exceeds the specified value.
+	AmountGt *int `json:"-" url:"amount__gt,omitempty"`
+	// Return only payables whose amount (in minor units) is less than the specified value.
+	AmountLt *int `json:"-" url:"amount__lt,omitempty"`
+	// Return only payables whose amount (in minor units) is greater than or equal to the specified value.
+	AmountGte *int `json:"-" url:"amount__gte,omitempty"`
+	// Return only payables whose amount (in minor units) is less than or equal to the specified value.
+	AmountLte *int `json:"-" url:"amount__lte,omitempty"`
+	// Return only payables that use the specified currency.
+	Currency *CurrencyEnum `json:"-" url:"currency,omitempty"`
+	// Return only payables received from counterparts with the specified name (exact match, case-sensitive).
+	//
+	// For counterparts of `type = individual`, the full name is formatted as `first_name last_name`.
+	CounterpartName *string `json:"-" url:"counterpart_name,omitempty"`
+	// Return only payables received from counterparts whose name contains the specified string (case-sensitive).
+	CounterpartNameContains *string `json:"-" url:"counterpart_name__contains,omitempty"`
+	// Return only payables received from counterparts whose name contains the specified string (case-insensitive).
+	CounterpartNameIcontains *string `json:"-" url:"counterpart_name__icontains,omitempty"`
+	// Apply the `icontains` condition to search for the specified text in the `document_id` and `counterpart_name` fields in the payables.
+	SearchText *string `json:"-" url:"search_text,omitempty"`
+	// Return payables that are due on the specified date (YYYY-MM-DD)
+	DueDate *string `json:"-" url:"due_date,omitempty"`
+	// Return payables that are due after the specified date (exclusive, YYYY-MM-DD).
+	DueDateGt *string `json:"-" url:"due_date__gt,omitempty"`
+	// Return payables that are due before the specified date (exclusive, YYYY-MM-DD).
+	DueDateLt *string `json:"-" url:"due_date__lt,omitempty"`
+	// Return payables that are due on or after the specified date (YYYY-MM-DD).
+	DueDateGte *string `json:"-" url:"due_date__gte,omitempty"`
+	// Return payables that are due before or on the specified date (YYYY-MM-DD).
+	DueDateLte *string `json:"-" url:"due_date__lte,omitempty"`
+	// Return a payable with the exact specified document number (case-sensitive).
+	//
+	// The `document_id` is the user-facing document number such as INV-00042, not to be confused with Monite resource IDs (`id`).
+	DocumentId *string `json:"-" url:"document_id,omitempty"`
+	// Return only payables whose document number (`document_id`) contains the specified string (case-sensitive).
+	DocumentIdContains *string `json:"-" url:"document_id__contains,omitempty"`
+	// Return only payables whose document number (`document_id`) contains the specified string (case-insensitive).
+	DocumentIdIcontains *string `json:"-" url:"document_id__icontains,omitempty"`
+	// Return only payables created in Monite by the entity user with the specified ID.
+	WasCreatedByUserId *string `json:"-" url:"was_created_by_user_id,omitempty"`
+	// Return only payables received from the counterpart with the specified ID.
+	//
+	// Counterparts that have been deleted but have associated payables will still return results here because the payables contain a frozen copy of the counterpart data.
+	//
+	// If the specified counterpart ID does not exist and never existed, no results are returned.
+	CounterpartId *string `json:"-" url:"counterpart_id,omitempty"`
+	// Return only payables coming from the specified source.
+	SourceOfPayableData *SourceOfPayableDataEnum `json:"-" url:"source_of_payable_data,omitempty"`
+	// Return only payables with specific OCR statuses.
+	OcrStatus *OcrStatusEnum `json:"-" url:"ocr_status,omitempty"`
 	// Search for a payable by the identifier of the line item associated with it.
 	LineItemId *string `json:"-" url:"line_item_id,omitempty"`
 	// Search for a payable by the identifier of the purchase order associated with it.
 	PurchaseOrderId *string `json:"-" url:"purchase_order_id,omitempty"`
-	// Search for a payable by the identifier of the project associated with it.
+	// Return only payables assigned to the project with the specified ID.
+	//
+	// Valid but nonexistent project IDs do not raise errors but return no results.
 	ProjectId *string `json:"-" url:"project_id,omitempty"`
-	// Search for a payable by the identifiers of the tags associated with it.
+	// Return only payables whose `tags` include at least one of the tags with the specified IDs. Valid but nonexistent tag IDs do not raise errors but produce no results.
 	TagIds []*string `json:"-" url:"tag_ids,omitempty"`
 }
 
 type PayablesGetAnalyticsRequest struct {
-	CreatedAtGt              *time.Time               `json:"-" url:"created_at__gt,omitempty"`
-	CreatedAtLt              *time.Time               `json:"-" url:"created_at__lt,omitempty"`
-	CreatedAtGte             *time.Time               `json:"-" url:"created_at__gte,omitempty"`
-	CreatedAtLte             *time.Time               `json:"-" url:"created_at__lte,omitempty"`
-	Status                   *PayableStateEnum        `json:"-" url:"status,omitempty"`
-	StatusIn                 []*PayableStateEnum      `json:"-" url:"status__in,omitempty"`
-	IdIn                     []*string                `json:"-" url:"id__in,omitempty"`
-	TotalAmount              *int                     `json:"-" url:"total_amount,omitempty"`
-	TotalAmountGt            *int                     `json:"-" url:"total_amount__gt,omitempty"`
-	TotalAmountLt            *int                     `json:"-" url:"total_amount__lt,omitempty"`
-	TotalAmountGte           *int                     `json:"-" url:"total_amount__gte,omitempty"`
-	TotalAmountLte           *int                     `json:"-" url:"total_amount__lte,omitempty"`
-	Amount                   *int                     `json:"-" url:"amount,omitempty"`
-	AmountGt                 *int                     `json:"-" url:"amount__gt,omitempty"`
-	AmountLt                 *int                     `json:"-" url:"amount__lt,omitempty"`
-	AmountGte                *int                     `json:"-" url:"amount__gte,omitempty"`
-	AmountLte                *int                     `json:"-" url:"amount__lte,omitempty"`
-	Currency                 *CurrencyEnum            `json:"-" url:"currency,omitempty"`
-	CounterpartName          *string                  `json:"-" url:"counterpart_name,omitempty"`
-	CounterpartNameContains  *string                  `json:"-" url:"counterpart_name__contains,omitempty"`
-	CounterpartNameIcontains *string                  `json:"-" url:"counterpart_name__icontains,omitempty"`
-	SearchText               *string                  `json:"-" url:"search_text,omitempty"`
-	DueDate                  *string                  `json:"-" url:"due_date,omitempty"`
-	DueDateGt                *string                  `json:"-" url:"due_date__gt,omitempty"`
-	DueDateLt                *string                  `json:"-" url:"due_date__lt,omitempty"`
-	DueDateGte               *string                  `json:"-" url:"due_date__gte,omitempty"`
-	DueDateLte               *string                  `json:"-" url:"due_date__lte,omitempty"`
-	DocumentId               *string                  `json:"-" url:"document_id,omitempty"`
-	DocumentIdContains       *string                  `json:"-" url:"document_id__contains,omitempty"`
-	DocumentIdIcontains      *string                  `json:"-" url:"document_id__icontains,omitempty"`
-	WasCreatedByUserId       *string                  `json:"-" url:"was_created_by_user_id,omitempty"`
-	CounterpartId            *string                  `json:"-" url:"counterpart_id,omitempty"`
-	SourceOfPayableData      *SourceOfPayableDataEnum `json:"-" url:"source_of_payable_data,omitempty"`
-	OcrStatus                *OcrStatusEnum           `json:"-" url:"ocr_status,omitempty"`
+	// Return only payables created in Monite after the specified date and time. The value must be in the ISO 8601 format YYYY-MM-DDThh:mm[:ss[.ffffff]][Z|±hh:mm].
+	CreatedAtGt *time.Time `json:"-" url:"created_at__gt,omitempty"`
+	// Return only payables created in Monite before the specified date and time.
+	CreatedAtLt *time.Time `json:"-" url:"created_at__lt,omitempty"`
+	// Return only payables created in Monite on or after the specified date and time.
+	CreatedAtGte *time.Time `json:"-" url:"created_at__gte,omitempty"`
+	// Return only payables created in Monite before or on the specified date and time.
+	CreatedAtLte *time.Time `json:"-" url:"created_at__lte,omitempty"`
+	// Return only payables that have the specified [status](https://docs.monite.com/accounts-payable/payables/index).
+	//
+	// To query multiple statuses at once, use the `status__in` parameter instead.
+	Status *PayableStateEnum `json:"-" url:"status,omitempty"`
+	// Return only payables that have the specified [statuses](https://docs.monite.com/accounts-payable/payables/index).
+	//
+	// To specify multiple statuses, repeat this parameter for each value: `status__in=draft&status__in=new`
+	StatusIn []*PayableStateEnum `json:"-" url:"status__in,omitempty"`
+	// Return only payables with specified IDs. Valid but nonexistent IDs do not raise errors but produce no results.
+	//
+	// To specify multiple IDs, repeat this parameter for each value: `id__in=<id1>&id__in=<id2>`
+	IdIn []*string `json:"-" url:"id__in,omitempty"`
+	// Return only payables with the exact specified total amount. The amount must be specified in the minor units of currency. For example, $12.5 is represented as 1250.
+	TotalAmount *int `json:"-" url:"total_amount,omitempty"`
+	// Return only payables whose total amount (in minor units) exceeds the specified value.
+	TotalAmountGt *int `json:"-" url:"total_amount__gt,omitempty"`
+	// Return only payables whose total amount (in minor units) is less than the specified value.
+	TotalAmountLt *int `json:"-" url:"total_amount__lt,omitempty"`
+	// Return only payables whose total amount (in minor units) is greater than or equal to the specified value.
+	TotalAmountGte *int `json:"-" url:"total_amount__gte,omitempty"`
+	// Return only payables whose total amount (in minor units) is less than or equal to the specified value.
+	TotalAmountLte *int `json:"-" url:"total_amount__lte,omitempty"`
+	// Return only payables with the specified amount.
+	Amount *int `json:"-" url:"amount,omitempty"`
+	// Return only payables whose amount (in minor units) exceeds the specified value.
+	AmountGt *int `json:"-" url:"amount__gt,omitempty"`
+	// Return only payables whose amount (in minor units) is less than the specified value.
+	AmountLt *int `json:"-" url:"amount__lt,omitempty"`
+	// Return only payables whose amount (in minor units) is greater than or equal to the specified value.
+	AmountGte *int `json:"-" url:"amount__gte,omitempty"`
+	// Return only payables whose amount (in minor units) is less than or equal to the specified value.
+	AmountLte *int `json:"-" url:"amount__lte,omitempty"`
+	// Return only payables that use the specified currency.
+	Currency *CurrencyEnum `json:"-" url:"currency,omitempty"`
+	// Return only payables received from counterparts with the specified name (exact match, case-sensitive).
+	//
+	// For counterparts of `type = individual`, the full name is formatted as `first_name last_name`.
+	CounterpartName *string `json:"-" url:"counterpart_name,omitempty"`
+	// Return only payables received from counterparts whose name contains the specified string (case-sensitive).
+	CounterpartNameContains *string `json:"-" url:"counterpart_name__contains,omitempty"`
+	// Return only payables received from counterparts whose name contains the specified string (case-insensitive).
+	CounterpartNameIcontains *string `json:"-" url:"counterpart_name__icontains,omitempty"`
+	// Apply the `icontains` condition to search for the specified text in the `document_id` and `counterpart_name` fields in the payables.
+	SearchText *string `json:"-" url:"search_text,omitempty"`
+	// Return payables that are due on the specified date (YYYY-MM-DD)
+	DueDate *string `json:"-" url:"due_date,omitempty"`
+	// Return payables that are due after the specified date (exclusive, YYYY-MM-DD).
+	DueDateGt *string `json:"-" url:"due_date__gt,omitempty"`
+	// Return payables that are due before the specified date (exclusive, YYYY-MM-DD).
+	DueDateLt *string `json:"-" url:"due_date__lt,omitempty"`
+	// Return payables that are due on or after the specified date (YYYY-MM-DD).
+	DueDateGte *string `json:"-" url:"due_date__gte,omitempty"`
+	// Return payables that are due before or on the specified date (YYYY-MM-DD).
+	DueDateLte *string `json:"-" url:"due_date__lte,omitempty"`
+	// Return a payable with the exact specified document number (case-sensitive).
+	//
+	// The `document_id` is the user-facing document number such as INV-00042, not to be confused with Monite resource IDs (`id`).
+	DocumentId *string `json:"-" url:"document_id,omitempty"`
+	// Return only payables whose document number (`document_id`) contains the specified string (case-sensitive).
+	DocumentIdContains *string `json:"-" url:"document_id__contains,omitempty"`
+	// Return only payables whose document number (`document_id`) contains the specified string (case-insensitive).
+	DocumentIdIcontains *string `json:"-" url:"document_id__icontains,omitempty"`
+	// Return only payables created in Monite by the entity user with the specified ID.
+	WasCreatedByUserId *string `json:"-" url:"was_created_by_user_id,omitempty"`
+	// Return only payables received from the counterpart with the specified ID.
+	//
+	// Counterparts that have been deleted but have associated payables will still return results here because the payables contain a frozen copy of the counterpart data.
+	//
+	// If the specified counterpart ID does not exist and never existed, no results are returned.
+	CounterpartId *string `json:"-" url:"counterpart_id,omitempty"`
+	// Return only payables coming from the specified source.
+	SourceOfPayableData *SourceOfPayableDataEnum `json:"-" url:"source_of_payable_data,omitempty"`
+	// Return only payables with specific OCR statuses.
+	OcrStatus *OcrStatusEnum `json:"-" url:"ocr_status,omitempty"`
 	// Search for a payable by the identifier of the line item associated with it.
 	LineItemId *string `json:"-" url:"line_item_id,omitempty"`
 	// Search for a payable by the identifier of the purchase order associated with it.
 	PurchaseOrderId *string `json:"-" url:"purchase_order_id,omitempty"`
-	// Search for a payable by the identifier of the project associated with it.
+	// Return only payables assigned to the project with the specified ID.
+	//
+	// Valid but nonexistent project IDs do not raise errors but return no results.
 	ProjectId *string `json:"-" url:"project_id,omitempty"`
-	// Search for a payable by the identifiers of the tags associated with it.
+	// Return only payables whose `tags` include at least one of the tags with the specified IDs. Valid but nonexistent tag IDs do not raise errors but produce no results.
 	TagIds []*string `json:"-" url:"tag_ids,omitempty"`
 }
 
@@ -849,7 +953,7 @@ func (c *CounterpartRawVatIdUpdateRequest) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
-type CurrencyExchangeSchema struct {
+type CurrencyExchangeSchema2 struct {
 	DefaultCurrencyCode string  `json:"default_currency_code" url:"default_currency_code"`
 	Rate                float64 `json:"rate" url:"rate"`
 	Total               float64 `json:"total" url:"total"`
@@ -858,38 +962,38 @@ type CurrencyExchangeSchema struct {
 	rawJSON         json.RawMessage
 }
 
-func (c *CurrencyExchangeSchema) GetDefaultCurrencyCode() string {
+func (c *CurrencyExchangeSchema2) GetDefaultCurrencyCode() string {
 	if c == nil {
 		return ""
 	}
 	return c.DefaultCurrencyCode
 }
 
-func (c *CurrencyExchangeSchema) GetRate() float64 {
+func (c *CurrencyExchangeSchema2) GetRate() float64 {
 	if c == nil {
 		return 0
 	}
 	return c.Rate
 }
 
-func (c *CurrencyExchangeSchema) GetTotal() float64 {
+func (c *CurrencyExchangeSchema2) GetTotal() float64 {
 	if c == nil {
 		return 0
 	}
 	return c.Total
 }
 
-func (c *CurrencyExchangeSchema) GetExtraProperties() map[string]interface{} {
+func (c *CurrencyExchangeSchema2) GetExtraProperties() map[string]interface{} {
 	return c.extraProperties
 }
 
-func (c *CurrencyExchangeSchema) UnmarshalJSON(data []byte) error {
-	type unmarshaler CurrencyExchangeSchema
+func (c *CurrencyExchangeSchema2) UnmarshalJSON(data []byte) error {
+	type unmarshaler CurrencyExchangeSchema2
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CurrencyExchangeSchema(value)
+	*c = CurrencyExchangeSchema2(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
@@ -899,7 +1003,7 @@ func (c *CurrencyExchangeSchema) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *CurrencyExchangeSchema) String() string {
+func (c *CurrencyExchangeSchema2) String() string {
 	if len(c.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
@@ -909,6 +1013,162 @@ func (c *CurrencyExchangeSchema) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+// Represents a file (such as a PDF invoice) that was uploaded to Monite.
+type FileSchema2 struct {
+	// A unique ID of this file.
+	Id string `json:"id" url:"id"`
+	// UTC date and time when this file was uploaded to Monite. Timestamps follow the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+	CreatedAt time.Time `json:"created_at" url:"created_at"`
+	// The type of the business object associated with this file.
+	FileType string `json:"file_type" url:"file_type"`
+	// The original file name (if available).
+	Name string `json:"name" url:"name"`
+	// Geographical region of the data center where the file is stored.
+	Region string `json:"region" url:"region"`
+	// The MD5 hash of the file.
+	Md5 string `json:"md5" url:"md5"`
+	// The file's [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types).
+	Mimetype string `json:"mimetype" url:"mimetype"`
+	// The URL to download the file.
+	Url string `json:"url" url:"url"`
+	// The file size in bytes.
+	Size int `json:"size" url:"size"`
+	// Preview images generated for this file. There can be multiple images with different sizes.
+	Previews []*PreviewSchema2 `json:"previews,omitempty" url:"previews,omitempty"`
+	// If the file is a PDF document, this property contains individual pages extracted from the file. Otherwise, an empty array.
+	Pages []*PageSchema2 `json:"pages,omitempty" url:"pages,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (f *FileSchema2) GetId() string {
+	if f == nil {
+		return ""
+	}
+	return f.Id
+}
+
+func (f *FileSchema2) GetCreatedAt() time.Time {
+	if f == nil {
+		return time.Time{}
+	}
+	return f.CreatedAt
+}
+
+func (f *FileSchema2) GetFileType() string {
+	if f == nil {
+		return ""
+	}
+	return f.FileType
+}
+
+func (f *FileSchema2) GetName() string {
+	if f == nil {
+		return ""
+	}
+	return f.Name
+}
+
+func (f *FileSchema2) GetRegion() string {
+	if f == nil {
+		return ""
+	}
+	return f.Region
+}
+
+func (f *FileSchema2) GetMd5() string {
+	if f == nil {
+		return ""
+	}
+	return f.Md5
+}
+
+func (f *FileSchema2) GetMimetype() string {
+	if f == nil {
+		return ""
+	}
+	return f.Mimetype
+}
+
+func (f *FileSchema2) GetUrl() string {
+	if f == nil {
+		return ""
+	}
+	return f.Url
+}
+
+func (f *FileSchema2) GetSize() int {
+	if f == nil {
+		return 0
+	}
+	return f.Size
+}
+
+func (f *FileSchema2) GetPreviews() []*PreviewSchema2 {
+	if f == nil {
+		return nil
+	}
+	return f.Previews
+}
+
+func (f *FileSchema2) GetPages() []*PageSchema2 {
+	if f == nil {
+		return nil
+	}
+	return f.Pages
+}
+
+func (f *FileSchema2) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *FileSchema2) UnmarshalJSON(data []byte) error {
+	type embed FileSchema2
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed: embed(*f),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*f = FileSchema2(unmarshaler.embed)
+	f.CreatedAt = unmarshaler.CreatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+	f.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FileSchema2) MarshalJSON() ([]byte, error) {
+	type embed FileSchema2
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"created_at"`
+	}{
+		embed:     embed(*f),
+		CreatedAt: internal.NewDateTime(f.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (f *FileSchema2) String() string {
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
 }
 
 // Contains information about a text block or line extracted from an uploaded document by OCR.
@@ -1198,8 +1458,11 @@ func (o *OcrRecognitionResponse) String() string {
 }
 
 type OcrResponseInvoiceReceiptData struct {
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// Total in cents/eurocents. Outdated, actual conversion happens in payables.
 	Total *int `json:"total,omitempty" url:"total,omitempty"`
+	// Total paid amount
+	TotalPaidAmountRaw *float64 `json:"total_paid_amount_raw,omitempty" url:"total_paid_amount_raw,omitempty"`
 	// Total, without minor units
 	TotalRaw *float64 `json:"total_raw,omitempty" url:"total_raw,omitempty"`
 	// Subtotal cents/eurocents. Outdated, actual conversion happens in payables.
@@ -1256,6 +1519,13 @@ func (o *OcrResponseInvoiceReceiptData) GetTotal() *int {
 		return nil
 	}
 	return o.Total
+}
+
+func (o *OcrResponseInvoiceReceiptData) GetTotalPaidAmountRaw() *float64 {
+	if o == nil {
+		return nil
+	}
+	return o.TotalPaidAmountRaw
 }
 
 func (o *OcrResponseInvoiceReceiptData) GetTotalRaw() *float64 {
@@ -1689,29 +1959,89 @@ func (o *OcrResponseInvoiceReceiptLineItemRaw) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
-type OcrStatusEnum string
+// When a PDF document is uploaded to Monite, it extracts individual pages from the document
+// and saves them as PNG images. This object contains the image and metadata of a single page.
+type PageSchema2 struct {
+	// A unique ID of the image.
+	Id string `json:"id" url:"id"`
+	// The [media type](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types) of the image.
+	Mimetype string `json:"mimetype" url:"mimetype"`
+	// Image file size, in bytes.
+	Size int `json:"size" url:"size"`
+	// The page number in the PDF document, from 0.
+	Number int `json:"number" url:"number"`
+	// The URL to download the image.
+	Url string `json:"url" url:"url"`
 
-const (
-	OcrStatusEnumProcessing OcrStatusEnum = "processing"
-	OcrStatusEnumError      OcrStatusEnum = "error"
-	OcrStatusEnumSuccess    OcrStatusEnum = "success"
-)
-
-func NewOcrStatusEnumFromString(s string) (OcrStatusEnum, error) {
-	switch s {
-	case "processing":
-		return OcrStatusEnumProcessing, nil
-	case "error":
-		return OcrStatusEnumError, nil
-	case "success":
-		return OcrStatusEnumSuccess, nil
-	}
-	var t OcrStatusEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
 }
 
-func (o OcrStatusEnum) Ptr() *OcrStatusEnum {
-	return &o
+func (p *PageSchema2) GetId() string {
+	if p == nil {
+		return ""
+	}
+	return p.Id
+}
+
+func (p *PageSchema2) GetMimetype() string {
+	if p == nil {
+		return ""
+	}
+	return p.Mimetype
+}
+
+func (p *PageSchema2) GetSize() int {
+	if p == nil {
+		return 0
+	}
+	return p.Size
+}
+
+func (p *PageSchema2) GetNumber() int {
+	if p == nil {
+		return 0
+	}
+	return p.Number
+}
+
+func (p *PageSchema2) GetUrl() string {
+	if p == nil {
+		return ""
+	}
+	return p.Url
+}
+
+func (p *PageSchema2) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PageSchema2) UnmarshalJSON(data []byte) error {
+	type unmarshaler PageSchema2
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PageSchema2(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PageSchema2) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type PayableAggregatedDataResponse struct {
@@ -1844,6 +2174,89 @@ func (p *PayableAggregatedItem) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+type PayableCreditNoteData struct {
+	// The unique identifier of the credit note.
+	Id string `json:"id" url:"id"`
+	// The credit note's unique document number.
+	DocumentId *string `json:"document_id,omitempty" url:"document_id,omitempty"`
+	// The date when the credit note was issued, in the YYYY-MM-DD format
+	IssuedAt *string `json:"issued_at,omitempty" url:"issued_at,omitempty"`
+	// The current status of the credit note in its lifecycle
+	Status string `json:"status" url:"status"`
+	// Credit note total amount.
+	TotalAmount *int `json:"total_amount,omitempty" url:"total_amount,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PayableCreditNoteData) GetId() string {
+	if p == nil {
+		return ""
+	}
+	return p.Id
+}
+
+func (p *PayableCreditNoteData) GetDocumentId() *string {
+	if p == nil {
+		return nil
+	}
+	return p.DocumentId
+}
+
+func (p *PayableCreditNoteData) GetIssuedAt() *string {
+	if p == nil {
+		return nil
+	}
+	return p.IssuedAt
+}
+
+func (p *PayableCreditNoteData) GetStatus() string {
+	if p == nil {
+		return ""
+	}
+	return p.Status
+}
+
+func (p *PayableCreditNoteData) GetTotalAmount() *int {
+	if p == nil {
+		return nil
+	}
+	return p.TotalAmount
+}
+
+func (p *PayableCreditNoteData) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PayableCreditNoteData) UnmarshalJSON(data []byte) error {
+	type unmarshaler PayableCreditNoteData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PayableCreditNoteData(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PayableCreditNoteData) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type PayableCursorFields string
 
 const (
@@ -1869,8 +2282,9 @@ func (p PayableCursorFields) Ptr() *PayableCursorFields {
 type PayableOriginEnum string
 
 const (
-	PayableOriginEnumUpload PayableOriginEnum = "upload"
-	PayableOriginEnumEmail  PayableOriginEnum = "email"
+	PayableOriginEnumUpload     PayableOriginEnum = "upload"
+	PayableOriginEnumEmail      PayableOriginEnum = "email"
+	PayableOriginEnumEinvoicing PayableOriginEnum = "einvoicing"
 )
 
 func NewPayableOriginEnumFromString(s string) (PayableOriginEnum, error) {
@@ -1879,6 +2293,8 @@ func NewPayableOriginEnumFromString(s string) (PayableOriginEnum, error) {
 		return PayableOriginEnumUpload, nil
 	case "email":
 		return PayableOriginEnumEmail, nil
+	case "einvoicing":
+		return PayableOriginEnumEinvoicing, nil
 	}
 	var t PayableOriginEnum
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -2164,11 +2580,15 @@ type PayableResponseSchema struct {
 	CounterpartVatIdId *string `json:"counterpart_vat_id_id,omitempty" url:"counterpart_vat_id_id,omitempty"`
 	// The ID of the role that the entity user who created this payable had at that time. If the payable was created using a partner access token, the value is `null`.
 	CreatedByRoleId *string `json:"created_by_role_id,omitempty" url:"created_by_role_id,omitempty"`
-	// The [currency code](https://docs.monite.com/docs/currencies) of the currency used in the payable.
-	Currency         *CurrencyEnum           `json:"currency,omitempty" url:"currency,omitempty"`
-	CurrencyExchange *CurrencyExchangeSchema `json:"currency_exchange,omitempty" url:"currency_exchange,omitempty"`
+	// The list of linked credit notes of the payable.
+	CreditNotes []*PayableCreditNoteData `json:"credit_notes" url:"credit_notes"`
+	// The [currency code](https://docs.monite.com/references/currencies) of the currency used in the payable.
+	Currency         *CurrencyEnum            `json:"currency,omitempty" url:"currency,omitempty"`
+	CurrencyExchange *CurrencyExchangeSchema2 `json:"currency_exchange,omitempty" url:"currency_exchange,omitempty"`
 	// An arbitrary description of this payable.
 	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// The value of the additional discount that will be applied to the total amount. in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	Discount *int `json:"discount,omitempty" url:"discount,omitempty"`
 	// A unique invoice number assigned by the invoice issuer for payment tracking purposes. This is different from `id` which is an internal ID created automatically by Monite.
 	DocumentId *string `json:"document_id,omitempty" url:"document_id,omitempty"`
 	// The date by which the payable must be paid, in the YYYY-MM-DD format. If the payable specifies payment terms with early payment discounts, this is the final payment date.
@@ -2176,7 +2596,7 @@ type PayableResponseSchema struct {
 	// The ID of the entity to which the payable was issued.
 	EntityId string `json:"entity_id" url:"entity_id"`
 	// The original file from which this payable was created.
-	File *FileSchema3 `json:"file,omitempty" url:"file,omitempty"`
+	File *FileSchema2 `json:"file,omitempty" url:"file,omitempty"`
 	// File id to retrieve file info from file saver.
 	FileId *string `json:"file_id,omitempty" url:"file_id,omitempty"`
 	// The date when the payable was issued, in the YYYY-MM-DD format.
@@ -2207,9 +2627,9 @@ type PayableResponseSchema struct {
 	Sender *string `json:"sender,omitempty" url:"sender,omitempty"`
 	// Specifies how the property values of this payable were provided: `ocr` - Monite OCR service extracted the values from the provided PDF or image file, `user_specified` - values were added or updated via an API call.
 	SourceOfPayableData SourceOfPayableDataEnum `json:"source_of_payable_data" url:"source_of_payable_data"`
-	// The [status](https://docs.monite.com/docs/payables-lifecycle) of the payable.
+	// The [status](https://docs.monite.com/accounts-payable/payables/index) of the payable.
 	Status PayableStateEnum `json:"status" url:"status"`
-	// The subtotal amount to be paid, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The subtotal amount to be paid, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	Subtotal *int `json:"subtotal,omitempty" url:"subtotal,omitempty"`
 	// The suggested date and corresponding discount in which payable could be paid. The date is in the YYYY-MM-DD format. The discount is calculated as X * (10^-4) - for example, 100 is 1%, 25 is 0,25%, 10000 is 100 %. Date varies depending on the payment terms and may even be equal to the due date with discount 0.
 	SuggestedPaymentTerm *SuggestedPaymentTerm `json:"suggested_payment_term,omitempty" url:"suggested_payment_term,omitempty"`
@@ -2217,11 +2637,13 @@ type PayableResponseSchema struct {
 	Tags []*TagReadSchema `json:"tags,omitempty" url:"tags,omitempty"`
 	// Registered tax percentage applied for a service price in minor units, e.g. 200 means 2%, 1050 means 10.5%.
 	Tax *int `json:"tax,omitempty" url:"tax,omitempty"`
-	// Tax amount in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// Tax amount in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	TaxAmount *int `json:"tax_amount,omitempty" url:"tax_amount,omitempty"`
-	// The total amount to be paid, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
-	TotalAmount        *int    `json:"total_amount,omitempty" url:"total_amount,omitempty"`
-	WasCreatedByUserId *string `json:"was_created_by_user_id,omitempty" url:"was_created_by_user_id,omitempty"`
+	// The total amount to be paid, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	TotalAmount *int `json:"total_amount,omitempty" url:"total_amount,omitempty"`
+	// The total price of the payable in [minor units](https://docs.monite.com/references/currencies#minor-units), excluding all issued credit notes.
+	TotalAmountWithCreditNotes *int    `json:"total_amount_with_credit_notes,omitempty" url:"total_amount_with_credit_notes,omitempty"`
+	WasCreatedByUserId         *string `json:"was_created_by_user_id,omitempty" url:"was_created_by_user_id,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -2325,6 +2747,13 @@ func (p *PayableResponseSchema) GetCreatedByRoleId() *string {
 	return p.CreatedByRoleId
 }
 
+func (p *PayableResponseSchema) GetCreditNotes() []*PayableCreditNoteData {
+	if p == nil {
+		return nil
+	}
+	return p.CreditNotes
+}
+
 func (p *PayableResponseSchema) GetCurrency() *CurrencyEnum {
 	if p == nil {
 		return nil
@@ -2332,7 +2761,7 @@ func (p *PayableResponseSchema) GetCurrency() *CurrencyEnum {
 	return p.Currency
 }
 
-func (p *PayableResponseSchema) GetCurrencyExchange() *CurrencyExchangeSchema {
+func (p *PayableResponseSchema) GetCurrencyExchange() *CurrencyExchangeSchema2 {
 	if p == nil {
 		return nil
 	}
@@ -2344,6 +2773,13 @@ func (p *PayableResponseSchema) GetDescription() *string {
 		return nil
 	}
 	return p.Description
+}
+
+func (p *PayableResponseSchema) GetDiscount() *int {
+	if p == nil {
+		return nil
+	}
+	return p.Discount
 }
 
 func (p *PayableResponseSchema) GetDocumentId() *string {
@@ -2367,7 +2803,7 @@ func (p *PayableResponseSchema) GetEntityId() string {
 	return p.EntityId
 }
 
-func (p *PayableResponseSchema) GetFile() *FileSchema3 {
+func (p *PayableResponseSchema) GetFile() *FileSchema2 {
 	if p == nil {
 		return nil
 	}
@@ -2526,6 +2962,13 @@ func (p *PayableResponseSchema) GetTotalAmount() *int {
 		return nil
 	}
 	return p.TotalAmount
+}
+
+func (p *PayableResponseSchema) GetTotalAmountWithCreditNotes() *int {
+	if p == nil {
+		return nil
+	}
+	return p.TotalAmountWithCreditNotes
 }
 
 func (p *PayableResponseSchema) GetWasCreatedByUserId() *string {
@@ -3044,26 +3487,70 @@ func (p PayablesVariableType) Ptr() *PayablesVariableType {
 	return &p
 }
 
-type SourceOfPayableDataEnum string
+// A preview image generated for a file.
+type PreviewSchema2 struct {
+	// The image URL.
+	Url string `json:"url" url:"url"`
+	// The image width in pixels.
+	Width int `json:"width" url:"width"`
+	// The image height in pixels.
+	Height int `json:"height" url:"height"`
 
-const (
-	SourceOfPayableDataEnumOcr           SourceOfPayableDataEnum = "ocr"
-	SourceOfPayableDataEnumUserSpecified SourceOfPayableDataEnum = "user_specified"
-)
-
-func NewSourceOfPayableDataEnumFromString(s string) (SourceOfPayableDataEnum, error) {
-	switch s {
-	case "ocr":
-		return SourceOfPayableDataEnumOcr, nil
-	case "user_specified":
-		return SourceOfPayableDataEnumUserSpecified, nil
-	}
-	var t SourceOfPayableDataEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
 }
 
-func (s SourceOfPayableDataEnum) Ptr() *SourceOfPayableDataEnum {
-	return &s
+func (p *PreviewSchema2) GetUrl() string {
+	if p == nil {
+		return ""
+	}
+	return p.Url
+}
+
+func (p *PreviewSchema2) GetWidth() int {
+	if p == nil {
+		return 0
+	}
+	return p.Width
+}
+
+func (p *PreviewSchema2) GetHeight() int {
+	if p == nil {
+		return 0
+	}
+	return p.Height
+}
+
+func (p *PreviewSchema2) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PreviewSchema2) UnmarshalJSON(data []byte) error {
+	type unmarshaler PreviewSchema2
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PreviewSchema2(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PreviewSchema2) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 // Suggested payment date and corresponding discount
@@ -3132,10 +3619,12 @@ type PayableUpdateSchema struct {
 	CounterpartRawData *CounterpartRawDataUpdateRequest `json:"counterpart_raw_data,omitempty" url:"-"`
 	// The ID of counterpart VAT ID object stored in counterparts service
 	CounterpartVatIdId *string `json:"counterpart_vat_id_id,omitempty" url:"-"`
-	// The [currency code](https://docs.monite.com/docs/currencies) of the currency used in the payable.
+	// The [currency code](https://docs.monite.com/references/currencies) of the currency used in the payable.
 	Currency *CurrencyEnum `json:"currency,omitempty" url:"-"`
 	// An arbitrary description of this payable.
 	Description *string `json:"description,omitempty" url:"-"`
+	// The value of the additional discount that will be applied to the total amount. in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
+	Discount *int `json:"discount,omitempty" url:"-"`
 	// A unique invoice number assigned by the invoice issuer for payment tracking purposes.
 	DocumentId *string `json:"document_id,omitempty" url:"-"`
 	// The date by which the payable must be paid, in the YYYY-MM-DD format. If the payable specifies payment terms with early payment discounts, this is the final payment date.
@@ -3152,7 +3641,7 @@ type PayableUpdateSchema struct {
 	PurchaseOrderId *string `json:"purchase_order_id,omitempty" url:"-"`
 	// The email address from which the invoice was sent to the entity.
 	Sender *string `json:"sender,omitempty" url:"-"`
-	// The subtotal amount to be paid, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The subtotal amount to be paid, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	Subtotal *int `json:"subtotal,omitempty" url:"-"`
 	// The suggested date and corresponding discount in which payable could be paid. The date is in the YYYY-MM-DD format. The discount is calculated as X * (10^-4) - for example, 100 is 1%, 25 is 0,25%, 10000 is 100 %. Date varies depending on the payment terms and may even be equal to the due date with discount 0.
 	SuggestedPaymentTerm *SuggestedPaymentTerm `json:"suggested_payment_term,omitempty" url:"-"`
@@ -3160,9 +3649,9 @@ type PayableUpdateSchema struct {
 	TagIds []string `json:"tag_ids,omitempty" url:"-"`
 	// Registered tax percentage applied for a service price in minor units, e.g. 200 means 2%, 1050 means 10.5%.
 	Tax *int `json:"tax,omitempty" url:"-"`
-	// Tax amount in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// Tax amount in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	TaxAmount *int `json:"tax_amount,omitempty" url:"-"`
-	// The total amount to be paid, in [minor units](https://docs.monite.com/docs/currencies#minor-units). For example, $12.50 is represented as 1250.
+	// The total amount to be paid, in [minor units](https://docs.monite.com/references/currencies#minor-units). For example, $12.50 is represented as 1250.
 	TotalAmount *int `json:"total_amount,omitempty" url:"-"`
 }
 

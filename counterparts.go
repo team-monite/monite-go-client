@@ -112,6 +112,9 @@ func (c *CounterpartCreatePayload) UnmarshalJSON(data []byte) error {
 }
 
 func (c CounterpartCreatePayload) MarshalJSON() ([]byte, error) {
+	if err := c.validate(); err != nil {
+		return nil, err
+	}
 	if c.Organization != nil {
 		return internal.MarshalJSONWithExtraProperty(c.Organization, "type", "organization")
 	}
@@ -134,6 +137,40 @@ func (c *CounterpartCreatePayload) Accept(visitor CounterpartCreatePayloadVisito
 		return visitor.VisitIndividual(c.Individual)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", c)
+}
+
+func (c *CounterpartCreatePayload) validate() error {
+	if c == nil {
+		return fmt.Errorf("type %T is nil", c)
+	}
+	var fields []string
+	if c.Organization != nil {
+		fields = append(fields, "organization")
+	}
+	if c.Individual != nil {
+		fields = append(fields, "individual")
+	}
+	if len(fields) == 0 {
+		if c.Type != "" {
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", c, c.Type)
+		}
+		return fmt.Errorf("type %T is empty", c)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", c, fields)
+	}
+	if c.Type != "" {
+		field := fields[0]
+		if c.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				c,
+				c.Type,
+				c,
+			)
+		}
+	}
+	return nil
 }
 
 type CounterpartCursorFields = string
@@ -372,10 +409,10 @@ func (c *CounterpartIndividualResponse) String() string {
 // This schema is used to create counterparts that are individuals (natural persons).
 type CounterpartIndividualRootCreatePayload struct {
 	Individual *CounterpartIndividualCreatePayload `json:"individual" url:"individual"`
-	// The language used to generate pdf documents for this counterpart.
+	// The language used to generate PDF documents for this counterpart.
 	Language         *LanguageCodeEnum `json:"language,omitempty" url:"language,omitempty"`
 	RemindersEnabled *bool             `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
-	// The counterpart's taxpayer identification number or tax ID. This field is required for counterparts that are non-VAT registered.
+	// The counterpart's taxpayer identification number or tax ID. For identification purposes, this field may be required for counterparts that are not VAT-registered.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -459,10 +496,10 @@ type CounterpartIndividualRootResponse struct {
 	// Entity user ID of counterpart creator.
 	CreatedByEntityUserId *string                        `json:"created_by_entity_user_id,omitempty" url:"created_by_entity_user_id,omitempty"`
 	Individual            *CounterpartIndividualResponse `json:"individual" url:"individual"`
-	// The language used to generate pdf documents for this counterpart.
+	// The language used to generate PDF documents for this counterpart.
 	Language         *LanguageCodeEnum `json:"language,omitempty" url:"language,omitempty"`
 	RemindersEnabled *bool             `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
-	// The counterpart's taxpayer identification number or tax ID. This field is required for counterparts that are non-VAT registered.
+	// The counterpart's taxpayer identification number or tax ID.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 	// The counterpart type: `organization` (juridical person) or `individual` (natural person).
 	Type CounterpartType `json:"type" url:"type"`
@@ -616,10 +653,10 @@ type CounterpartIndividualRootUpdatePayload struct {
 	// ID of the shipping address.
 	DefaultShippingAddressId *string                             `json:"default_shipping_address_id,omitempty" url:"default_shipping_address_id,omitempty"`
 	Individual               *CounterpartIndividualUpdatePayload `json:"individual" url:"individual"`
-	// The language used to generate pdf documents for this counterpart.
+	// The language used to generate PDF documents for this counterpart.
 	Language         *LanguageCodeEnum `json:"language,omitempty" url:"language,omitempty"`
 	RemindersEnabled *bool             `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
-	// The counterpart's taxpayer identification number or tax ID. This field is required for counterparts that are non-VAT registered.
+	// The counterpart's taxpayer identification number or tax ID. For identification purposes, this field may be required for counterparts that are not VAT-registered.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -1008,11 +1045,11 @@ func (c *CounterpartOrganizationResponse) String() string {
 
 // This schema is used to create counterparts that are organizations (juridical persons).
 type CounterpartOrganizationRootCreatePayload struct {
-	// The language used to generate pdf documents for this counterpart.
+	// The language used to generate PDF documents for this counterpart.
 	Language         *LanguageCodeEnum                     `json:"language,omitempty" url:"language,omitempty"`
 	Organization     *CounterpartOrganizationCreatePayload `json:"organization" url:"organization"`
 	RemindersEnabled *bool                                 `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
-	// The counterpart's taxpayer identification number or tax ID. This field is required for counterparts that are non-VAT registered.
+	// The counterpart's taxpayer identification number or tax ID. For identification purposes, this field may be required for counterparts that are not VAT-registered.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -1095,11 +1132,11 @@ type CounterpartOrganizationRootResponse struct {
 	DefaultShippingAddressId *string `json:"default_shipping_address_id,omitempty" url:"default_shipping_address_id,omitempty"`
 	// Entity user ID of counterpart creator.
 	CreatedByEntityUserId *string `json:"created_by_entity_user_id,omitempty" url:"created_by_entity_user_id,omitempty"`
-	// The language used to generate pdf documents for this counterpart.
+	// The language used to generate PDF documents for this counterpart.
 	Language         *LanguageCodeEnum                `json:"language,omitempty" url:"language,omitempty"`
 	Organization     *CounterpartOrganizationResponse `json:"organization" url:"organization"`
 	RemindersEnabled *bool                            `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
-	// The counterpart's taxpayer identification number or tax ID. This field is required for counterparts that are non-VAT registered.
+	// The counterpart's taxpayer identification number or tax ID.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 	// The counterpart type: `organization` (juridical person) or `individual` (natural person).
 	Type CounterpartType `json:"type" url:"type"`
@@ -1252,11 +1289,11 @@ type CounterpartOrganizationRootUpdatePayload struct {
 	DefaultBillingAddressId *string `json:"default_billing_address_id,omitempty" url:"default_billing_address_id,omitempty"`
 	// ID of the shipping address.
 	DefaultShippingAddressId *string `json:"default_shipping_address_id,omitempty" url:"default_shipping_address_id,omitempty"`
-	// The language used to generate pdf documents for this counterpart.
+	// The language used to generate PDF documents for this counterpart.
 	Language         *LanguageCodeEnum                     `json:"language,omitempty" url:"language,omitempty"`
 	Organization     *CounterpartOrganizationUpdatePayload `json:"organization" url:"organization"`
 	RemindersEnabled *bool                                 `json:"reminders_enabled,omitempty" url:"reminders_enabled,omitempty"`
-	// The counterpart's taxpayer identification number or tax ID. This field is required for counterparts that are non-VAT registered.
+	// The counterpart's taxpayer identification number or tax ID. For identification purposes, this field may be required for counterparts that are not VAT-registered.
 	TaxId *string `json:"tax_id,omitempty" url:"tax_id,omitempty"`
 
 	extraProperties map[string]interface{}
@@ -1607,7 +1644,7 @@ type CounterpartTagSchema struct {
 	UpdatedAt time.Time `json:"updated_at" url:"updated_at"`
 	// The tag category.
 	Category *CounterpartTagCategory `json:"category,omitempty" url:"category,omitempty"`
-	// ID of the user who created the tag
+	// ID of the user who created the tag.
 	CreatedByEntityUserId *string `json:"created_by_entity_user_id,omitempty" url:"created_by_entity_user_id,omitempty"`
 	// The tag description.
 	Description *string `json:"description,omitempty" url:"description,omitempty"`

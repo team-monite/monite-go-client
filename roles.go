@@ -13,17 +13,19 @@ type CreateRoleRequest struct {
 	// Role name
 	Name string `json:"name" url:"-"`
 	// Access permissions
-	Permissions *BizObjectsSchema `json:"permissions,omitempty" url:"-"`
+	Permissions *BizObjectsSchemaInput `json:"permissions,omitempty" url:"-"`
 }
 
 type RolesGetRequest struct {
-	// Order by
+	// Sort order (ascending by default). Typically used together with the `sort` parameter.
 	Order *OrderEnum `json:"-" url:"order,omitempty"`
-	// Max is 100
+	// The number of items (0 .. 100) to return in a single page of the response. The response may contain fewer items if it is the last or only page.
 	Limit *int `json:"-" url:"limit,omitempty"`
-	// A token, obtained from previous page. Prior over other filters
+	// A pagination token obtained from a previous call to this endpoint. Use it to get the next or previous page of results for your initial query. If `pagination_token` is specified, all other query parameters are ignored and inferred from the initial query.
+	//
+	// If not specified, the first page of results will be returned.
 	PaginationToken *string `json:"-" url:"pagination_token,omitempty"`
-	// Allowed sort fields
+	// The field to sort the results by. Typically used together with the `order` parameter.
 	Sort         *RoleCursorFields `json:"-" url:"sort,omitempty"`
 	IdIn         []*string         `json:"-" url:"id__in,omitempty"`
 	Name         *string           `json:"-" url:"name,omitempty"`
@@ -32,6 +34,147 @@ type RolesGetRequest struct {
 	CreatedAtLt  *time.Time        `json:"-" url:"created_at__lt,omitempty"`
 	CreatedAtGte *time.Time        `json:"-" url:"created_at__gte,omitempty"`
 	CreatedAtLte *time.Time        `json:"-" url:"created_at__lte,omitempty"`
+}
+
+type BizObjectsSchemaInput struct {
+	// List of objects
+	Objects []*RootSchemaInput `json:"objects,omitempty" url:"objects,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (b *BizObjectsSchemaInput) GetObjects() []*RootSchemaInput {
+	if b == nil {
+		return nil
+	}
+	return b.Objects
+}
+
+func (b *BizObjectsSchemaInput) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BizObjectsSchemaInput) UnmarshalJSON(data []byte) error {
+	type unmarshaler BizObjectsSchemaInput
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BizObjectsSchemaInput(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BizObjectsSchemaInput) String() string {
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+type CommonSchemaInput struct {
+	// List of actions
+	Actions []*ActionSchema `json:"actions,omitempty" url:"actions,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CommonSchemaInput) GetActions() []*ActionSchema {
+	if c == nil {
+		return nil
+	}
+	return c.Actions
+}
+
+func (c *CommonSchemaInput) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CommonSchemaInput) UnmarshalJSON(data []byte) error {
+	type unmarshaler CommonSchemaInput
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CommonSchemaInput(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CommonSchemaInput) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type PayableSchemaInput struct {
+	// List of actions
+	Actions []*PayableActionSchema `json:"actions,omitempty" url:"actions,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *PayableSchemaInput) GetActions() []*PayableActionSchema {
+	if p == nil {
+		return nil
+	}
+	return p.Actions
+}
+
+func (p *PayableSchemaInput) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PayableSchemaInput) UnmarshalJSON(data []byte) error {
+	type unmarshaler PayableSchemaInput
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PayableSchemaInput(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PayableSchemaInput) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 type RoleCursorFields string
@@ -59,10 +202,10 @@ func (r RoleCursorFields) Ptr() *RoleCursorFields {
 type RolePaginationResponse struct {
 	// array of records
 	Data []*RoleResponse `json:"data" url:"data"`
-	// A token that can be sent in the `pagination_token` query parameter to get the next page of results, or `null` if there is no next page (i.e. you've reached the last page).
-	NextPaginationToken *string `json:"next_pagination_token,omitempty" url:"next_pagination_token,omitempty"`
 	// A token that can be sent in the `pagination_token` query parameter to get the previous page of results, or `null` if there is no previous page (i.e. you've reached the first page).
 	PrevPaginationToken *string `json:"prev_pagination_token,omitempty" url:"prev_pagination_token,omitempty"`
+	// A token that can be sent in the `pagination_token` query parameter to get the next page of results, or `null` if there is no next page (i.e. you've reached the last page).
+	NextPaginationToken *string `json:"next_pagination_token,omitempty" url:"next_pagination_token,omitempty"`
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
@@ -75,18 +218,18 @@ func (r *RolePaginationResponse) GetData() []*RoleResponse {
 	return r.Data
 }
 
-func (r *RolePaginationResponse) GetNextPaginationToken() *string {
-	if r == nil {
-		return nil
-	}
-	return r.NextPaginationToken
-}
-
 func (r *RolePaginationResponse) GetPrevPaginationToken() *string {
 	if r == nil {
 		return nil
 	}
 	return r.PrevPaginationToken
+}
+
+func (r *RolePaginationResponse) GetNextPaginationToken() *string {
+	if r == nil {
+		return nil
+	}
+	return r.NextPaginationToken
 }
 
 func (r *RolePaginationResponse) GetExtraProperties() map[string]interface{} {
@@ -121,9 +264,750 @@ func (r *RolePaginationResponse) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
+type RootSchemaInput struct {
+	ObjectType            string
+	ApprovalPolicy        *CommonSchemaInput
+	ApprovalRequest       *CommonSchemaInput
+	Comment               *CommonSchemaInput
+	Counterpart           *CommonSchemaInput
+	CounterpartVatId      *CommonSchemaInput
+	Entity                *CommonSchemaInput
+	EntityBankAccount     *CommonSchemaInput
+	EntityUser            *CommonSchemaInput
+	EntityVatIds          *CommonSchemaInput
+	Export                *CommonSchemaInput
+	Mailbox               *CommonSchemaInput
+	Onboarding            *CommonSchemaInput
+	OverdueReminder       *CommonSchemaInput
+	Payable               *PayableSchemaInput
+	PayablesPurchaseOrder *CommonSchemaInput
+	PaymentRecord         *CommonSchemaInput
+	PaymentReminder       *CommonSchemaInput
+	Person                *CommonSchemaInput
+	Product               *CommonSchemaInput
+	Project               *CommonSchemaInput
+	Receivable            *CommonSchemaInput
+	Reconciliation        *CommonSchemaInput
+	Role                  *CommonSchemaInput
+	Tag                   *CommonSchemaInput
+	TodoTask              *CommonSchemaInput
+	TodoTaskMute          *CommonSchemaInput
+	Transaction           *CommonSchemaInput
+	Workflow              *CommonSchemaInput
+}
+
+func (r *RootSchemaInput) GetObjectType() string {
+	if r == nil {
+		return ""
+	}
+	return r.ObjectType
+}
+
+func (r *RootSchemaInput) GetApprovalPolicy() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.ApprovalPolicy
+}
+
+func (r *RootSchemaInput) GetApprovalRequest() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.ApprovalRequest
+}
+
+func (r *RootSchemaInput) GetComment() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Comment
+}
+
+func (r *RootSchemaInput) GetCounterpart() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Counterpart
+}
+
+func (r *RootSchemaInput) GetCounterpartVatId() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.CounterpartVatId
+}
+
+func (r *RootSchemaInput) GetEntity() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Entity
+}
+
+func (r *RootSchemaInput) GetEntityBankAccount() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.EntityBankAccount
+}
+
+func (r *RootSchemaInput) GetEntityUser() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.EntityUser
+}
+
+func (r *RootSchemaInput) GetEntityVatIds() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.EntityVatIds
+}
+
+func (r *RootSchemaInput) GetExport() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Export
+}
+
+func (r *RootSchemaInput) GetMailbox() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Mailbox
+}
+
+func (r *RootSchemaInput) GetOnboarding() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Onboarding
+}
+
+func (r *RootSchemaInput) GetOverdueReminder() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.OverdueReminder
+}
+
+func (r *RootSchemaInput) GetPayable() *PayableSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Payable
+}
+
+func (r *RootSchemaInput) GetPayablesPurchaseOrder() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.PayablesPurchaseOrder
+}
+
+func (r *RootSchemaInput) GetPaymentRecord() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.PaymentRecord
+}
+
+func (r *RootSchemaInput) GetPaymentReminder() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.PaymentReminder
+}
+
+func (r *RootSchemaInput) GetPerson() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Person
+}
+
+func (r *RootSchemaInput) GetProduct() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Product
+}
+
+func (r *RootSchemaInput) GetProject() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Project
+}
+
+func (r *RootSchemaInput) GetReceivable() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Receivable
+}
+
+func (r *RootSchemaInput) GetReconciliation() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Reconciliation
+}
+
+func (r *RootSchemaInput) GetRole() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Role
+}
+
+func (r *RootSchemaInput) GetTag() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Tag
+}
+
+func (r *RootSchemaInput) GetTodoTask() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.TodoTask
+}
+
+func (r *RootSchemaInput) GetTodoTaskMute() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.TodoTaskMute
+}
+
+func (r *RootSchemaInput) GetTransaction() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Transaction
+}
+
+func (r *RootSchemaInput) GetWorkflow() *CommonSchemaInput {
+	if r == nil {
+		return nil
+	}
+	return r.Workflow
+}
+
+func (r *RootSchemaInput) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		ObjectType string `json:"object_type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	r.ObjectType = unmarshaler.ObjectType
+	if unmarshaler.ObjectType == "" {
+		return fmt.Errorf("%T did not include discriminant object_type", r)
+	}
+	switch unmarshaler.ObjectType {
+	case "approval_policy":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.ApprovalPolicy = value
+	case "approval_request":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.ApprovalRequest = value
+	case "comment":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Comment = value
+	case "counterpart":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Counterpart = value
+	case "counterpart_vat_id":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.CounterpartVatId = value
+	case "entity":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Entity = value
+	case "entity_bank_account":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.EntityBankAccount = value
+	case "entity_user":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.EntityUser = value
+	case "entity_vat_ids":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.EntityVatIds = value
+	case "export":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Export = value
+	case "mailbox":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Mailbox = value
+	case "onboarding":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Onboarding = value
+	case "overdue_reminder":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.OverdueReminder = value
+	case "payable":
+		value := new(PayableSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Payable = value
+	case "payables_purchase_order":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.PayablesPurchaseOrder = value
+	case "payment_record":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.PaymentRecord = value
+	case "payment_reminder":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.PaymentReminder = value
+	case "person":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Person = value
+	case "product":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Product = value
+	case "project":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Project = value
+	case "receivable":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Receivable = value
+	case "reconciliation":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Reconciliation = value
+	case "role":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Role = value
+	case "tag":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Tag = value
+	case "todo_task":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.TodoTask = value
+	case "todo_task_mute":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.TodoTaskMute = value
+	case "transaction":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Transaction = value
+	case "workflow":
+		value := new(CommonSchemaInput)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.Workflow = value
+	}
+	return nil
+}
+
+func (r RootSchemaInput) MarshalJSON() ([]byte, error) {
+	if err := r.validate(); err != nil {
+		return nil, err
+	}
+	if r.ApprovalPolicy != nil {
+		return internal.MarshalJSONWithExtraProperty(r.ApprovalPolicy, "object_type", "approval_policy")
+	}
+	if r.ApprovalRequest != nil {
+		return internal.MarshalJSONWithExtraProperty(r.ApprovalRequest, "object_type", "approval_request")
+	}
+	if r.Comment != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Comment, "object_type", "comment")
+	}
+	if r.Counterpart != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Counterpart, "object_type", "counterpart")
+	}
+	if r.CounterpartVatId != nil {
+		return internal.MarshalJSONWithExtraProperty(r.CounterpartVatId, "object_type", "counterpart_vat_id")
+	}
+	if r.Entity != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Entity, "object_type", "entity")
+	}
+	if r.EntityBankAccount != nil {
+		return internal.MarshalJSONWithExtraProperty(r.EntityBankAccount, "object_type", "entity_bank_account")
+	}
+	if r.EntityUser != nil {
+		return internal.MarshalJSONWithExtraProperty(r.EntityUser, "object_type", "entity_user")
+	}
+	if r.EntityVatIds != nil {
+		return internal.MarshalJSONWithExtraProperty(r.EntityVatIds, "object_type", "entity_vat_ids")
+	}
+	if r.Export != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Export, "object_type", "export")
+	}
+	if r.Mailbox != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Mailbox, "object_type", "mailbox")
+	}
+	if r.Onboarding != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Onboarding, "object_type", "onboarding")
+	}
+	if r.OverdueReminder != nil {
+		return internal.MarshalJSONWithExtraProperty(r.OverdueReminder, "object_type", "overdue_reminder")
+	}
+	if r.Payable != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Payable, "object_type", "payable")
+	}
+	if r.PayablesPurchaseOrder != nil {
+		return internal.MarshalJSONWithExtraProperty(r.PayablesPurchaseOrder, "object_type", "payables_purchase_order")
+	}
+	if r.PaymentRecord != nil {
+		return internal.MarshalJSONWithExtraProperty(r.PaymentRecord, "object_type", "payment_record")
+	}
+	if r.PaymentReminder != nil {
+		return internal.MarshalJSONWithExtraProperty(r.PaymentReminder, "object_type", "payment_reminder")
+	}
+	if r.Person != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Person, "object_type", "person")
+	}
+	if r.Product != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Product, "object_type", "product")
+	}
+	if r.Project != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Project, "object_type", "project")
+	}
+	if r.Receivable != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Receivable, "object_type", "receivable")
+	}
+	if r.Reconciliation != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Reconciliation, "object_type", "reconciliation")
+	}
+	if r.Role != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Role, "object_type", "role")
+	}
+	if r.Tag != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Tag, "object_type", "tag")
+	}
+	if r.TodoTask != nil {
+		return internal.MarshalJSONWithExtraProperty(r.TodoTask, "object_type", "todo_task")
+	}
+	if r.TodoTaskMute != nil {
+		return internal.MarshalJSONWithExtraProperty(r.TodoTaskMute, "object_type", "todo_task_mute")
+	}
+	if r.Transaction != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Transaction, "object_type", "transaction")
+	}
+	if r.Workflow != nil {
+		return internal.MarshalJSONWithExtraProperty(r.Workflow, "object_type", "workflow")
+	}
+	return nil, fmt.Errorf("type %T does not define a non-empty union type", r)
+}
+
+type RootSchemaInputVisitor interface {
+	VisitApprovalPolicy(*CommonSchemaInput) error
+	VisitApprovalRequest(*CommonSchemaInput) error
+	VisitComment(*CommonSchemaInput) error
+	VisitCounterpart(*CommonSchemaInput) error
+	VisitCounterpartVatId(*CommonSchemaInput) error
+	VisitEntity(*CommonSchemaInput) error
+	VisitEntityBankAccount(*CommonSchemaInput) error
+	VisitEntityUser(*CommonSchemaInput) error
+	VisitEntityVatIds(*CommonSchemaInput) error
+	VisitExport(*CommonSchemaInput) error
+	VisitMailbox(*CommonSchemaInput) error
+	VisitOnboarding(*CommonSchemaInput) error
+	VisitOverdueReminder(*CommonSchemaInput) error
+	VisitPayable(*PayableSchemaInput) error
+	VisitPayablesPurchaseOrder(*CommonSchemaInput) error
+	VisitPaymentRecord(*CommonSchemaInput) error
+	VisitPaymentReminder(*CommonSchemaInput) error
+	VisitPerson(*CommonSchemaInput) error
+	VisitProduct(*CommonSchemaInput) error
+	VisitProject(*CommonSchemaInput) error
+	VisitReceivable(*CommonSchemaInput) error
+	VisitReconciliation(*CommonSchemaInput) error
+	VisitRole(*CommonSchemaInput) error
+	VisitTag(*CommonSchemaInput) error
+	VisitTodoTask(*CommonSchemaInput) error
+	VisitTodoTaskMute(*CommonSchemaInput) error
+	VisitTransaction(*CommonSchemaInput) error
+	VisitWorkflow(*CommonSchemaInput) error
+}
+
+func (r *RootSchemaInput) Accept(visitor RootSchemaInputVisitor) error {
+	if r.ApprovalPolicy != nil {
+		return visitor.VisitApprovalPolicy(r.ApprovalPolicy)
+	}
+	if r.ApprovalRequest != nil {
+		return visitor.VisitApprovalRequest(r.ApprovalRequest)
+	}
+	if r.Comment != nil {
+		return visitor.VisitComment(r.Comment)
+	}
+	if r.Counterpart != nil {
+		return visitor.VisitCounterpart(r.Counterpart)
+	}
+	if r.CounterpartVatId != nil {
+		return visitor.VisitCounterpartVatId(r.CounterpartVatId)
+	}
+	if r.Entity != nil {
+		return visitor.VisitEntity(r.Entity)
+	}
+	if r.EntityBankAccount != nil {
+		return visitor.VisitEntityBankAccount(r.EntityBankAccount)
+	}
+	if r.EntityUser != nil {
+		return visitor.VisitEntityUser(r.EntityUser)
+	}
+	if r.EntityVatIds != nil {
+		return visitor.VisitEntityVatIds(r.EntityVatIds)
+	}
+	if r.Export != nil {
+		return visitor.VisitExport(r.Export)
+	}
+	if r.Mailbox != nil {
+		return visitor.VisitMailbox(r.Mailbox)
+	}
+	if r.Onboarding != nil {
+		return visitor.VisitOnboarding(r.Onboarding)
+	}
+	if r.OverdueReminder != nil {
+		return visitor.VisitOverdueReminder(r.OverdueReminder)
+	}
+	if r.Payable != nil {
+		return visitor.VisitPayable(r.Payable)
+	}
+	if r.PayablesPurchaseOrder != nil {
+		return visitor.VisitPayablesPurchaseOrder(r.PayablesPurchaseOrder)
+	}
+	if r.PaymentRecord != nil {
+		return visitor.VisitPaymentRecord(r.PaymentRecord)
+	}
+	if r.PaymentReminder != nil {
+		return visitor.VisitPaymentReminder(r.PaymentReminder)
+	}
+	if r.Person != nil {
+		return visitor.VisitPerson(r.Person)
+	}
+	if r.Product != nil {
+		return visitor.VisitProduct(r.Product)
+	}
+	if r.Project != nil {
+		return visitor.VisitProject(r.Project)
+	}
+	if r.Receivable != nil {
+		return visitor.VisitReceivable(r.Receivable)
+	}
+	if r.Reconciliation != nil {
+		return visitor.VisitReconciliation(r.Reconciliation)
+	}
+	if r.Role != nil {
+		return visitor.VisitRole(r.Role)
+	}
+	if r.Tag != nil {
+		return visitor.VisitTag(r.Tag)
+	}
+	if r.TodoTask != nil {
+		return visitor.VisitTodoTask(r.TodoTask)
+	}
+	if r.TodoTaskMute != nil {
+		return visitor.VisitTodoTaskMute(r.TodoTaskMute)
+	}
+	if r.Transaction != nil {
+		return visitor.VisitTransaction(r.Transaction)
+	}
+	if r.Workflow != nil {
+		return visitor.VisitWorkflow(r.Workflow)
+	}
+	return fmt.Errorf("type %T does not define a non-empty union type", r)
+}
+
+func (r *RootSchemaInput) validate() error {
+	if r == nil {
+		return fmt.Errorf("type %T is nil", r)
+	}
+	var fields []string
+	if r.ApprovalPolicy != nil {
+		fields = append(fields, "approval_policy")
+	}
+	if r.ApprovalRequest != nil {
+		fields = append(fields, "approval_request")
+	}
+	if r.Comment != nil {
+		fields = append(fields, "comment")
+	}
+	if r.Counterpart != nil {
+		fields = append(fields, "counterpart")
+	}
+	if r.CounterpartVatId != nil {
+		fields = append(fields, "counterpart_vat_id")
+	}
+	if r.Entity != nil {
+		fields = append(fields, "entity")
+	}
+	if r.EntityBankAccount != nil {
+		fields = append(fields, "entity_bank_account")
+	}
+	if r.EntityUser != nil {
+		fields = append(fields, "entity_user")
+	}
+	if r.EntityVatIds != nil {
+		fields = append(fields, "entity_vat_ids")
+	}
+	if r.Export != nil {
+		fields = append(fields, "export")
+	}
+	if r.Mailbox != nil {
+		fields = append(fields, "mailbox")
+	}
+	if r.Onboarding != nil {
+		fields = append(fields, "onboarding")
+	}
+	if r.OverdueReminder != nil {
+		fields = append(fields, "overdue_reminder")
+	}
+	if r.Payable != nil {
+		fields = append(fields, "payable")
+	}
+	if r.PayablesPurchaseOrder != nil {
+		fields = append(fields, "payables_purchase_order")
+	}
+	if r.PaymentRecord != nil {
+		fields = append(fields, "payment_record")
+	}
+	if r.PaymentReminder != nil {
+		fields = append(fields, "payment_reminder")
+	}
+	if r.Person != nil {
+		fields = append(fields, "person")
+	}
+	if r.Product != nil {
+		fields = append(fields, "product")
+	}
+	if r.Project != nil {
+		fields = append(fields, "project")
+	}
+	if r.Receivable != nil {
+		fields = append(fields, "receivable")
+	}
+	if r.Reconciliation != nil {
+		fields = append(fields, "reconciliation")
+	}
+	if r.Role != nil {
+		fields = append(fields, "role")
+	}
+	if r.Tag != nil {
+		fields = append(fields, "tag")
+	}
+	if r.TodoTask != nil {
+		fields = append(fields, "todo_task")
+	}
+	if r.TodoTaskMute != nil {
+		fields = append(fields, "todo_task_mute")
+	}
+	if r.Transaction != nil {
+		fields = append(fields, "transaction")
+	}
+	if r.Workflow != nil {
+		fields = append(fields, "workflow")
+	}
+	if len(fields) == 0 {
+		if r.ObjectType != "" {
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", r, r.ObjectType)
+		}
+		return fmt.Errorf("type %T is empty", r)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", r, fields)
+	}
+	if r.ObjectType != "" {
+		field := fields[0]
+		if r.ObjectType != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				r,
+				r.ObjectType,
+				r,
+			)
+		}
+	}
+	return nil
+}
+
 type UpdateRoleRequest struct {
 	// Role name
 	Name *string `json:"name,omitempty" url:"-"`
 	// Access permissions
-	Permissions *BizObjectsSchema `json:"permissions,omitempty" url:"-"`
+	Permissions *BizObjectsSchemaInput `json:"permissions,omitempty" url:"-"`
 }
