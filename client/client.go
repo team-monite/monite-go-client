@@ -8,7 +8,6 @@ import (
 	analytics "github.com/team-monite/monite-go-client/analytics"
 	approvalpoliciesclient "github.com/team-monite/monite-go-client/approvalpolicies/client"
 	approvalrequests "github.com/team-monite/monite-go-client/approvalrequests"
-	batchpayments "github.com/team-monite/monite-go-client/batchpayments"
 	comments "github.com/team-monite/monite-go-client/comments"
 	core "github.com/team-monite/monite-go-client/core"
 	counterpartsclient "github.com/team-monite/monite-go-client/counterparts/client"
@@ -25,7 +24,6 @@ import (
 	mailboxes "github.com/team-monite/monite-go-client/mailboxes"
 	mailtemplates "github.com/team-monite/monite-go-client/mailtemplates"
 	measureunits "github.com/team-monite/monite-go-client/measureunits"
-	onboardinglinks "github.com/team-monite/monite-go-client/onboardinglinks"
 	option "github.com/team-monite/monite-go-client/option"
 	overduereminders "github.com/team-monite/monite-go-client/overduereminders"
 	partnersettings "github.com/team-monite/monite-go-client/partnersettings"
@@ -59,7 +57,6 @@ type Client struct {
 	ApprovalPolicies      *approvalpoliciesclient.Client
 	ApprovalRequests      *approvalrequests.Client
 	AccessTokens          *accesstokens.Client
-	BatchPayments         *batchpayments.Client
 	Comments              *comments.Client
 	Counterparts          *counterpartsclient.Client
 	DataExports           *dataexportsclient.Client
@@ -74,7 +71,6 @@ type Client struct {
 	MailboxDomains        *mailboxdomains.Client
 	Mailboxes             *mailboxes.Client
 	MeasureUnits          *measureunits.Client
-	OnboardingLinks       *onboardinglinks.Client
 	OverdueReminders      *overduereminders.Client
 	CreditNotes           *creditnotes.Client
 	PurchaseOrders        *purchaseorders.Client
@@ -113,7 +109,6 @@ func NewClient(opts ...option.RequestOption) *Client {
 		ApprovalPolicies:      approvalpoliciesclient.NewClient(opts...),
 		ApprovalRequests:      approvalrequests.NewClient(opts...),
 		AccessTokens:          accesstokens.NewClient(opts...),
-		BatchPayments:         batchpayments.NewClient(opts...),
 		Comments:              comments.NewClient(opts...),
 		Counterparts:          counterpartsclient.NewClient(opts...),
 		DataExports:           dataexportsclient.NewClient(opts...),
@@ -128,7 +123,6 @@ func NewClient(opts ...option.RequestOption) *Client {
 		MailboxDomains:        mailboxdomains.NewClient(opts...),
 		Mailboxes:             mailboxes.NewClient(opts...),
 		MeasureUnits:          measureunits.NewClient(opts...),
-		OnboardingLinks:       onboardinglinks.NewClient(opts...),
 		OverdueReminders:      overduereminders.NewClient(opts...),
 		CreditNotes:           creditnotes.NewClient(opts...),
 		PurchaseOrders:        purchaseorders.NewClient(opts...),

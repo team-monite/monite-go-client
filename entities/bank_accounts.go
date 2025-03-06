@@ -6,15 +6,6 @@ import (
 	monitegoclient "github.com/team-monite/monite-go-client"
 )
 
-type CompleteVerificationRequest struct {
-	AirwallexPlaid *monitegoclient.CompleteVerificationAirwallexPlaidRequest `json:"airwallex_plaid,omitempty" url:"-"`
-	Type           monitegoclient.BankAccountVerificationType                `json:"type" url:"-"`
-}
-
-type CompleteRefreshVerificationRequest struct {
-	Type monitegoclient.BankAccountVerificationType `json:"type" url:"-"`
-}
-
 type CreateEntityBankAccountRequest struct {
 	// The name of the person or business that owns this bank account. Required if the account currency is GBP or USD.
 	AccountHolderName *string `json:"account_holder_name,omitempty" url:"-"`
